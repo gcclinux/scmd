@@ -11,7 +11,7 @@ import (
 // content holds our static web server content.
 func main() {
 
-	msg, _ := versionRemote()
+	msg, _, _ := versionRemote()
 
 	if len(os.Args) == 2 {
 		arg1 := os.Args[1]

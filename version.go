@@ -19,12 +19,12 @@ func versionCheck(msg string) {
 }
 
 // versionRemotefunction the retrieves the remote ersion and return it's value
-func versionRemote() (msg string, upgrade bool) {
+func versionRemote() (msg string, remote string, upgrade bool) {
 	upgrade = false
 	remote_version := ""
 	file := filepath.Base(os.Args[0])
 
-	lines, err := UrlToLines("https://raw.githubusercontent.com/gcclinux/scmd/main/bin/release")
+	lines, err := UrlToLines("https://raw.githubusercontent.com/gcclinux/scmd/main/release")
 	if err != nil {
 		log.Println(err)
 	}
@@ -45,7 +45,7 @@ func versionRemote() (msg string, upgrade bool) {
 		upgrade = true
 	}
 
-	return msg, upgrade
+	return msg, remote_version, upgrade
 }
 
 func UrlToLines(url string) ([]string, error) {

@@ -22,28 +22,19 @@ func runUpgrade() {
 	file := getFile()
 	remote_version := ""
 
-	lines, err := UrlToLines("https://raw.githubusercontent.com/gcclinux/scmd/main/bin/release")
-	if err != nil {
-		log.Println(err)
-	}
-
-	for _, line := range lines {
-		remote_version = line
-	}
-
 	local_int := strings.Replace(Release, ".", "", -1)
-	msg, upgrade := versionRemote()
+	msg, remote_version, upgrade := versionRemote()
 
 	if upgrade {
 
 		local := fmt.Sprintf("%v%v%v", filepath.Dir(os.Args[0]), string(path), filepath.Base(os.Args[0]))
 		old := fmt.Sprintf("%v%v%v%v%v%v", filepath.Dir(os.Args[0]), string(path), "v", local_int, "-", filepath.Base(os.Args[0]))
-		remote := fmt.Sprintf("%v%v", "https://github.com/gcclinux/scmd/raw/main/bin/", file)
+		remote := fmt.Sprintf("%v%v", "https://github.com/gcclinux/scmd/releases/download/latest/", file)
 
 		downloadFile(file, remote)
 		replaceFile(local, old)
 		replaceFile(file, local)
-		err = os.Chmod(local, 0750)
+		err := os.Chmod(local, 0750)
 		if err != nil {
 			log.Fatal(err)
 		}
