@@ -122,15 +122,15 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 			sc = append(sc, "----------------------------------------------------------------------")
 			sc = append(sc, "Upgrade checking current version")
 			sc = append(sc, versionCheck)
-			sc = append(sc, "")
-			sc = append(sc, "Downloading ...")
+			if !strings.Contains(versionCheck, "newer") && !strings.Contains(versionCheck, "already") {
+				result := runUpgrade()
 
-			result := runUpgrade()
+				sc = append(sc, "")
+				sc = append(sc, "----------------------------------------------------------------------")
+				sc = append(sc, "Current version status")
+				sc = append(sc, result)
+			}
 
-			sc = append(sc, "")
-			sc = append(sc, "----------------------------------------------------------------------")
-			sc = append(sc, "Current version status")
-			sc = append(sc, result)
 		} else if hidden == "download" {
 
 			sc = append(sc, "")
