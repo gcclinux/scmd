@@ -163,9 +163,30 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 		var command = r.Form["command"][0]
 		var description = r.Form["description"][0]
 
-		status := tar.AddField(command, description)
+		save := true
+		status := false
+		var _, received = tar.SelectSearch(command, "json")
+		bytes := received
+		var dt []tardigrade.MyStruct
+		json.Unmarshal(bytes, &dt)
 
-		data.Status = fmt.Sprintf("%t", status)
+		checkDB(received)
+
+		for x := range dt {
+			cmd := string(dt[x].Key)
+			check := strings.Contains(command, cmd)
+			if check {
+				save = false
+			}
+		}
+
+		if save {
+			status = tar.AddField(command, description)
+			data.Status = fmt.Sprintf("%t", status)
+		} else {
+			data.Status = fmt.Sprintf("%v", "(false) Duplicate command!")
+		}
+
 		data.Return = "Return Status: "
 		data.DescTitle = "Description: "
 		data.Data = fmt.Sprintf("%v", description)
