@@ -1,13 +1,14 @@
 # scmd (Search Command)
 
-Simple search command App that gives the possibility to find commands or store commands locally, this app will evolve and have a web interface in the near future.
+Simple search command App that gives the possibility to find commands or store commands locally, this app will evolve and have a web interface in the near future.<BR>
 
-Release: 1.0.0 - Initial SCMD CLI & Web UI <BR>
-Release: 1.0.1 - Recompiled with updated tardigrade-mod v0.2.0 <BR>
-Release: 1.0.2 - Minor cosmetic changes in the search UI <BR>
-Release: 1.1.0 - Added binary upgrade option in the menu! <BR>
-Release: 1.2.0 - Added option to specific what port to open the Web UI <BR>
-Release: 1.3.0 - Added option to save or display functions as well as commands <BR>
+Release: 1.0.0 - (18-02-2023) Initial SCMD CLI & Web UI<BR>
+Release: 1.0.1 - (19-02-2023) Recompiled with updated tardigrade-mod v0.2.0<BR>
+Release: 1.0.2 - (26-02-2023) Minor cosmetic changes in the search UI<BR>
+Release: 1.1.0 - (05-03-2023) Added binary upgrade option in the menu!<BR>
+Release: 1.2.0 - (12-03-2023) Added option to specific what port to open the Web UI<BR>
+Release: 1.3.0 - (19-03-2023) Added option to save or display functions also<BR>
+Release: 1.3.1 - (26-03-2023) Check if command already exist + cosmetics<BR>
 
 > Display this help menu
 ```
@@ -17,9 +18,9 @@ Usage: 	 scmd-Linux-x86_64 --help
 ```
 Usage: 	 scmd-Linux-x86_64 --web
 ```
-> Opens the web UI with alternative Port:
+> Opens the web UI with alternative Port: (-service won't launch the browser)
 ```
-Usage: 	 scmd-Linux-x86_64 --web -port [port]
+Usage: 	 scmd-Linux-x86_64 --web -port [port] -service
 ```
 > Show local and available scmd version
 ```
