@@ -106,9 +106,8 @@
                 </div>
                 <h3 class="fs-2">Download (scmd)</h3>
                 <p>Download the last compiled version of the application from <a href="https://github.com/">https://github.com/</a> so that you can run your own version locally with your own commands.</p>
-                <form method="post" autocomplete="off">
-                  <button type="submit">Local App</button>
-                  <input autocomplete="false" name="hidden" type="hidden" id="upgrade" name="upgrade" value="upgrade">
+                <form action="https://github.com/gcclinux/scmd/releases/tag/latest">
+                  <button type="submit">App Download</button>
               </form>
               </div>
 
@@ -118,10 +117,19 @@
                 </div>
                 <h3 class="fs-2">Download (DB)</h3>
                 <p>Download the lastest version of the commands and fucntion database from <a href="https://github.com/">https://github.com/</a> allowing you to start with a full list and start adding your own.</p>
-                  
-                <a target="_blank" href="https://raw.githubusercontent.com/gcclinux/scmd/main/tardigrade.db" download="tardigrade.db">
-                  <button type="button">Download</button>
-                  </a>
+                  <button onclick="downloadFile()">DB Download</button>
+              </div>
+
+              <div class="feature col">
+                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
+                </div>
+                <h3 class="fs-2">CLI Help</h3>
+                <p>CLI Help provides a list of commands and syntax to help individuals using SCMD via command line when web interface is not available.</p>
+                <form method="post" autocomplete="off">
+                  <button type="submit">CLI Help</button>
+                  <input autocomplete="false" name="hidden" type="hidden" id="cli" name="cli" value="cli">
+              </form>
               </div>
 
             </div>
@@ -142,5 +150,30 @@
             <p> &nbsp; </p>
           </div>
         {{end}}
+
+        <script>
+          function downloadFile() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://raw.githubusercontent.com/gcclinux/scmd/main/tardigrade.db', true);
+            xhr.responseType = 'blob';
+          
+            xhr.onload = function() {
+              if (xhr.status === 200) {
+                var url = window.URL.createObjectURL(xhr.response);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'tardigrade.db';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function() {
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);  
+                }, 0);
+              }
+            };
+          
+            xhr.send();
+          }
+          </script>
 </body>
 </html>
