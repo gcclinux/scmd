@@ -57,29 +57,76 @@
             Version: {{.Version}}
           </div>
           <hr>
-          <div class="vertical-menu text-center mt-3">
-              <button class="active">SCMD (HELP)</button>
-              <form method="post" autocomplete="off">
+          <div class="container px-1 py-4" id="featured-3">
+            <div class="row g-4 py-1 row-cols-1 row-cols-lg-3">
+
+              <div class="feature col">
+                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                  <svg class="bi" width="1em" height="1em"><use xlink:href="#collection"></use></svg>
+                </div>
+                <h3 class="fs-2">SCMD</h3>
+                <p>Search Command (SCMD) Start your query by inputing your search criteria in the searchbar. Search based on comma or space separated pattern(s)</p>
+                <form action="/">
+                  <button type="submit">Search</button>
+              </form>
+              </div>
+
+              <div class="feature col">
+                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                  <svg class="bi" width="1em" height="1em"><use xlink:href="#people-circle"></use></svg>
+                </div>
+                <h3 class="fs-2">Version</h3>
+                <p>Version helps to show the current version of the application and also shows if there is a newer version only available to download.</p>
+                <form method="post" autocomplete="off">
                   <button type="submit">Version</button>
                   <input autocomplete="false" name="hidden" type="hidden" id="version" name="version" value="version">
               </form>
-              <form method="post" autocomplete="off">
+              </div>
+
+              <div class="feature col">
+                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
+                </div>
+                <h3 class="fs-2">Upgrade</h3>
+                <p>Upgrade will check <a href="https://github.com/gcclinux/scmd">https://github.com/gcclinux/scmd</a> to see if there is a new version of the application available and if there is, it will download and upgrade it.</p>
+                <form method="post" autocomplete="off">
                   <button type="submit">Upgrade</button>
                   <input autocomplete="false" name="hidden" type="hidden" id="upgrade" name="upgrade" value="upgrade">
               </form>
-              <form method="post" autocomplete="off">
-                  <button type="submit">Download &#128274;</button>
-                  <input autocomplete="false" name="hidden" type="hidden" id="downloadx" name="downloadx" value="downloadx">
-              </form>
-              <form method="post" autocomplete="off">
-                  <button type="submit">Delete CMD &#128274;</button>
-                  <input autocomplete="false" name="hidden" type="hidden" id="delete" name="delete" value="delete">
-              </form>
-              <form method="post" autocomplete="off">
-                  <button type="submit">Update CMD &#128274;</button>
-                  <input autocomplete="false" name="hidden" type="hidden" id="update" name="update" value="update">
-              </form>
+              </div>
+            </div>
           </div>
+
+          <div class="container px-1 py-4" id="featured-3">
+            <div class="row g-4 py-1 row-cols-1 row-cols-lg-3">
+
+              <div class="feature col">
+                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
+                </div>
+                <h3 class="fs-2">Download (scmd)</h3>
+                <p>Download the last compiled version of the application from <a href="https://github.com/">https://github.com/</a> so that you can run your own version locally with your own commands.</p>
+                <form method="post" autocomplete="off">
+                  <button type="submit">Local App</button>
+                  <input autocomplete="false" name="hidden" type="hidden" id="upgrade" name="upgrade" value="upgrade">
+              </form>
+              </div>
+
+              <div class="feature col">
+                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
+                </div>
+                <h3 class="fs-2">Download (DB)</h3>
+                <p>Download the lastest version of the commands and fucntion database from <a href="https://github.com/">https://github.com/</a> allowing you to start with a full list and start adding your own.</p>
+                  
+                <a target="_blank" href="https://raw.githubusercontent.com/gcclinux/scmd/main/tardigrade.db" download="tardigrade.db">
+                  <button type="button">Download</button>
+                  </a>
+              </div>
+
+            </div>
+          </div>
+
 
           {{if .AllData}}
           <div class="bg-dark text-white mt-5">
@@ -95,6 +142,5 @@
             <p> &nbsp; </p>
           </div>
         {{end}}
-    
 </body>
 </html>
