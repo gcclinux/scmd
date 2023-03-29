@@ -56,7 +56,7 @@
           {{end}}
 
             {{if .AllData}}
-            <div class="bg-dark text-white mt-5">
+            <div class="bg-dark text-white ml-5 mt-5 mr-5">
               {{$odd := true}}
                 {{range $data := .AllData}}
                   {{if $odd}}
@@ -75,9 +75,9 @@
             {{$odd := true}}
               {{range $datac := .Code}}
                 {{if $odd}}
-                    <pre class="bg-white text-black mt-5"><B>{{ $datac }}</B></pre>
+                    <pre class="bg-white text-black ml-5 mt-5 mr-5 "><B>{{ $datac }}</B></pre>
                   {{else}}
-                    <pre class="bg-black text-white mt-5">{{ $datac }}</pre>
+                    <pre class="bg-black text-white ml-5 mt-5 mr-5">{{ $datac }}</pre>
                   {{end}}
                 {{$odd = not $odd}}
             {{end}}
