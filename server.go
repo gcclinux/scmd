@@ -202,6 +202,9 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 		PageTitle: "(SCMD)",
 	}
 
+	remoteAddr := r.RemoteAddr
+	WriteLogToFile("scmd.log", "ADD: "+remoteAddr)
+
 	data.Version = Release
 
 	if r.Method == "GET" {
@@ -210,6 +213,8 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		var command = r.Form["command"][0]
 		var description = r.Form["description"][0]
+
+		WriteLogToFile("scmd.log", remoteAddr+" : "+command)
 
 		save := true
 		status := false
@@ -250,6 +255,9 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	tar := tardigrade.Tardigrade{}
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/home.html"))
 
+	remoteAddr := r.RemoteAddr
+	WriteLogToFile("scmd.log", "HOME: "+remoteAddr)
+
 	data := BuildStruct{
 		PageTitle: "(SCMD)",
 	}
@@ -263,6 +271,9 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		r.ParseForm()
 		var pattern = r.Form["pattern"][0]
+
+		WriteLogToFile("scmd.log", pattern)
+
 		var _, received = tar.SelectSearch(pattern, "raw")
 		bytes := received
 		var dt []BuildStruct

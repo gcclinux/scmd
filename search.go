@@ -10,6 +10,9 @@ import (
 
 // search prints the result returned by the Tardigrade mod
 func search(pattern string) {
+
+	WriteLogToFile("scmd.log", pattern)
+
 	tar := tardigrade.Tardigrade{}
 
 	var _, received = tar.SelectSearch(pattern, "json")

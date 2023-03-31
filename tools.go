@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -44,4 +46,16 @@ func replaceLast(x, y, z string) (x2 string) {
 		return x
 	}
 	return x[:i] + z + x[i+len(y):]
+}
+
+// WriteLogToFile is a function that takes a message string and a file name and stores the information into the file
+func WriteLogToFile(logFile, message string) {
+	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	logger := log.New(file, "", log.LstdFlags)
+	logger.Println(": " + message)
 }
