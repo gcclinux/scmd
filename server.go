@@ -203,7 +203,7 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	remoteAddr := r.RemoteAddr
-	WriteLogToFile("scmd.log", "ADD: "+remoteAddr)
+	WriteLogToFile(webLog, "ADD: "+remoteAddr)
 
 	data.Version = Release
 
@@ -214,7 +214,7 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 		var command = r.Form["command"][0]
 		var description = r.Form["description"][0]
 
-		WriteLogToFile("scmd.log", remoteAddr+" : "+command)
+		WriteLogToFile(webLog, remoteAddr+" : "+command)
 
 		save := true
 		status := false
@@ -256,7 +256,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/home.html"))
 
 	remoteAddr := r.RemoteAddr
-	WriteLogToFile("scmd.log", "HOME: "+remoteAddr)
+	WriteLogToFile(webLog, "HOME: "+remoteAddr)
 
 	data := BuildStruct{
 		PageTitle: "(SCMD)",
@@ -272,7 +272,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		var pattern = r.Form["pattern"][0]
 
-		WriteLogToFile("scmd.log", pattern)
+		WriteLogToFile(webLog, "SEARCH: "+pattern)
 
 		var _, received = tar.SelectSearch(pattern, "raw")
 		bytes := received

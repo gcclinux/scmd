@@ -10,6 +10,8 @@ import (
 	"github.com/gcclinux/tardigrade-mod"
 )
 
+const webLog = "scmdweb.log"
+
 // checkDB will see if the Database exist and if it contains any data.
 func checkDB(received []byte) (response string) {
 

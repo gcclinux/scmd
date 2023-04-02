@@ -11,7 +11,7 @@ import (
 // search prints the result returned by the Tardigrade mod
 func search(pattern string) {
 
-	WriteLogToFile("scmd.log", pattern)
+	WriteLogToFile(webLog, "CLI: "+pattern)
 
 	tar := tardigrade.Tardigrade{}
 
