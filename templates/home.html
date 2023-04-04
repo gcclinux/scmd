@@ -43,7 +43,7 @@
           Version: {{.Version}}
         </div>
         <hr>
-        <div class="container-fluid ml-n5 mt-2">
+        <div class="container-fluid ms-n5 mt-2">
           {{if not .Code}}
             {{if not .AllData}}
               {{if not .Pattern}}
@@ -56,7 +56,7 @@
           {{end}}
 
             {{if .AllData}}
-            <div class="bg-dark text-white ml-5 mt-5 mr-5">
+            <div class="bg-dark text-white ms-5 ps-5 mt-5 me-5 pe-5">
               {{$odd := true}}
                 {{range $data := .AllData}}
                   {{if $odd}}
@@ -75,9 +75,9 @@
             {{$odd := true}}
               {{range $datac := .Code}}
                 {{if $odd}}
-                    <pre class="bg-white text-black ml-5 mt-5 mr-5 "><B>{{ $datac }}</B></pre>
+                    <pre class="bg-white text-black ms-5 ps-2 mt-5 me-5 pe-2"><B>{{ $datac }}</B></pre>
                   {{else}}
-                    <pre class="bg-black text-white ml-5 mt-5 mr-5">{{ $datac }}</pre>
+                    <pre class="bg-black text-white ms-5 ps-2 mt-5 me-5 pe-2">{{ $datac }}</pre>
                   {{end}}
                 {{$odd = not $odd}}
             {{end}}
