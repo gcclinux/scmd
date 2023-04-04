@@ -10,6 +10,7 @@ Release: 1.2.0 - (12-03-2023) Added option to specific what port to open the Web
 Release: 1.3.0 - (19-03-2023) Added option to save or display functions also<BR>
 Release: 1.3.1 - (26-03-2023) Check if command already exist + cosmetics<BR>
 Release: 1.3.2 - (01-04-2023) Created the Help page and added search login.<BR>
+Release: 1.3.3 - (05-04-2023) Minor cosmetics on help page (before annual leave).<BR>
 
 > Display this help menu
 ```
