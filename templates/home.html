@@ -29,27 +29,31 @@
             </li>
             <li class="nav-item">
               <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
-            </li>
+            </li>            
           </ul>
-          <form action="/" method="post" autocomplete="off" class="d-flex" role="search">
-            <input class="form-control me-4" type="search" placeholder="Search" aria-label="Search" name="pattern" style="width: 500px;">
-            <input autocomplete="false" name="hidden" type="hidden" name="pattern">
-            <button class="btn btn-outline-success text-white fw-bold" type="submit">Search</button>
-          </form>
+          <span class="navbar-text">
+            Version: {{.Version}}
+          </span>
         </div>
       </div>
     </nav>
-        <div class="container-fluid mt-3">
-          Version: {{.Version}}
-        </div>
         <hr>
         <div class="container-fluid ms-n5 mt-2">
+          <div class="position-relative text-center">
+            <form action="/" method="post" autocomplete="off" class="d-inline-flex" role="search">
+              <input class="position-relative text-center me-4" type="search" placeholder="Search" aria-label="Search" name="pattern" style="width: 600px;">
+              <input autocomplete="false" name="hidden" type="hidden" name="pattern">
+              <button class="btn btn-outline-success text-black fw-bold" type="submit">Search</button>
+            </form>
+          </div>
+
           {{if not .Code}}
             {{if not .AllData}}
               {{if not .Pattern}}
                   <div class="position-relative text-center">
-                    <H2>Start your query by inputing your search criteria in the searchbar.</H2>
-                    <H4>Search based on comma or space separated pattern(s)</H4>
+                    <BR>
+                    <H2>Start your technical query by inputing your search criteria in the searchbar.</H2>
+                    <H4>Search based on comma or space separated pattern(s) or phrases</H4>
                   </div>
                 {{end}}
             {{end}}

@@ -29,14 +29,21 @@
               <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
             </li>
           </ul>
+          <span class="navbar-text">
+            Version: {{.Version}}
+          </span>
         </div>
       </div>
     </nav>
-        <div class="container-fluid mt-3">
-          Version: {{.Version}}
-        </div>
         <hr>
         <form action="/add" method="post" autocomplete="off">
+          <div class="position-relative text-center">
+            <BR>
+            <H5>Start adding your own commands or functions you wish to save, either local or remote.</H5>
+            <H6><i>Please be as descriptive as possible, indentation, punctuation in full details </H6>
+            <H6>remotely bad description, commands, functions will be deleted!</i></H6>
+            <BR>
+          </div>
               <label for="command" class="ms-3 form-label"><B>Enter Full Command Syntax</B> - Example: <i>$ go get -u github.com/gcclinux/scmd</i></label>
               <div class="input-group flex-nowrap">
                   <span class="ms-3 input-group-text" id="addon-wrapping">CMD</span>
