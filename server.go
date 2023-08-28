@@ -42,6 +42,8 @@ func routes() {
 
 	HTTP := 3333
 	browser := true
+	CRT := "/home/ricardowagemaker/Programming/GitServer/crt/cert.pem"
+	KEY := "/home/ricardowagemaker/Programming/GitServer/crt/privkey.pem"
 
 	count := len(os.Args)
 
@@ -67,14 +69,26 @@ func routes() {
 
 	if browser {
 		log.Println("Starting scmd web UI on port", HTTP)
-		openBrowser(fmt.Sprintf("http://localhost:%v", HTTP))
-		err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+		openBrowser(fmt.Sprintf("https://localhost:%v", HTTP))
+		//TODO
+		// if CRT exist {
+		// 	err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
+		// } else {
+		// 	err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+		// }
+		err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
 		if err != nil {
 			log.Println(err)
 		}
 	} else {
 		go func() {
-			err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+			//TODO
+			// if CRT exist {
+			// 	err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
+			// } else {
+			// 	err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+			// }
+			err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
 			if err != nil {
 				log.Println(err)
 			}
@@ -86,6 +100,28 @@ func routes() {
 			wg.Done()
 		}()
 	}
+
+	// if browser {
+	// 	log.Println("Starting scmd web UI on port", HTTP)
+	// 	openBrowser(fmt.Sprintf("http://localhost:%v", HTTP))
+	// 	err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 	}
+	// } else {
+	// 	go func() {
+	// 		err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+	// 		if err != nil {
+	// 			log.Println(err)
+	// 		}
+	// 		wg.Done() // one goroutine finished
+	// 	}()
+
+	// 	go func() {
+	// 		log.Println("Starting scmd web service on port", HTTP)
+	// 		wg.Done()
+	// 	}()
+	// }
 
 	// wait until WaitGroup is done
 	wg.Wait()
