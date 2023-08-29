@@ -42,24 +42,83 @@ func routes() {
 
 	HTTP := 3333
 	browser := true
-	CRT := "/home/ricardowagemaker/Programming/GitServer/crt/cert.pem"
-	KEY := "/home/ricardowagemaker/Programming/GitServer/crt/privkey.pem"
+	SSL := true
+	CRT := ""
+	KEY := ""
 
 	count := len(os.Args)
+	///log.Println("Count: ", count)
+
+	if count == 2 {
+		if os.Args[1] == "--web" {
+			SSL = false
+		} else {
+			wrongSyntax()
+			os.Exit(1)
+		}
+	}
+
+	if count == 3 {
+		wrongSyntax()
+	}
 
 	if count == 4 {
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
-	} else if count == 5 {
+		if os.Args[1] == "--web" {
+			SSL = false
+		} else if SSL {
+			CRT = os.Args[2]
+			KEY = os.Args[3]
+		} else {
+			wrongSyntax()
+			os.Exit(1)
+		}
+	}
+
+	if count == 5 {
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
 		if os.Args[4] == "-service" {
 			browser = false
+			if SSL {
+				wrongSyntax()
+				os.Exit(1)
+			}
+		}
+	}
+
+	if count == 6 {
+		if os.Args[2] == "-port" && isInt(os.Args[3]) {
+			HTTP, _ = strconv.Atoi(os.Args[3])
+		}
+		if os.Args[4] == "-service" {
+			browser = false
+		}
+		if !SSL {
+			wrongSyntax()
+			os.Exit(1)
 		} else {
-			log.Println("Incorrect syntax: (", os.Args[4], ") is not an option")
-			os.Exit(0)
+			CRT = os.Args[4]
+			KEY = os.Args[5]
+		}
+	}
+
+	if count == 7 {
+		if os.Args[2] == "-port" && isInt(os.Args[3]) {
+			HTTP, _ = strconv.Atoi(os.Args[3])
+		}
+		if os.Args[4] == "-service" {
+			browser = false
+		}
+		if SSL {
+			CRT = os.Args[5]
+			KEY = os.Args[6]
+		} else {
+			wrongSyntax()
+			os.Exit(1)
 		}
 	}
 
@@ -68,60 +127,38 @@ func routes() {
 	http.HandleFunc("/help", HelpPage)
 
 	if browser {
-		log.Println("Starting scmd web UI on port", HTTP)
-		openBrowser(fmt.Sprintf("https://localhost:%v", HTTP))
-		//TODO
-		// if CRT exist {
-		// 	err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
-		// } else {
-		// 	err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
-		// }
-		err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
-		if err != nil {
-			log.Println(err)
-		}
-	} else {
-		go func() {
-			//TODO
-			// if CRT exist {
-			// 	err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
-			// } else {
-			// 	err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
-			// }
+		if SSL {
+			log.Println("Starting scmd web HTTPS UI on port", HTTP)
+			openBrowser(fmt.Sprintf("https://localhost:%v", HTTP))
 			err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
 			if err != nil {
 				log.Println(err)
 			}
+		} else {
+			log.Println("Starting scmd web HTTP UI on port", HTTP)
+			openBrowser(fmt.Sprintf("http://localhost:%v", HTTP))
+			err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+
+	} else {
+		go func() {
+			if SSL {
+				err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
+				if err != nil {
+					log.Println(err)
+				}
+			} else {
+				err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
+				if err != nil {
+					log.Println(err)
+				}
+			}
 			wg.Done() // one goroutine finished
 		}()
-
-		go func() {
-			log.Println("Starting scmd web service on port", HTTP)
-			wg.Done()
-		}()
 	}
-
-	// if browser {
-	// 	log.Println("Starting scmd web UI on port", HTTP)
-	// 	openBrowser(fmt.Sprintf("http://localhost:%v", HTTP))
-	// 	err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 	}
-	// } else {
-	// 	go func() {
-	// 		err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
-	// 		if err != nil {
-	// 			log.Println(err)
-	// 		}
-	// 		wg.Done() // one goroutine finished
-	// 	}()
-
-	// 	go func() {
-	// 		log.Println("Starting scmd web service on port", HTTP)
-	// 		wg.Done()
-	// 	}()
-	// }
 
 	// wait until WaitGroup is done
 	wg.Wait()

@@ -29,6 +29,8 @@ func main() {
 			runUpgrade()
 		} else if arg1 == "--web" {
 			routes()
+		} else if arg1 == "--ssl" {
+			routes()
 		} else {
 			wrongSyntax()
 		}
@@ -43,12 +45,26 @@ func main() {
 			saveCmd(os.Args[2], os.Args[3])
 		} else if os.Args[1] == "--web" {
 			routes()
+		} else if os.Args[1] == "--ssl" {
+			routes()
 		} else {
 			wrongSyntax()
 		}
 	} else if len(os.Args) == 5 {
 		if os.Args[1] == "--web" {
 			routes()
+		}
+	} else if len(os.Args) == 6 {
+		if os.Args[1] == "--ssl" {
+			routes()
+		} else {
+			wrongSyntax()
+		}
+	} else if len(os.Args) == 7 {
+		if os.Args[1] == "--ssl" {
+			routes()
+		} else {
+			wrongSyntax()
 		}
 	} else {
 		wrongSyntax()

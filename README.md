@@ -14,39 +14,55 @@ Release: 1.3.3 - (05-04-2023) Minor cosmetics on help page (before annual leave)
 
 > Display this help menu
 ```
-Usage: 	 scmd-Linux-x86_64 --help
+Usage: 	 scmd-Linux-x86_64(exe) --help
 ```
 > Opens the web UI with default Port: "3333" 
 ```
-Usage: 	 scmd-Linux-x86_64 --web
+Usage: 	 scmd-Linux-x86_64(exe) --web
+```
+> Opens the Web UI with alternative Port:
+```
+Usage: 	 scmd-Linux-x86_64(exe) --web -port [port]
 ```
 > Opens the web UI with alternative Port: (-service won't launch the browser)
 ```
-Usage: 	 scmd-Linux-x86_64 --web -port [port] -service
+Usage: 	 scmd-Linux-x86_64(exe) --web -port [port] -service
+```
+> Opens SSL Web UI with default Port: "3333" 
+```
+Usage: 	 scmd-Linux-x86_64(exe) --ssl [certificate.pem] [privkey.pem]
+```
+> Opens SSL web UI with alternative Port:
+```
+Usage: 	 scmd-Linux-x86_64(exe) --ssl -port [port] [certificate.pem] [privkey.pem]
+```
+> Starts SCMD SSL without launching Web UI
+```
+Usage: 	 scmd-Linux-x86_64(exe) --ssl -port [port] -service [certificate.pem] [privkey.pem]
 ```
 > Show local and available scmd version
 ```
-Usage: 	 scmd-Linux-x86_64 --version
+Usage: 	 scmd-Linux-x86_64(exe) --version
 ```
 > Create a copy for the commands database and save it in Home folder
 ```
-Usage: 	 scmd-Linux-x86_64 --copydb
+Usage: 	 scmd-Linux-x86_64(exe) --copydb
 ```
 > Download all available commands database from online (override locally saved commands)
 ```
-Usage: 	 scmd-Linux-x86_64 --download
+Usage: 	 scmd-Linux-x86_64(exe) --download
 ```
 > Download and upgrade the latest version of the scmd application binary
 ```
-Usage: 	 scmd-Linux-x86_64 --upgrade
+Usage: 	 scmd-Linux-x86_64(exe) --upgrade
 ```
 > Search command based on comma separated pattern(s)
 ```
-Usage: 	 scmd-Linux-x86_64 --search "patterns"
+Usage: 	 scmd-Linux-x86_64(exe) --search "patterns"
 ```
 > Save new command with description in the local database
 ```
-Usage: 	 scmd-Linux-x86_64 --save "command" "description"
+Usage: 	 scmd-Linux-x86_64(exe) --save "command" "description"
 ```
 
 This app is also enriched by utilising the "tardigrade-mod" database available for download from github.com

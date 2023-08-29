@@ -110,3 +110,50 @@
 {"id":110,"key":"import java.io.BufferedReader;\r\nimport java.io.InputStreamReader;\r\nimport java.io.PrintWriter;\r\nimport java.net.ServerSocket;\r\nimport java.net.Socket;\r\n\r\npublic class Main {\r\n  public static void main(String args[]) {\r\n    WebServer ws = new WebServer();\r\n    ws.start();\r\n  }\r\n}\r\n\r\nclass WebServer {\r\n  protected void start() {\r\n    ServerSocket s;\r\n    System.out.println(\"Webserver starting up on port 80\");\r\n    System.out.println(\"(press ctrl-c to exit)\");\r\n    try {\r\n      // create the main server socket\r\n      s = new ServerSocket(80);\r\n    } catch (Exception e) {\r\n      System.out.println(\"Error: \" + e);\r\n      return;\r\n    }\r\n\r\n    System.out.println(\"Waiting for connection\");\r\n    for (;;) {\r\n      try {\r\n        Socket remote = s.accept();\r\n        System.out.println(\"Connection, sending data.\");\r\n        BufferedReader in = new BufferedReader(new InputStreamReader(remote.getInputStream()));\r\n        PrintWriter out = new PrintWriter(remote.getOutputStream());\r\n\r\n        String str = \".\";\r\n        while (!str.equals(\"\"))\r\n          str = in.readLine();\r\n\r\n        out.println(\"HTTP/1.0 200 OK\");\r\n        out.println(\"Content-Type: text/html\");\r\n        out.println(\"Server: Bot\");\r\n        out.println(\"\");\r\n        out.println(\"<H1>Welcome to the Ultra Mini-WebServer</H2>\");\r\n        out.flush();\r\n        remote.close();\r\n      } catch (Exception e) {\r\n        System.out.println(\"Error: \" + e);\r\n      }\r\n    }\r\n  }\r\n}","data":"Java web server as simple example to help you started"}
 {"id":111,"key":"$ go get -u github.com/gcclinux/scmd","data":"test"}
 {"id":112,"key":"func WriteLogToFile(message string) {\r\n    file, err := os.OpenFile(\"log.txt\", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)\r\n    if err != nil {\r\n        log.Fatal(err)\r\n    }\r\n    defer file.Close()\r\n\r\n    logger := log.New(file, \"\", log.LstdFlags)\r\n    logger.Println(message)\r\n}","data":"Golang function to write log information or data to a local file."}
+{"id":113,"key":"$ conda config --set auto_activate_base false","data":"If you'd prefer that conda's base environment not be activated on startup,    set the auto_activate_base parameter to false"}
+{"id":114,"key":"sudo apt-get update && sudo apt-get -y dist-upgrade && sudo apt-get install raspberrypi-ui-mods rpi-chromium-mods","data":"Install GUI desktop on rapsberry PI, update apt, and then install the raspberrypi-ui-mods and rpi-chromium-mods packages by typing out the following commands"}
+{"id":115,"key":"sudo raspi-config","data":"Raspberry Pi or raspbian configuration tool for all settings including wifi, display, network, ssh and GPU configuration."}
+{"id":116,"key":"$ wget -qO- https://brightdata.com/static/earnapp/install.sh > /tmp/earnapp.sh && sudo bash /tmp/earnapp.sh","data":"Download, install and configure earnapp on any linux flavour via command line!"}
+{"id":117,"key":"$ sudo iw wlan0 get power_save","data":"Debian check if power save is enabled, this will put network card to sleep"}
+{"id":118,"key":"$ sudo iw wlan0 set power_save off","data":"Debian disable NIC or network card from power save or sleep"}
+{"id":119,"key":"$ sudo grep psk= /etc/NetworkManager/system-connections/* | awk -F\"/\" '{print substr($0, index($0, $5))}' | sed 's/.nmconnection:psk=/ = /g'","data":"Display stored wifi connections in ubuntu linux"}
+{"id":120,"key":"PS> winget install Vim -e --source winget","data":"Powershell install application via command line using winget"}
+{"id":121,"key":"$ sudo systemctl disable earnapp","data":"Linux command to disable the earnapp.service app so it won't start automatic when system reboot"}
+{"id":122,"key":"$ sudo systemctl daemon-reload","data":"Linux command to restart the systemctl daemon-reload on the Server"}
+{"id":123,"key":"$ sudo systemctl reset-failed","data":"Linux command to reset failed services listed in systemctl"}
+{"id":124,"key":"$ sudo update-alternatives --config php","data":"Linux command to set an alternative or a default version of a specific app in this case to choose php version"}
+{"id":125,"key":"$ sudo apt purge openssh-server && sudo apt autoremove","data":"Debian and Ubuntu completely delete and remove a package application from command line"}
+{"id":126,"key":"$ awk '/32 host/ { print f } {f=$2}' <<< \"$(</proc/net/fib_trie)\" | sort -u","data":"Linux command get local IP address through proc "}
+{"id":127,"key":"$ awk '/32 host/ { print f } {f=$2}' /proc/net/fib_trie | sort -u","data":"Linux command get local IP address through proc"}
+{"id":128,"key":"$ sudo powertop","data":"Linux To inspect and monitor the power usage statistics, run the following command"}
+{"id":129,"key":"% sw_vers","data":"Darwin or MacOS command to show what version of the OS is installed"}
+{"id":130,"key":"% cd / && sudo dscl . -create /Users/oink UserShell /bin/bash UniqueID 666 PrimaryGroupID 1000","data":"Darwin command to create a new user called oink with specific shell id and gorup"}
+{"id":131,"key":"CMD> wlan profile YOUR_WIFI_NAME key=clear","data":"Windows command to show the wifi password under Key Content if you forgot what your password is. "}
+{"id":132,"key":"$ sudo -u www-data php /server/www/n/updater/updater.phar","data":"Nextcloud update command using the command line updater and not occ "}
+{"id":133,"key":"$ sudo nmcli dev wifi list","data":"How can I display the list of available wifi (Wi-Fi) networks via command line on Ubuntu or any other Linux"}
+{"id":134,"key":"$ sudo snap install network-manager","data":"Ubuntu install network application manager via snap"}
+{"id":135,"key":"$ sudo nmcli dev wifi connect \"network-ssid\" password \"network-password\"","data":"How-to connect to wifi (Wi-Fi) using nmcli a network application manager for Ubuntu or other Linux"}
+{"id":136,"key":"$ sudo nmcli --ask dev wifi connect","data":"How-to connect to wifi (Wi-Fi) using nmcli a network application manager for Ubuntu or other Linux"}
+{"id":137,"key":"$ sudo apt install network-manager","data":"Ubuntu install network application manager via apt"}
+{"id":138,"key":"% sw_vers && echo \"Architecture: \\t\\t $(arch)\"","data":"Darwin or MacOS command to show OS version and architecture"}
+{"id":139,"key":"% sysctl -n machdep.cpu.brand_string","data":"Darwin or MacOS command to show CPU model and type"}
+{"id":140,"key":"% sw_vers && echo \"Architecture: \\t\\t $(arch)\" && echo \"CPUModel: \\t\\t $(sysctl -n machdep.cpu.brand_string)\"","data":"Darwin or MacOS command to show OS version and architecture & Model"}
+{"id":141,"key":"$ sudo nmcli con show --active","data":"How-to show active wifi (Wi-Fi) connection using nmcli a network application manager for Ubuntu or other Linux"}
+{"id":142,"key":"PS> $FormatEnumerationLimit = 200; Get-Module Microsoft.PowerShell.Utility | Format-List","data":"PowerShell List formatted views to expand hidden details in a query"}
+{"id":143,"key":"$ autoexpect -f mount.win10 sudo mount -t cifs -o vers=3.0,username=user@outlook.com //192.168.1.100/SHARE /home/ubuntu/win10-share","data":"Linux command create expect file to automatically mount a windows filesystem, tested on ubuntu & fedora"}
+{"id":144,"key":"$ sudo tar -C /usr/local -xzf go1.20.5.linux-amd64.tar.gz","data":"Linux quick example how-to install golang or go command from line"}
+{"id":145,"key":"$ sudo -u www-data php /server/www/n/occ app:update --all","data":"Nextcloud update apps example using occ"}
+{"id":146,"key":"$ sudo -u www-data php /server/www/n/occ app:enable richdocumentscode_arm64","data":"Nextcloud enable app that is already installed and updated"}
+{"id":147,"key":"$ sudo -u www-data php /server/www/n/occ app:list","data":"Nextcloud list all available apps via command line using occ"}
+{"id":148,"key":"cd '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server'","data":"Ubuntu Preferences.xml location for plex server"}
+{"id":149,"key":"$ PGPASSWORD=password pg_dump -h host_name -d db_name -U user_name -v -f host_name-db_name-file_name-`date '+%Y-%m-%d'`.sql","data":"Postgresql simple backup command using pb_dump or psql databases"}
+{"id":150,"key":"$ df -h | awk '{print $6}' | egrep  \"/[a-z]\" > /backup/root-mounts-exclude && sudo rsync -avr --exclude-from='/backup/root-mounts-exclude' / /backup/root/","data":"In Linux this is the quickest way to backup root file system is by excluding all other mountpoints "}
+{"id":151,"key":"PS> Get-PSDrive","data":"PowerShell drive is a data store location that you can access like a filesystem drive in PowerShell"}
+{"id":152,"key":"PS> Copy-Item -Path \"SourcePath\" -Destination \"DestinationPath\" -Recurse -Force -Verbose","data":"PowerShell to Copy a Folder and contents – Overwrite Existing  with Verbose output."}
+{"id":153,"key":"$ sudo -u www-data php occ config:system:set updater.release.channel --value=beta","data":"Nextcloud set update to beta or stable release"}
+{"id":154,"key":"$ GIT_SSL_NO_VERIFY=true git clone https://wagemaker.no-ip.co.uk:3000/ricardo/tardigrade-mod.git","data":"Git clone skip certificate checking : server certificate verification failed. CAfile: none CRLfile: none"}
+{"id":155,"key":"$ git config --global http.sslVerify \"false\"","data":"Git clone skip certificate checking : server certificate verification failed. CAfile: none CRLfile: none"}
+{"id":156,"key":"$ openssl genrsa -des3 -out myCA.key 2048","data":"Using openssl generate the private key to become a local CA Password:localhost"}
+{"id":157,"key":"$ openssl req -x509 -new -nodes -key myCA.key -sha256 -days 1825 -out myCA.pem","data":"Using openssl and the myCA.key password generate local ssl certificate TLS"}
+{"id":158,"key":"$ sudo cp myCA.pem /usr/local/share/ca-certificates/myCA.crt","data":"Adding the Root Certificate to Linux renaming it from myCA.pem to myCA.crt"}
+{"id":159,"key":"\r\n% sudo security add-trusted-cert -d -r trustRoot -k \"/Library/Keychains/System.keychain\" myCA.pem","data":"Adding the Root Certificate to MacOS - Darwin via cli"}
