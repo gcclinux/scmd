@@ -151,7 +151,7 @@
 {"id":151,"key":"PS> Get-PSDrive","data":"PowerShell drive is a data store location that you can access like a filesystem drive in PowerShell"}
 {"id":152,"key":"PS> Copy-Item -Path \"SourcePath\" -Destination \"DestinationPath\" -Recurse -Force -Verbose","data":"PowerShell to Copy a Folder and contents – Overwrite Existing  with Verbose output."}
 {"id":153,"key":"$ sudo -u www-data php occ config:system:set updater.release.channel --value=beta","data":"Nextcloud set update to beta or stable release"}
-{"id":154,"key":"$ GIT_SSL_NO_VERIFY=true git clone https://wagemaker.no-ip.co.uk:3000/ricardo/tardigrade-mod.git","data":"Git clone skip certificate checking : server certificate verification failed. CAfile: none CRLfile: none"}
+{"id":154,"key":"$ GIT_SSL_NO_VERIFY=true git clone https://github.com/gcclinux/tardigrade-mod.git","data":"Git clone skip certificate checking : server certificate verification failed. CAfile: none CRLfile: none"}
 {"id":155,"key":"$ git config --global http.sslVerify \"false\"","data":"Git clone skip certificate checking : server certificate verification failed. CAfile: none CRLfile: none"}
 {"id":156,"key":"$ openssl genrsa -des3 -out myCA.key 2048","data":"Using openssl generate the private key to become a local CA Password:localhost"}
 {"id":157,"key":"$ openssl req -x509 -new -nodes -key myCA.key -sha256 -days 1825 -out myCA.pem","data":"Using openssl and the myCA.key password generate local ssl certificate TLS"}
