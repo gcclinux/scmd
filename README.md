@@ -11,6 +11,7 @@ Release: 1.3.0 - (19-03-2023) Added option to save or display functions also<BR>
 Release: 1.3.1 - (26-03-2023) Check if command already exist + cosmetics<BR>
 Release: 1.3.2 - (01-04-2023) Created the Help page and added search login.<BR>
 Release: 1.3.3 - (05-04-2023) Minor cosmetics on help page (before annual leave).<BR>
+Release: 1.3.5 - (29-08-2023) Added TLS capabilities for HTTPS.<BR>
 
 > Display this help menu
 ```
