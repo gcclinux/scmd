@@ -345,42 +345,45 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		var pattern = r.Form["pattern"][0]
 
-		WriteLogToFile(webLog, "SEARCH: "+pattern)
+		if len(pattern) < 3 {
+			tmpl.Execute(w, data)
+		} else {
+			WriteLogToFile(webLog, "SEARCH: "+pattern)
 
-		var _, received = tar.SelectSearch(pattern, "raw")
-		bytes := received
-		var dt []BuildStruct
-		json.Unmarshal(bytes, &dt)
+			var _, received = tar.SelectSearch(pattern, "raw")
+			bytes := received
+			var dt []BuildStruct
+			json.Unmarshal(bytes, &dt)
 
-		data.Pattern = checkDB(received)
+			data.Pattern = checkDB(received)
 
-		for x := range dt {
+			for x := range dt {
 
-			code := isCode(dt[x].Key)
+				code := isCode(dt[x].Key)
 
-			if code {
-				funccmd := dt[x].Key
-				if !strings.HasSuffix(funccmd, "{{end}}") {
-					funccmd = replaceLast(funccmd, "}", "\n}")
+				if code {
+					funccmd := dt[x].Key
+					if !strings.HasSuffix(funccmd, "{{end}}") {
+						funccmd = replaceLast(funccmd, "}", "\n}")
+					}
+					funccmd = strings.ReplaceAll(funccmd, "\n\t\n\t", "\n\n\t")
+					scode = append(scode, "//ID: "+strconv.Itoa(dt[x].Id)+" - "+dt[x].Data)
+					scode = append(scode, funccmd)
+				} else {
+					sc = append(sc, "----------------------------------------------------------------------")
+					sc = append(sc, "# ID: ")
+					sc = append(sc, strconv.Itoa(dt[x].Id))
+					sc = append(sc, "# Description: ")
+					sc = append(sc, fmt.Sprintf("\"%s\"", string(dt[x].Data)))
+					sc = append(sc, "# Command : ")
+					sc = append(sc, string(dt[x].Key))
+					sc = append(sc, "")
 				}
-				funccmd = strings.ReplaceAll(funccmd, "\n\t\n\t", "\n\n\t")
-				scode = append(scode, "//ID: "+strconv.Itoa(dt[x].Id)+" - "+dt[x].Data)
-				scode = append(scode, funccmd)
-			} else {
-				sc = append(sc, "----------------------------------------------------------------------")
-				sc = append(sc, "# ID: ")
-				sc = append(sc, strconv.Itoa(dt[x].Id))
-				sc = append(sc, "# Description: ")
-				sc = append(sc, fmt.Sprintf("\"%s\"", string(dt[x].Data)))
-				sc = append(sc, "# Command : ")
-				sc = append(sc, string(dt[x].Key))
-				sc = append(sc, "")
 			}
+
+			data.AllData = sc
+			data.Code = scode
+			tmpl.Execute(w, data)
 		}
-
-		data.AllData = sc
-		data.Code = scode
-		tmpl.Execute(w, data)
-
 	}
 }
