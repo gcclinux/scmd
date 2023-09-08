@@ -157,3 +157,334 @@
 {"id":157,"key":"$ openssl req -x509 -new -nodes -key myCA.key -sha256 -days 1825 -out myCA.pem","data":"Using openssl and the myCA.key password generate local ssl certificate TLS"}
 {"id":158,"key":"$ sudo cp myCA.pem /usr/local/share/ca-certificates/myCA.crt","data":"Adding the Root Certificate to Linux renaming it from myCA.pem to myCA.crt"}
 {"id":159,"key":"\r\n% sudo security add-trusted-cert -d -r trustRoot -k \"/Library/Keychains/System.keychain\" myCA.pem","data":"Adding the Root Certificate to MacOS - Darwin via cli"}
+{"id":160,"key":"$ strings your_executable | grep \"GLIBC\"","data":"Find out what version of the GNU C Library (glibc) was used to compile a binary executable, you can use the strings command"}
+{"id":161,"key":"#include <stdio.h>\r\n#include <stdlib.h>\r\n\r\nmain()\r\n{\r\n        char cYesNo = '\\0';\r\n        int iResp1 = 0;\r\n        int iResp2 = 0;\r\n        int iResp3 = 0;\r\n        int iResp4 = 0;\r\n        int iElapsedTime = 0;\r\n        int iCurrentTime = 0;\r\n        int iRandomNum = 0;\r\n        int iNow = 0;\r\n        int iWait = 0;\r\n        int i1 = 0;\r\n        int i2 = 0;\r\n        int i3 = 0;\r\n        int i4 = 0;\r\n        int iCounter = 0;\r\n\r\n        srand(time(NULL));\r\n\r\n        system (\"clear\");\r\n\r\n        printf(\"\\n\\nPlay a game of Concentration? ( y or n): \");\r\n        scanf(\"%c\", &cYesNo);\r\n\r\n        if (cYesNo == 'y' || cYesNo == 'Y' ) {\r\n                int iSelection = 0;\r\n\r\n                while ( iSelection != 5 ) {\r\n                                system (\"clear\");\r\n                                printf(\"\\n\");\r\n                                printf(\"1\\t Easy\\n\");\r\n                                printf(\"2\\t Medium\\n\");\r\n                                printf(\"3\\t Hard\\n\");\r\n                                printf(\"4\\t Extreme\\n\");\r\n                                printf(\"\\n\");\r\n                                printf(\"5\\t Quit\\n\");\r\n                                printf(\"\\n\");\r\n                                printf(\"Enter you level or quit (1-5): \");\r\n                                scanf(\"%d\", &iSelection);\r\n\r\n                        switch (iSelection) {\r\n\r\n                                case 1:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next three numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\n\", i1, i2, i3);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 3 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d\", &iResp1, &iResp2, &iResp3);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d\\n\\n\", i1, i2, i3);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 5 );\r\n                                        }\r\n                                }\r\n                                case 2:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next three numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\n\", i1, i2, i3);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 2 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d\", &iResp1, &iResp2, &iResp3);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d\\n\\n\", i1, i2, i3);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 5 );\r\n                                        }\r\n                                }\r\n                                case 3:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n                                        i4 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next four numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\t%d\\n\", i1, i2, i3, i4);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 2 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d%d\", &iResp1, &iResp2, &iResp3, &iResp4);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 && i4 == iResp4 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d %d\\n\\n\", i1, i2, i3, i4);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 7 );\r\n                                        }\r\n                                }\r\n                                case 4:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n                                        i4 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next four numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\t%d\\n\", i1, i2, i3, i4);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 1 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d%d\", &iResp1, &iResp2, &iResp3, &iResp4);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 && i4 == iResp4 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d %d\\n\\n\", i1, i2, i3, i4);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 7 );\r\n                                        }\r\n                                }\r\n                        }\r\n                }\r\n                system (\"clear\");\r\n                printf(\"\\n\");\r\n                printf(\"\\nThank you for playing concentration\\n\\n\");\r\n                printf(\"\\n\");\r\n        }\r\n}","data":"Simple c guess number game"}
+{"id":162,"key":"#include <stdio.h>\r\n#include <stdlib.h>\r\n\r\nmain()\r\n{\r\n        char cYesNo = '\\0';\r\n        int iResp1 = 0;\r\n        int iResp2 = 0;\r\n        int iResp3 = 0;\r\n        int iResp4 = 0;\r\n        int iElapsedTime = 0;\r\n        int iCurrentTime = 0;\r\n        int iRandomNum = 0;\r\n        int iNow = 0;\r\n        int iWait = 0;\r\n        int i1 = 0;\r\n        int i2 = 0;\r\n        int i3 = 0;\r\n        int i4 = 0;\r\n        int iCounter = 0;\r\n\r\n        srand(time(NULL));\r\n\r\n        system (\"clear\");\r\n\r\n        printf(\"\\n\\nPlay a game of Concentration? ( y or n): \");\r\n        scanf(\"%c\", &cYesNo);\r\n\r\n        if (cYesNo == 'y' || cYesNo == 'Y' ) {\r\n                int iSelection = 0;\r\n\r\n                while ( iSelection != 5 ) {\r\n                                system (\"clear\");\r\n                                printf(\"\\n\");\r\n                                printf(\"1\\t Easy\\n\");\r\n                                printf(\"2\\t Medium\\n\");\r\n                                printf(\"3\\t Hard\\n\");\r\n                                printf(\"4\\t Extreme\\n\");\r\n                                printf(\"\\n\");\r\n                                printf(\"5\\t Quit\\n\");\r\n                                printf(\"\\n\");\r\n                                printf(\"Enter you level or quit (1-5): \");\r\n                                scanf(\"%d\", &iSelection);\r\n\r\n                        switch (iSelection) {\r\n\r\n                                case 1:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next three numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\n\", i1, i2, i3);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 3 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d\", &iResp1, &iResp2, &iResp3);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d\\n\\n\", i1, i2, i3);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 5 );\r\n                                        }\r\n                                }\r\n                                case 2:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next three numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\n\", i1, i2, i3);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 2 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d\", &iResp1, &iResp2, &iResp3);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d\\n\\n\", i1, i2, i3);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 5 );\r\n                                        }\r\n                                }\r\n                                case 3:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n                                        i4 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next four numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\t%d\\n\", i1, i2, i3, i4);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 2 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d%d\", &iResp1, &iResp2, &iResp3, &iResp4);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 && i4 == iResp4 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d %d\\n\\n\", i1, i2, i3, i4);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 7 );\r\n                                        }\r\n                                }\r\n                                case 4:{\r\n                                        i1 = rand() %100;\r\n                                        i2 = rand() %100;\r\n                                        i3 = rand() %100;\r\n                                        i4 = rand() %100;\r\n\r\n                                        printf(\"\\nConcentrate on the next four numbers\\n\");\r\n                                        printf(\"\\n%d\\t%d\\t%d\\t%d\\n\", i1, i2, i3, i4);\r\n\r\n                                        iCurrentTime = time(NULL);\r\n\r\n                                        do {\r\n                                                iElapsedTime = time(NULL);\r\n                                        } while ( (iElapsedTime - iCurrentTime) < 1 );\r\n\r\n                                        system (\"clear\");\r\n\r\n                                        printf(\"\\nEnter each number separated with one space: \");\r\n                                        scanf(\"%d%d%d%d\", &iResp1, &iResp2, &iResp3, &iResp4);\r\n\r\n                                        if ( i1 == iResp1 && i2 == iResp2 && i3 == iResp3 && i4 == iResp4 ){\r\n                                                printf(\"\\nCongratulations!\\n\\n\");\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 3 );\r\n                                        }\r\n                                        else {\r\n                                                printf(\"\\nSorry, correct numbers were %d %d %d %d\\n\\n\", i1, i2, i3, i4);\r\n                                                iNow = time(NULL);\r\n                                                do {\r\n                                                        iWait = time(NULL);\r\n                                                } while ( (iWait - iNow) < 7 );\r\n                                        }\r\n                                }\r\n                        }\r\n                }\r\n                system (\"clear\");\r\n                printf(\"\\n\");\r\n                printf(\"\\nThank you for playing concentration\\n\\n\");\r\n                printf(\"\\n\");\r\n        }\r\n}","data":"Simple game writing in c language to guess the numbers"}
+{"id":163,"key":"$ cat file.txt | awk {'first = $1; $1=\"\"; print $0'}|sed 's/^ //g' ","data":"Generic Linux awk command to show all columns after first column "}
+{"id":164,"key":"&","data":"Generic Linux command Start a new process in the background"}
+{"id":165,"key":"$ sed -i 's/$/pattern/g' file.txt","data":"Generic Linux command sed add pattern at the end of each line"}
+{"id":166,"key":"$ alias","data":"Generic Linux command Create an alias •"}
+{"id":167,"key":"$ apropos","data":"Generic Linux command Search Help manual pages (man -k)"}
+{"id":168,"key":"$ apt","data":"Generic Linux command Search for and install software packages (Debian/Ubuntu)"}
+{"id":169,"key":"$ apt-get","data":"Generic Linux command Search for and install software packages (Debian/Ubuntu)"}
+{"id":170,"key":"$ aptitude","data":"Generic Linux command Search for and install software packages (Debian/Ubuntu)"}
+{"id":171,"key":"$ aspell","data":"Generic Linux command Spell Checker"}
+{"id":172,"key":"$ at","data":"Generic Linux command Schedule a command to run once at a particular time"}
+{"id":173,"key":"$ awk","data":"Generic Linux command Find and Replace text, database sort/validate/index"}
+{"id":174,"key":"$ basename","data":"Generic Linux command Strip directory and suffix from filenames"}
+{"id":175,"key":"$ base32","data":"Generic Linux command Base32 encode/decode data and print to standard output"}
+{"id":176,"key":"$ base64","data":"Generic Linux command Base64 encode/decode data and print to standard output"}
+{"id":177,"key":"$ bash","data":"Generic Linux command GNU Bourne-Again SHell"}
+{"id":178,"key":"$ bc","data":"Generic Linux command Arbitrary precision calculator language"}
+{"id":179,"key":"$ bg","data":"Generic Linux command Send to background"}
+{"id":180,"key":"$ bind","data":"Generic Linux command Set or display readline key and function bindings •"}
+{"id":181,"key":"$ break","data":"Generic Linux command Exit from a loop •"}
+{"id":182,"key":"$ builtin","data":"Generic Linux command Run a shell builtin"}
+{"id":183,"key":"$ bzip2","data":"Generic Linux command Compress or decompress named file(s)"}
+{"id":184,"key":"$ cal","data":"Generic Linux command Display a calendar"}
+{"id":185,"key":"$ caller","data":"Generic Linux command Return the context of any active subroutine call •"}
+{"id":186,"key":"$ case","data":"Generic Linux command Conditionally perform a command"}
+{"id":187,"key":"$ cat","data":"Generic Linux command Concatenate and print (display) the content of files"}
+{"id":188,"key":"$ cd","data":"Generic Linux command Change Directory"}
+{"id":189,"key":"$ cfdisk","data":"Generic Linux command Partition table manipulator for Linux"}
+{"id":190,"key":"$ chattr","data":"Generic Linux command Change file attributes on a Linux file system"}
+{"id":191,"key":"$ chgrp","data":"Generic Linux command Change group ownership"}
+{"id":192,"key":"$ chmod","data":"Generic Linux command Change access permissions"}
+{"id":193,"key":"$ chown","data":"Generic Linux command Change file owner and group"}
+{"id":194,"key":"$ chpasswd","data":"Generic Linux command Update passwords in batch mode"}
+{"id":195,"key":"$ chroot","data":"Generic Linux command Run a command with a different root directory"}
+{"id":196,"key":"$ chkconfig","data":"Generic Linux command System services (runlevel)"}
+{"id":197,"key":"$ cksum","data":"Generic Linux command Print CRC checksum and byte counts"}
+{"id":198,"key":"$ clear","data":"Generic Linux command Clear terminal screen"}
+{"id":199,"key":"$ cmp","data":"Generic Linux command Compare two files"}
+{"id":200,"key":"$ comm","data":"Generic Linux command Compare two sorted files line by line"}
+{"id":201,"key":"$ command","data":"Generic Linux command Run a command - ignoring shell functions •"}
+{"id":202,"key":"$ continue","data":"Generic Linux command Resume the next iteration of a loop •"}
+{"id":203,"key":"$ cp","data":"Generic Linux command Copy one or more files to another location"}
+{"id":204,"key":"$ cpio","data":"Generic Linux command Copy files to and from archives"}
+{"id":205,"key":"$ cron","data":"Generic Linux command Daemon to execute scheduled commands"}
+{"id":206,"key":"$ crontab","data":"Generic Linux command Schedule a command to run at a later time"}
+{"id":207,"key":"$ csplit","data":"Generic Linux command Split a file into context-determined pieces"}
+{"id":208,"key":"$ curl","data":"Generic Linux command Transfer data from or to a server"}
+{"id":209,"key":"$ cut","data":"Generic Linux command Divide a file into several parts"}
+{"id":210,"key":"$ date","data":"Generic Linux command Display or change the date & time"}
+{"id":211,"key":"$ dc","data":"Generic Linux command Desk Calculator"}
+{"id":212,"key":"$ dd","data":"Generic Linux command Data Duplicator - convert and copy a file, write disk headers, boot records"}
+{"id":213,"key":"$ ddrescue","data":"Generic Linux command Data recovery tool"}
+{"id":214,"key":"$ declare","data":"Generic Linux command Declare variables and give them attributes •"}
+{"id":215,"key":"$ df","data":"Generic Linux command Display free disk space"}
+{"id":216,"key":"$ diff","data":"Generic Linux command Display the differences between two files"}
+{"id":217,"key":"$ diff3","data":"Generic Linux command Show differences among three files"}
+{"id":218,"key":"$ dig","data":"Generic Linux command DNS lookup"}
+{"id":219,"key":"$ dir","data":"Generic Linux command Briefly list directory contents"}
+{"id":220,"key":"$ dircolors","data":"Generic Linux command Colour setup for 'ls'"}
+{"id":221,"key":"$ dirname","data":"Generic Linux command Convert a full pathname to just a path"}
+{"id":222,"key":"$ dirs","data":"Generic Linux command Display list of remembered directories"}
+{"id":223,"key":"$ dos2unix","data":"Generic Linux command Windows/MAC to UNIX text file format converter"}
+{"id":224,"key":"$ dmesg","data":"Generic Linux command Print kernel & driver messages"}
+{"id":225,"key":"$ dpkg","data":"Generic Linux command Package manager (Debian/Ubuntu)."}
+{"id":226,"key":"$ du","data":"Generic Linux command Estimate file space usage"}
+{"id":227,"key":"$ echo","data":"Generic Linux command Display message on screen •"}
+{"id":228,"key":"$ egrep","data":"Generic Linux command Search file(s) for lines that match an extended expression"}
+{"id":229,"key":"$ eject","data":"Generic Linux command Eject removable media"}
+{"id":230,"key":"$ enable","data":"Generic Linux command Enable and disable builtin shell commands •"}
+{"id":231,"key":"$ env","data":"Generic Linux command Environment variables"}
+{"id":232,"key":"$ ethtool","data":"Generic Linux command Ethernet card settings"}
+{"id":233,"key":"$ eval","data":"Generic Linux command Evaluate several commands/arguments"}
+{"id":234,"key":"$ exec","data":"Generic Linux command Execute a command"}
+{"id":235,"key":"$ exit","data":"Generic Linux command Exit the shell"}
+{"id":236,"key":"$ expand","data":"Generic Linux command Convert tabs to spaces"}
+{"id":237,"key":"$ export","data":"Generic Linux command Set an environment variable"}
+{"id":238,"key":"$ expr","data":"Generic Linux command Evaluate expressions"}
+{"id":239,"key":"$ false","data":"Generic Linux command Do nothing, unsuccessfully"}
+{"id":240,"key":"$ fdformat","data":"Generic Linux command Low-level format a floppy disk"}
+{"id":241,"key":"$ fdisk","data":"Generic Linux command Partition table manipulator for Linux"}
+{"id":242,"key":"$ fg","data":"Generic Linux command Send job to foreground"}
+{"id":243,"key":"$ fgrep","data":"Generic Linux command Search file(s) for lines that match a fixed string"}
+{"id":244,"key":"$ file","data":"Generic Linux command Determine file type"}
+{"id":245,"key":"$ find","data":"Generic Linux command Search for files that meet a desired criteria"}
+{"id":246,"key":"$ fmt","data":"Generic Linux command Reformat paragraph text"}
+{"id":247,"key":"$ fold","data":"Generic Linux command Wrap text to fit a specified width"}
+{"id":248,"key":"$ for","data":"Generic Linux command Expand words, and execute commands"}
+{"id":249,"key":"$ format","data":"Generic Linux command Format disks or tapes"}
+{"id":250,"key":"$ free","data":"Generic Linux command Display memory usage"}
+{"id":251,"key":"$ fsck","data":"Generic Linux command File system consistency check and repair"}
+{"id":252,"key":"$ ftp","data":"Generic Linux command File Transfer Protocol"}
+{"id":253,"key":"$ function","data":"Generic Linux command Define Function Macros"}
+{"id":254,"key":"$ fuser","data":"Generic Linux command Identify/kill the process that is accessing a file"}
+{"id":255,"key":"$ gawk","data":"Generic Linux command Find and Replace text within file(s)"}
+{"id":256,"key":"$ getopts","data":"Generic Linux command Parse positional parameters"}
+{"id":257,"key":"$ getfacl","data":"Generic Linux command Get file access control lists"}
+{"id":258,"key":"$ grep","data":"Generic Linux command Search file(s) for lines that match a given pattern"}
+{"id":259,"key":"$ groupadd","data":"Generic Linux command Add a user security group"}
+{"id":260,"key":"$ groupdel","data":"Generic Linux command Delete a group"}
+{"id":261,"key":"$ groupmod","data":"Generic Linux command Modify a group"}
+{"id":262,"key":"$ groups","data":"Generic Linux command Print group names a user is in"}
+{"id":263,"key":"$ gzip","data":"Generic Linux command Compress or decompress named file(s)"}
+{"id":264,"key":"$ hash","data":"Generic Linux command Remember the full pathname of a name argument"}
+{"id":265,"key":"$ head","data":"Generic Linux command Output the first part of file(s)"}
+{"id":266,"key":"$ help","data":"Generic Linux command Display help for a built-in command •"}
+{"id":267,"key":"$ history","data":"Generic Linux command Command History"}
+{"id":268,"key":"$ hostname","data":"Generic Linux command Print or set system name"}
+{"id":269,"key":"$ htop","data":"Generic Linux command Interactive process viewer"}
+{"id":270,"key":"$ iconv","data":"Generic Linux command Convert the character set of a file"}
+{"id":271,"key":"$ id","data":"Generic Linux command Print user and group id's"}
+{"id":272,"key":"$ if","data":"Generic Linux command Conditionally perform a command"}
+{"id":273,"key":"$ ifconfig","data":"Generic Linux command Configure a network interface"}
+{"id":274,"key":"$ ifdown","data":"Generic Linux command Stop a network interface"}
+{"id":275,"key":"$ ifup","data":"Generic Linux command Start a network interface up"}
+{"id":276,"key":"$ import","data":"Generic Linux command Capture an X server screen and save the image to file"}
+{"id":277,"key":"$ install","data":"Generic Linux command Copy files and set attributes"}
+{"id":278,"key":"$ iostat","data":"Generic Linux command Report CPU and i/o statistics"}
+{"id":279,"key":"$ ip","data":"Generic Linux command Routing, devices and tunnels"}
+{"id":280,"key":"$ jobs","data":"Generic Linux command List active jobs •"}
+{"id":281,"key":"$ join","data":"Generic Linux command Join lines on a common field"}
+{"id":282,"key":"$ kill","data":"Generic Linux command Kill a process by specifying its PID"}
+{"id":283,"key":"$ killall","data":"Generic Linux command Kill processes by name"}
+{"id":284,"key":"$ klist","data":"Generic Linux command List cached Kerberos tickets"}
+{"id":285,"key":"$ less","data":"Generic Linux command Display output one screen at a time"}
+{"id":286,"key":"$ let","data":"Generic Linux command Perform arithmetic on shell variables •"}
+{"id":287,"key":"$ link","data":"Generic Linux command Create a link to a file"}
+{"id":288,"key":"$ ln","data":"Generic Linux command Create a symbolic link to a file"}
+{"id":289,"key":"$ local","data":"Generic Linux command Create a function variable •"}
+{"id":290,"key":"$ locate","data":"Generic Linux command Find files"}
+{"id":291,"key":"$ logname","data":"Generic Linux command Print current login name"}
+{"id":292,"key":"$ logout","data":"Generic Linux command Exit a login shell •"}
+{"id":293,"key":"$ look","data":"Generic Linux command Display lines beginning with a given string"}
+{"id":294,"key":"$ lpc","data":"Generic Linux command Line printer control program"}
+{"id":295,"key":"$ lpr","data":"Generic Linux command Print files"}
+{"id":296,"key":"$ lprint","data":"Generic Linux command Print a file"}
+{"id":297,"key":"$ lprintd","data":"Generic Linux command Delete a print job"}
+{"id":298,"key":"$ lprintq","data":"Generic Linux command List the print queue"}
+{"id":299,"key":"$ lprm","data":"Generic Linux command Remove jobs from the print queue"}
+{"id":300,"key":"$ lsattr","data":"Generic Linux command List file attributes on a Linux second extended file system"}
+{"id":301,"key":"$ lsblk","data":"Generic Linux command List block devices"}
+{"id":302,"key":"$ ls","data":"Generic Linux command List information about file(s)"}
+{"id":303,"key":"$ lsof","data":"Generic Linux command List open files"}
+{"id":304,"key":"$ lspci","data":"Generic Linux command List all PCI devices"}
+{"id":305,"key":"$ make","data":"Generic Linux command Recompile a group of programs"}
+{"id":306,"key":"$ man","data":"Generic Linux command Help manual"}
+{"id":307,"key":"$ mapfile","data":"Generic Linux command Read lines from standard input into an indexed array variable •"}
+{"id":308,"key":"$ mkdir","data":"Generic Linux command Create new folder(s)"}
+{"id":309,"key":"$ mkfifo","data":"Generic Linux command Make FIFOs (named pipes)"}
+{"id":310,"key":"$ mkfile","data":"Generic Linux command Make a file"}
+{"id":311,"key":"$ mkisofs","data":"Generic Linux command Create a hybrid ISO9660/JOLIET/HFS filesystem"}
+{"id":312,"key":"$ mknod","data":"Generic Linux command Make block or character special files"}
+{"id":313,"key":"$ mktemp","data":"Generic Linux command Make a temporary file"}
+{"id":314,"key":"$ more","data":"Generic Linux command Display output one screen at a time"}
+{"id":315,"key":"$ most","data":"Generic Linux command Browse or page through a text file"}
+{"id":316,"key":"$ mount","data":"Generic Linux command Mount a file system"}
+{"id":317,"key":"$ mtools","data":"Generic Linux command Manipulate MS-DOS files"}
+{"id":318,"key":"$ mtr","data":"Generic Linux command Network diagnostics (traceroute/ping)"}
+{"id":319,"key":"$ mv","data":"Generic Linux command Move or rename files or directories"}
+{"id":320,"key":"$ mmv","data":"Generic Linux command Mass Move and rename (files)"}
+{"id":321,"key":"$ nc","data":"Generic Linux command Netcat, read and write data across networks"}
+{"id":322,"key":"$ netstat","data":"Generic Linux command Networking connections/stats"}
+{"id":323,"key":"$ nft","data":"Generic Linux command nftables for packet filtering and classification"}
+{"id":324,"key":"$ nice","data":"Generic Linux command Set the priority of a command or job"}
+{"id":325,"key":"$ nl","data":"Generic Linux command Number lines and write files"}
+{"id":326,"key":"$ nohup","data":"Generic Linux command Run a command immune to hangups"}
+{"id":327,"key":"$ notify-send","data":"Generic Linux command Send desktop notifications"}
+{"id":328,"key":"$ nslookup","data":"Generic Linux command Query Internet name servers interactively"}
+{"id":329,"key":"$ open","data":"Generic Linux command Open a file in its default application"}
+{"id":330,"key":"$ op","data":"Generic Linux command Operator access"}
+{"id":331,"key":"$ passwd","data":"Generic Linux command Modify a user password"}
+{"id":332,"key":"$ paste","data":"Generic Linux command Merge lines of files"}
+{"id":333,"key":"$ pathchk","data":"Generic Linux command Check file name portability"}
+{"id":334,"key":"$ Perf","data":"Generic Linux command Performance analysis tools for Linux"}
+{"id":335,"key":"$ ping","data":"Generic Linux command Test a network connection"}
+{"id":336,"key":"$ pgrep","data":"Generic Linux command List processes by name"}
+{"id":337,"key":"$ pkill","data":"Generic Linux command Kill processes by name"}
+{"id":338,"key":"$ popd","data":"Generic Linux command Restore the previous value of the current directory"}
+{"id":339,"key":"$ pr","data":"Generic Linux command Prepare files for printing"}
+{"id":340,"key":"$ printcap","data":"Generic Linux command Printer capability database"}
+{"id":341,"key":"$ printenv","data":"Generic Linux command Print environment variables"}
+{"id":342,"key":"$ printf","data":"Generic Linux command Format and print data •"}
+{"id":343,"key":"$ ps","data":"Generic Linux command Process status"}
+{"id":344,"key":"$ pushd","data":"Generic Linux command Save and then change the current directory"}
+{"id":345,"key":"$ pv","data":"Generic Linux command Monitor the progress of data through a pipe"}
+{"id":346,"key":"$ pwd","data":"Generic Linux command Print Working Directory"}
+{"id":347,"key":"$ quota","data":"Generic Linux command Display disk usage and limits"}
+{"id":348,"key":"$ quotacheck","data":"Generic Linux command Scan a file system for disk usage"}
+{"id":349,"key":"$ ram","data":"Generic Linux command ram disk device"}
+{"id":350,"key":"$ rar","data":"Generic Linux command Archive files with compression"}
+{"id":351,"key":"$ rcp","data":"Generic Linux command Copy files between two machines"}
+{"id":352,"key":"$ read","data":"Generic Linux command Read a line from standard input •"}
+{"id":353,"key":"$ readarray","data":"Generic Linux command Read from stdin into an array variable •"}
+{"id":354,"key":"$ readonly","data":"Generic Linux command Mark variables/functions as readonly"}
+{"id":355,"key":"$ reboot","data":"Generic Linux command Reboot the system"}
+{"id":356,"key":"$ rename","data":"Generic Linux command Rename files"}
+{"id":357,"key":"$ renice","data":"Generic Linux command Alter priority of running processes"}
+{"id":358,"key":"$ remsync","data":"Generic Linux command Synchronize remote files via email"}
+{"id":359,"key":"$ return","data":"Generic Linux command Exit a shell function"}
+{"id":360,"key":"$ rev","data":"Generic Linux command Reverse lines of a file"}
+{"id":361,"key":"$ rm","data":"Generic Linux command Remove files"}
+{"id":362,"key":"$ rmdir","data":"Generic Linux command Remove folder(s)"}
+{"id":363,"key":"$ rsync","data":"Generic Linux command Remote file copy (Synchronize file trees)"}
+{"id":364,"key":"$ screen","data":"Generic Linux command Multiplex terminal, run remote shells via ssh"}
+{"id":365,"key":"$ scp","data":"Generic Linux command Secure copy (remote file copy)"}
+{"id":366,"key":"$ sdiff","data":"Generic Linux command Merge two files interactively"}
+{"id":367,"key":"$ sed","data":"Generic Linux command Stream Editor"}
+{"id":368,"key":"$ select","data":"Generic Linux command Accept user choices via keyboard input"}
+{"id":369,"key":"$ seq","data":"Generic Linux command Print numeric sequences"}
+{"id":370,"key":"$ set","data":"Generic Linux command Manipulate shell variables and functions"}
+{"id":371,"key":"$ setfacl","data":"Generic Linux command Set file access control lists."}
+{"id":372,"key":"$ sftp","data":"Generic Linux command Secure File Transfer Program"}
+{"id":373,"key":"$ sha256sum","data":"Generic Linux command Compute and check SHA256 (256-bit) checksums"}
+{"id":374,"key":"$ shift","data":"Generic Linux command Shift positional parameters"}
+{"id":375,"key":"$ shopt","data":"Generic Linux command Shell Options"}
+{"id":376,"key":"$ shuf","data":"Generic Linux command Generate random permutations"}
+{"id":377,"key":"$ shutdown","data":"Generic Linux command Shutdown or restart linux"}
+{"id":378,"key":"$ sleep","data":"Generic Linux command Delay for a specified time"}
+{"id":379,"key":"$ slocate","data":"Generic Linux command Find files"}
+{"id":380,"key":"$ sort","data":"Generic Linux command Sort text files"}
+{"id":381,"key":"$ source","data":"Generic Linux command Run commands from a file '.' •"}
+{"id":382,"key":"$ split","data":"Generic Linux command Split a file into fixed-size pieces"}
+{"id":383,"key":"$ ss","data":"Generic Linux command Socket Statistics"}
+{"id":384,"key":"$ ssh","data":"Generic Linux command Secure Shell client (remote login program)"}
+{"id":385,"key":"$ stat","data":"Generic Linux command Display file or file system status"}
+{"id":386,"key":"$ strace","data":"Generic Linux command Trace system calls and signals"}
+{"id":387,"key":"$ su","data":"Generic Linux command Substitute user identity"}
+{"id":388,"key":"$ sudo","data":"Generic Linux command Execute a command as another user"}
+{"id":389,"key":"$ sum","data":"Generic Linux command Print a checksum for a file"}
+{"id":390,"key":"$ suspend","data":"Generic Linux command Suspend execution of this shell •"}
+{"id":391,"key":"$ sync","data":"Generic Linux command Synchronize data on disk with memory"}
+{"id":392,"key":"$ tail","data":"Generic Linux command Output the last part of a file"}
+{"id":393,"key":"$ tar","data":"Generic Linux command Store, list or extract files in an archive"}
+{"id":394,"key":"$ tee","data":"Generic Linux command Redirect output to multiple files"}
+{"id":395,"key":"$ test","data":"Generic Linux command Evaluate a conditional expression"}
+{"id":396,"key":"$ time","data":"Generic Linux command Measure Program running time"}
+{"id":397,"key":"$ timeout","data":"Generic Linux command Run a command with a time limit"}
+{"id":398,"key":"$ times","data":"Generic Linux command User and system times"}
+{"id":399,"key":"$ tmux","data":"Generic Linux command Terminal multiplexer"}
+{"id":400,"key":"$ touch","data":"Generic Linux command Change file timestamps"}
+{"id":401,"key":"$ top","data":"Generic Linux command List processes running on the system"}
+{"id":402,"key":"$ tput","data":"Generic Linux command Set terminal-dependent capabilities, color, position"}
+{"id":403,"key":"$ traceroute","data":"Generic Linux command Trace Route to Host"}
+{"id":404,"key":"$ trap","data":"Generic Linux command Execute a command when the shell receives a signal •"}
+{"id":405,"key":"$ tr","data":"Generic Linux command Translate, squeeze, and/or delete characters"}
+{"id":406,"key":"$ true","data":"Generic Linux command Do nothing, successfully"}
+{"id":407,"key":"$ tsort","data":"Generic Linux command Topological sort"}
+{"id":408,"key":"$ tty","data":"Generic Linux command Print filename of terminal on stdin"}
+{"id":409,"key":"$ type","data":"Generic Linux command Describe a command •"}
+{"id":410,"key":"$ ulimit","data":"Generic Linux command Limit user resources •"}
+{"id":411,"key":"$ umask","data":"Generic Linux command Users file creation mask"}
+{"id":412,"key":"$ umount","data":"Generic Linux command Unmount a device"}
+{"id":413,"key":"$ unalias","data":"Generic Linux command Remove an alias •"}
+{"id":414,"key":"$ uname","data":"Generic Linux command Print system information"}
+{"id":415,"key":"$ unexpand","data":"Generic Linux command Convert spaces to tabs"}
+{"id":416,"key":"$ uniq","data":"Generic Linux command Uniquify files"}
+{"id":417,"key":"$ units","data":"Generic Linux command Convert units from one scale to another"}
+{"id":418,"key":"$ unix2dos","data":"Generic Linux command UNIX to Windows or MAC text file format converter"}
+{"id":419,"key":"$ unrar","data":"Generic Linux command Extract files from a rar archive"}
+{"id":420,"key":"$ unset","data":"Generic Linux command Remove variable or function names"}
+{"id":421,"key":"$ unshar","data":"Generic Linux command Unpack shell archive scripts"}
+{"id":422,"key":"$ until","data":"Generic Linux command Execute commands (until error)"}
+{"id":423,"key":"$ uptime","data":"Generic Linux command Show uptime"}
+{"id":424,"key":"$ useradd","data":"Generic Linux command Create new user account"}
+{"id":425,"key":"$ userdel","data":"Generic Linux command Delete a user account"}
+{"id":426,"key":"$ usermod","data":"Generic Linux command Modify user account"}
+{"id":427,"key":"$ users","data":"Generic Linux command List users currently logged in"}
+{"id":428,"key":"$ uuencode","data":"Generic Linux command Encode a binary file"}
+{"id":429,"key":"$ uudecode","data":"Generic Linux command Decode a file created by uuencode"}
+{"id":430,"key":"-v","data":"Generic Linux command Verbosely list directory contents ('ls -l -b')"}
+{"id":431,"key":"$ vdir","data":"Generic Linux command Verbosely list directory contents ('ls -l -b')"}
+{"id":432,"key":"$ vi","data":"Generic Linux command Text Editor"}
+{"id":433,"key":"$ vmstat","data":"Generic Linux command Report virtual memory statistics"}
+{"id":434,"key":"$ w","data":"Generic Linux command Show who is logged on and what they are doing"}
+{"id":435,"key":"$ wait","data":"Generic Linux command Wait for a process to complete •"}
+{"id":436,"key":"$ watch","data":"Generic Linux command Execute/display a program periodically"}
+{"id":437,"key":"$ wc","data":"Generic Linux command Print byte, word, and line counts"}
+{"id":438,"key":"$ whereis","data":"Generic Linux command Search the user's , man pages and source files for a program"}
+{"id":439,"key":"$ which","data":"Generic Linux command Search the user's  for a program file"}
+{"id":440,"key":"$ while","data":"Generic Linux command Execute commands"}
+{"id":441,"key":"$ who","data":"Generic Linux command Print all usernames currently logged in"}
+{"id":442,"key":"$ whoami","data":"Generic Linux command Print the current user id and name ('id -un')"}
+{"id":443,"key":"$ wget","data":"Generic Linux command Retrieve web pages or files via HTTP, HTTPS or FTP"}
+{"id":444,"key":"$ write","data":"Generic Linux command Send a message to another user"}
+{"id":445,"key":"$ xargs","data":"Generic Linux command Execute utility, passing constructed argument list(s)"}
+{"id":446,"key":"$ xdg-open","data":"Generic Linux command Open a file or URL in the user's preferred application."}
+{"id":447,"key":"$ xxd","data":"Generic Linux command Make a hexdump or do the reverse"}
+{"id":448,"key":"$ xz","data":"Generic Linux command Compress or decompress .xz and .lzma files"}
+{"id":449,"key":"$ yes","data":"Generic Linux command Print a string until interrupted"}
+{"id":450,"key":"$ zip","data":"Generic Linux command Package and compress (archive) files"}
+{"id":451,"key":"$ .","data":"Generic Linux command Run a command script in the current shell"}
+{"id":452,"key":"!!","data":"Generic Linux command Run the last command again"}
+{"id":453,"key":"###","data":"Generic Linux command Comment / Remark"}
+{"id":454,"key":"$ go bug","data":"Go help start a bug report"}
+{"id":455,"key":"$ go build ","data":"Go help compile packages and dependencies"}
+{"id":456,"key":"$ go clean","data":"Go help remove object files and cached files"}
+{"id":457,"key":"$ go doc","data":"Go help show documentation for package or symbol"}
+{"id":458,"key":"$ go env","data":"Go help print Go environment information"}
+{"id":459,"key":"$ go fix","data":"Go help update packages to use new APIs"}
+{"id":460,"key":"$ go fmt","data":"Go help gofmt (reformat) package sources"}
+{"id":461,"key":"$ go generate","data":"Go help generate Go files by processing source"}
+{"id":462,"key":"$ go get","data":"Go help add dependencies to current module and install them"}
+{"id":463,"key":"$ go install","data":"Go help compile and install packages and dependencies "}
+{"id":464,"key":"$ go list","data":"Go help list packages or modules"}
+{"id":465,"key":"$ go mod","data":"Go help module maintenance"}
+{"id":466,"key":"$ go work ","data":"Go help workspace maintenance"}
+{"id":467,"key":"$ go run ","data":"Go help compile and run Go program"}
+{"id":468,"key":"$ go test","data":"Go help test packages"}
+{"id":469,"key":"$ go tool","data":"Go help run specified go tool"}
+{"id":470,"key":"$ go version","data":"Go help print Go version"}
+{"id":471,"key":"$ go vet","data":"Go help report likely mistakes in packages"}
+{"id":472,"key":"$ go help buildconstraint","data":"Go help build constraints"}
+{"id":473,"key":"$ go help buildmode","data":"Go help build modes"}
+{"id":474,"key":"$ go help c","data":"Go help calling between Go and C"}
+{"id":475,"key":"$ go help cache","data":"Go help build and test caching"}
+{"id":476,"key":"$ go help environment","data":"Go help environment variables"}
+{"id":477,"key":"$ go help filetype","data":"Go help The go command examines the contents of a restricted set of files in each directory"}
+{"id":478,"key":"$ go help go.mod","data":"Go help the go.mod file"}
+{"id":479,"key":"$ go help gopath","data":"Go help GOPATH environment variable"}
+{"id":480,"key":"$ go help gopath-get","data":"Go help legacy GOPATH go get"}
+{"id":481,"key":"$ go help goproxy","data":"Go help support for module proxy protocol"}
+{"id":482,"key":"$ go help importpath","data":"Go help for import path syntax"}
+{"id":483,"key":"$ go help modules","data":"Go help modules, module versions, and more"}
+{"id":484,"key":"$ go help module-get","data":"Go help module-aware go get"}
+{"id":485,"key":"$ go help module-auth","data":"Go help module authentication using go.sum"}
+{"id":486,"key":"$ go help packages","data":"Go help package lists and patterns"}
+{"id":487,"key":"$ go help private","data":"Go help configuration for downloading non-public code"}
+{"id":488,"key":"$ go help testflag","data":"Go help on testing flags options"}
+{"id":489,"key":"$ go help testfunc","data":"Go help testing functions options"}
+{"id":490,"key":"$ go help vcs","data":"Go help info on controlling version control with GOVCS"}
