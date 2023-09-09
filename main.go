@@ -12,8 +12,9 @@ import (
 func main() {
 
 	msg, _, _ := versionRemote()
+	count := len(os.Args)
 
-	if len(os.Args) == 2 {
+	if count == 2 {
 		arg1 := os.Args[1]
 		if arg1 == "--help" {
 			helpHere(getName())
@@ -34,13 +35,15 @@ func main() {
 		} else {
 			wrongSyntax()
 		}
-	} else if len(os.Args) == 3 {
+	} else if count == 3 {
 		if (os.Args[1]) == "--search" {
 			search(os.Args[2])
+		} else if (os.Args[1]) == "--web" && (os.Args[2]) == "--block" {
+			routes()
 		} else {
 			wrongSyntax()
 		}
-	} else if len(os.Args) == 4 {
+	} else if count == 4 {
 		if (os.Args[1]) == "--save" {
 			saveCmd(os.Args[2], os.Args[3])
 		} else if os.Args[1] == "--web" {
@@ -50,17 +53,17 @@ func main() {
 		} else {
 			wrongSyntax()
 		}
-	} else if len(os.Args) == 5 {
+	} else if count == 5 {
 		if os.Args[1] == "--web" {
 			routes()
 		}
-	} else if len(os.Args) == 6 {
+	} else if count == 6 && os.Args[count-1] == "!-block" {
 		if os.Args[1] == "--ssl" {
 			routes()
-		} else {
-			wrongSyntax()
 		}
-	} else if len(os.Args) == 7 {
+	} else if count == 6 && os.Args[count-1] == "--block" && os.Args[1] == "--web" {
+		routes()
+	} else if len(os.Args) == 7 || len(os.Args) == 8 || len(os.Args) == 9 {
 		if os.Args[1] == "--ssl" {
 			routes()
 		} else {

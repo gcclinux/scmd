@@ -29,6 +29,7 @@ type BuildStruct struct {
 	CmdFunc   string
 	AllData   []string
 	Code      []string
+	Insert    bool
 }
 
 //go:embed templates
@@ -47,7 +48,8 @@ func routes() {
 	KEY := ""
 
 	count := len(os.Args)
-	///log.Println("Count: ", count)
+	log.Println("Count: ", count)
+	log.Println("Last: ", os.Args[count-1])
 
 	if count == 2 {
 		if os.Args[1] == "--web" {
@@ -58,11 +60,19 @@ func routes() {
 		}
 	}
 
-	if count == 3 {
+	if count == 3 && os.Args[count-1] != "--block" {
 		wrongSyntax()
+		os.Exit(1)
+	} else {
+		if os.Args[1] == "--web" {
+			SSL = false
+		} else {
+			wrongSyntax()
+			os.Exit(1)
+		}
 	}
 
-	if count == 4 {
+	if count == 4 && os.Args[count-1] != "--block" {
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
@@ -77,7 +87,7 @@ func routes() {
 		}
 	}
 
-	if count == 5 {
+	if count == 5 && os.Args[count-1] != "--block" {
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
@@ -90,7 +100,26 @@ func routes() {
 		}
 	}
 
-	if count == 6 {
+	if count == 6 && os.Args[count-1] == "--block" {
+		if os.Args[1] == "--web" {
+			SSL = false
+		}
+		if os.Args[2] == "-port" && isInt(os.Args[3]) {
+			HTTP, _ = strconv.Atoi(os.Args[3])
+		}
+		if os.Args[4] == "-service" {
+			browser = false
+			if SSL {
+				wrongSyntax()
+				os.Exit(1)
+			}
+		}
+	}
+
+	if count == 6 && os.Args[count-1] != "--block" {
+		if os.Args[1] == "--web" {
+			SSL = false
+		}
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
@@ -123,7 +152,9 @@ func routes() {
 	}
 
 	http.HandleFunc("/", HomePage)
-	http.HandleFunc("/add", AddPage)
+	if os.Args[count-1] != "--block" {
+		http.HandleFunc("/add", AddPage)
+	}
 	http.HandleFunc("/help", HelpPage)
 
 	if browser {
@@ -168,7 +199,15 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/help.html"))
 	data := BuildStruct{
-		PageTitle: "(SCMD)",
+		PageTitle: "(HELP)",
+	}
+
+	if os.Args[len(os.Args)-1] == "--block" {
+		data.Insert = false
+		log.Println("data.Insert: ", data.Insert)
+	} else {
+		data.Insert = true
+		log.Println("data.Insert: ", data.Insert)
 	}
 
 	data.Version = Release
@@ -333,6 +372,14 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 
 	data := BuildStruct{
 		PageTitle: "(SCMD)",
+	}
+
+	if os.Args[len(os.Args)-1] == "--block" {
+		data.Insert = false
+		log.Println("data.Insert: ", data.Insert)
+	} else {
+		data.Insert = true
+		log.Println("data.Insert: ", data.Insert)
 	}
 
 	data.Version = Release

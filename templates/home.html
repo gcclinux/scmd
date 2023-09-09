@@ -23,20 +23,21 @@
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link active fw-bold" aria-current="page" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active fw-bold" aria-current="page" href="/add">Add </a>
-            </li>
+              {{if .Insert}}
+                <li class="nav-item">
+                  <a class="nav-link active fw-bold" aria-current="page" href="/add">Add</a>
+                </li>
+                {{end}}
             <li class="nav-item">
               <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
             </li>            
           </ul>
-          <span class="navbar-text">
-            Version: {{.Version}}
-          </span>
         </div>
       </div>
     </nav>
+    <div class="container-fluid mt-3">
+      Version: {{.Version}}
+    </div>
         <hr>
 
         <div class="container-fluid ms-n5 mt-2">
