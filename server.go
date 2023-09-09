@@ -201,6 +201,9 @@ func routes() {
 			wrongSyntax()
 			os.Exit(1)
 		}
+		if os.Args[4] == "-service" {
+			browser = false
+		}
 		if SSL {
 			CRT = os.Args[5]
 			KEY = os.Args[6]
