@@ -63,7 +63,7 @@ func routes() {
 	if count == 3 && os.Args[count-1] != "--block" {
 		wrongSyntax()
 		os.Exit(1)
-	} else {
+	} else if count == 3 && os.Args[count-1] == "--block" {
 		if os.Args[1] == "--web" {
 			SSL = false
 		} else {
@@ -73,6 +73,7 @@ func routes() {
 	}
 
 	if count == 4 && os.Args[count-1] != "--block" {
+		log.Println("server.go Line 77")
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
