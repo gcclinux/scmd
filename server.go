@@ -88,13 +88,21 @@ func routes() {
 		}
 	}
 
-	if count == 5 && os.Args[count-1] != "--block" {
+	if count == 5 {
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
 		if os.Args[4] == "-service" {
 			browser = false
 			if SSL {
+				wrongSyntax()
+				os.Exit(1)
+			}
+		} else {
+			if SSL {
+				CRT = os.Args[2]
+				KEY = os.Args[3]
+			} else {
 				wrongSyntax()
 				os.Exit(1)
 			}

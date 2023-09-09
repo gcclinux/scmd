@@ -54,9 +54,7 @@ func main() {
 			wrongSyntax()
 		}
 	} else if count == 5 {
-		if os.Args[1] == "--web" {
-			routes()
-		}
+		routes()
 	} else if count == 6 && os.Args[count-1] == "!-block" {
 		if os.Args[1] == "--ssl" {
 			routes()
