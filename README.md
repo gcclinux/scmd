@@ -12,6 +12,7 @@ Release: 1.3.1 - (26-03-2023) Check if command already exist + cosmetics<BR>
 Release: 1.3.2 - (01-04-2023) Created the Help page and added search login.<BR>
 Release: 1.3.3 - (05-04-2023) Minor cosmetics on help page (before annual leave).<BR>
 Release: 1.3.5 - (29-08-2023) Added TLS capabilities for HTTPS.<BR>
+Release: 1.3.6 - (09-09-2023) Added -block "DISABLES" add commands page.<BR>
 
 > Display this help menu
 ```
@@ -21,25 +22,49 @@ Usage: 	 scmd-Linux-x86_64(exe) --help
 ```
 Usage: 	 scmd-Linux-x86_64(exe) --web
 ```
+> Opens the Web UI with default Port: "3333" & "DISABLE" add commands
+```
+Usage:   scmd-win-x86_64(exe) --web -block
+```
 > Opens the Web UI with alternative Port:
 ```
 Usage: 	 scmd-Linux-x86_64(exe) --web -port [port]
+```
+> Opens the Web UI with alternative Port: & "DISABLE" add commands
+```
+Usage:   scmd-win-x86_64(exe) --web -port [port] -block
 ```
 > Opens the web UI with alternative Port: (-service won't launch the browser)
 ```
 Usage: 	 scmd-Linux-x86_64(exe) --web -port [port] -service
 ```
+> Starts SCMD without launching Web UI & "DISABLE" add commands
+```
+Usage:   scmd-win-x86_64(exe) --web -port [port] -service -block
+```
 > Opens SSL Web UI with default Port: "3333" 
 ```
 Usage: 	 scmd-Linux-x86_64(exe) --ssl [certificate.pem] [privkey.pem]
+```
+> Opens SSL Web UI with default Port: "3333" & "DISABLE" add commands
+```
+Usage:   scmd-win-x86_64(exe) --ssl [certificate.pem] [privkey.pem] -block
 ```
 > Opens SSL web UI with alternative Port:
 ```
 Usage: 	 scmd-Linux-x86_64(exe) --ssl -port [port] [certificate.pem] [privkey.pem]
 ```
+> Opens SSL web UI with alternative Port: & "DISABLE" add commands
+```
+Usage:   scmd-win-x86_64(exe) --ssl -port [port] [certificate.pem] [privkey.pem] -block
+```
 > Starts SCMD SSL without launching Web UI
 ```
 Usage: 	 scmd-Linux-x86_64(exe) --ssl -port [port] -service [certificate.pem] [privkey.pem]
+```
+> Starts SCMD SSL without launching Web UI & "DISABLE" add commands
+```
+Usage:   scmd-win-x86_64(exe) --ssl -port [port] -service [certificate.pem] [privkey.pem] -block
 ```
 > Show local and available scmd version
 ```
