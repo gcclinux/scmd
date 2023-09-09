@@ -59,7 +59,7 @@ func main() {
 		if os.Args[1] == "--ssl" {
 			routes()
 		}
-	} else if count == 6 && os.Args[count-1] == "--block" && os.Args[1] == "--web" {
+	} else if count == 6 && os.Args[count-1] == "--block" && os.Args[1] == "--web" || os.Args[1] == "--ssl" {
 		routes()
 	} else if len(os.Args) == 7 || len(os.Args) == 8 || len(os.Args) == 9 {
 		if os.Args[1] == "--ssl" {

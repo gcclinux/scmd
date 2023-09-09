@@ -60,10 +60,10 @@ func routes() {
 		}
 	}
 
-	if count == 3 && os.Args[count-1] != "--block" {
+	if count == 3 && os.Args[count-1] != "-block" {
 		wrongSyntax()
 		os.Exit(1)
-	} else if count == 3 && os.Args[count-1] == "--block" {
+	} else if count == 3 && os.Args[count-1] == "-block" {
 		if os.Args[1] == "--web" {
 			SSL = false
 		} else {
@@ -72,8 +72,8 @@ func routes() {
 		}
 	}
 
-	if count == 4 && os.Args[count-1] != "--block" {
-		log.Println("server.go Line 77")
+	if count == 4 && os.Args[count-1] != "-block" {
+		//log.Println("server.go Line 77")
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
 		}
@@ -89,8 +89,13 @@ func routes() {
 	}
 
 	if count == 5 {
+		if os.Args[1] == "--web" {
+			SSL = false
+		}
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
+		} else if os.Args[2] == "-service" {
+			browser = false
 		}
 		if os.Args[4] == "-service" {
 			browser = false
@@ -98,18 +103,21 @@ func routes() {
 				wrongSyntax()
 				os.Exit(1)
 			}
-		} else {
-			if SSL {
+		}
+		if SSL {
+			if os.Args[2] == "-service" {
+				CRT = os.Args[3]
+				KEY = os.Args[4]
+
+			} else {
 				CRT = os.Args[2]
 				KEY = os.Args[3]
-			} else {
-				wrongSyntax()
-				os.Exit(1)
+
 			}
 		}
 	}
 
-	if count == 6 && os.Args[count-1] == "--block" {
+	if count == 6 && os.Args[count-1] == "-block" {
 		if os.Args[1] == "--web" {
 			SSL = false
 		}
@@ -125,7 +133,7 @@ func routes() {
 		}
 	}
 
-	if count == 6 && os.Args[count-1] != "--block" {
+	if count == 6 && os.Args[count-1] != "-block" {
 		if os.Args[1] == "--web" {
 			SSL = false
 		}
@@ -142,11 +150,24 @@ func routes() {
 			CRT = os.Args[4]
 			KEY = os.Args[5]
 		}
+	} else if count == 6 && os.Args[count-1] == "-block" {
+		if os.Args[2] == "-service" {
+			browser = false
+		}
+		if !SSL {
+			wrongSyntax()
+			os.Exit(1)
+		} else {
+			CRT = os.Args[3]
+			KEY = os.Args[4]
+		}
 	}
-
-	if count == 7 {
+	if count == 7 && os.Args[count-1] != "-block" {
 		if os.Args[2] == "-port" && isInt(os.Args[3]) {
 			HTTP, _ = strconv.Atoi(os.Args[3])
+		} else {
+			wrongSyntax()
+			os.Exit(1)
 		}
 		if os.Args[4] == "-service" {
 			browser = false
@@ -158,10 +179,39 @@ func routes() {
 			wrongSyntax()
 			os.Exit(1)
 		}
+	} else if count == 7 && os.Args[count-1] == "-block" {
+		if os.Args[2] == "-port" && isInt(os.Args[3]) {
+			HTTP, _ = strconv.Atoi(os.Args[3])
+		} else {
+			wrongSyntax()
+			os.Exit(1)
+		}
+		if SSL {
+			CRT = os.Args[4]
+			KEY = os.Args[5]
+		} else {
+			wrongSyntax()
+			os.Exit(1)
+		}
+	}
+	if count == 8 && os.Args[count-1] == "-block" {
+		if os.Args[2] == "-port" && isInt(os.Args[3]) {
+			HTTP, _ = strconv.Atoi(os.Args[3])
+		} else {
+			wrongSyntax()
+			os.Exit(1)
+		}
+		if SSL {
+			CRT = os.Args[5]
+			KEY = os.Args[6]
+		} else {
+			wrongSyntax()
+			os.Exit(1)
+		}
 	}
 
 	http.HandleFunc("/", HomePage)
-	if os.Args[count-1] != "--block" {
+	if os.Args[count-1] != "-block" {
 		http.HandleFunc("/add", AddPage)
 	}
 	http.HandleFunc("/help", HelpPage)
@@ -211,12 +261,12 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 		PageTitle: "(HELP)",
 	}
 
-	if os.Args[len(os.Args)-1] == "--block" {
+	if os.Args[len(os.Args)-1] == "-block" {
 		data.Insert = false
-		log.Println("data.Insert: ", data.Insert)
+		//log.Println("data.Insert: ", data.Insert)
 	} else {
 		data.Insert = true
-		log.Println("data.Insert: ", data.Insert)
+		//log.Println("data.Insert: ", data.Insert)
 	}
 
 	data.Version = Release
@@ -383,12 +433,12 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		PageTitle: "(SCMD)",
 	}
 
-	if os.Args[len(os.Args)-1] == "--block" {
+	if os.Args[len(os.Args)-1] == "-block" {
 		data.Insert = false
-		log.Println("data.Insert: ", data.Insert)
+		//log.Println("data.Insert: ", data.Insert)
 	} else {
 		data.Insert = true
-		log.Println("data.Insert: ", data.Insert)
+		//log.Println("data.Insert: ", data.Insert)
 	}
 
 	data.Version = Release
