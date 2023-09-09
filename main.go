@@ -38,7 +38,7 @@ func main() {
 	} else if count == 3 {
 		if (os.Args[1]) == "--search" {
 			search(os.Args[2])
-		} else if (os.Args[1]) == "--web" && (os.Args[2]) == "--block" {
+		} else if (os.Args[1]) == "--web" && (os.Args[2]) == "-block" {
 			routes()
 		} else {
 			wrongSyntax()
@@ -55,11 +55,13 @@ func main() {
 		}
 	} else if count == 5 {
 		routes()
-	} else if count == 6 && os.Args[count-1] == "!-block" {
+	} else if count == 6 && os.Args[count-1] != "-block" {
 		if os.Args[1] == "--ssl" {
 			routes()
+		} else {
+			wrongSyntax()
 		}
-	} else if count == 6 && os.Args[count-1] == "--block" && os.Args[1] == "--web" || os.Args[1] == "--ssl" {
+	} else if count == 6 && os.Args[count-1] == "-block" && os.Args[1] == "--web" || os.Args[1] == "--ssl" {
 		routes()
 	} else if len(os.Args) == 7 || len(os.Args) == 8 || len(os.Args) == 9 {
 		if os.Args[1] == "--ssl" {
