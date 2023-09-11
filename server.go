@@ -217,6 +217,8 @@ func routes() {
 	if os.Args[count-1] != "-block" {
 		http.HandleFunc("/add", AddPage)
 	}
+
+	http.HandleFunc("/game", GamePage)
 	http.HandleFunc("/help", HelpPage)
 
 	if browser {
@@ -506,5 +508,24 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 			data.Code = scode
 			tmpl.Execute(w, data)
 		}
+	}
+}
+
+func GamePage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	//tar := tardigrade.Tardigrade{}
+	tmpl := template.Must(template.ParseFS(tplFolder, "templates/game.html"))
+
+	remoteAddr := r.RemoteAddr
+	WriteLogToFile(webLog, "GAME: "+remoteAddr)
+
+	data := BuildStruct{
+		PageTitle: "(GAME)",
+	}
+
+	if r.Method == "GET" {
+		tmpl.Execute(w, data)
+	} else {
+		r.ParseForm()
 	}
 }
