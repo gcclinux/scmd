@@ -523,6 +523,8 @@ func GamePage(w http.ResponseWriter, r *http.Request) {
 		PageTitle: "(GAME)",
 	}
 
+	data.Version = Release
+
 	if r.Method == "GET" {
 		tmpl.Execute(w, data)
 	} else {
