@@ -48,8 +48,8 @@ func routes() {
 	KEY := ""
 
 	count := len(os.Args)
-	log.Println("Count: ", count)
-	log.Println("Last: ", os.Args[count-1])
+	// log.Println("Count: ", count)
+	// log.Println("Last: ", os.Args[count-1])
 
 	if count == 2 {
 		if os.Args[1] == "--web" {
@@ -524,6 +524,12 @@ func GamePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Version = Release
+
+	if os.Args[len(os.Args)-1] == "-block" {
+		data.Insert = false
+	} else {
+		data.Insert = true
+	}
 
 	if r.Method == "GET" {
 		tmpl.Execute(w, data)
