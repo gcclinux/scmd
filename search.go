@@ -15,7 +15,7 @@ func search(pattern string) {
 
 	tar := tardigrade.Tardigrade{}
 
-	var _, received = tar.SelectSearch(pattern, "json")
+	var _, received = tar.SelectSearch(pattern, "json", "tardigrade.db")
 	bytes := received
 	var dt []tardigrade.MyStruct
 	json.Unmarshal(bytes, &dt)

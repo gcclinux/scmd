@@ -33,10 +33,10 @@ func isInt(in string) (result bool) {
 }
 
 // copyDB function create a copy of your current saved commands database and store it in your ${HOME} drive
-func copyDB() {
+func copyDB(db string) {
 	fmt.Println()
 	tar := tardigrade.Tardigrade{}
-	msg, status := tar.CreatedDBCopy()
+	msg, status := tar.CreatedDBCopy(db)
 	fmt.Println(msg, "(", status, ")")
 	fmt.Println()
 }

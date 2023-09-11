@@ -24,8 +24,6 @@ func main() {
 			fmt.Println("Usage: \t", getName(), "--search [pattern(s)]")
 		} else if arg1 == "--download" {
 			download()
-		} else if arg1 == "--copydb" {
-			copyDB()
 		} else if arg1 == "--upgrade" {
 			runUpgrade()
 		} else if arg1 == "--web" {
@@ -40,13 +38,13 @@ func main() {
 			search(os.Args[2])
 		} else if (os.Args[1]) == "--web" && (os.Args[2]) == "-block" {
 			routes()
+		} else if os.Args[1] == "--copydb" {
+			copyDB(os.Args[2])
 		} else {
 			wrongSyntax()
 		}
 	} else if count == 4 {
-		if (os.Args[1]) == "--save" {
-			saveCmd(os.Args[2], os.Args[3])
-		} else if os.Args[1] == "--web" {
+		if os.Args[1] == "--web" {
 			routes()
 		} else if os.Args[1] == "--ssl" {
 			routes()
@@ -54,7 +52,12 @@ func main() {
 			wrongSyntax()
 		}
 	} else if count == 5 {
-		routes()
+		if (os.Args[1]) == "--save" {
+			saveCmd(os.Args[2], os.Args[3], os.Args[4])
+		} else {
+			routes()
+		}
+
 	} else if count == 6 && os.Args[count-1] != "-block" {
 		if os.Args[1] == "--ssl" {
 			routes()

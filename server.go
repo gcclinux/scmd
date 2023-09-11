@@ -404,7 +404,7 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 
 		save := true
 		status := false
-		var _, received = tar.SelectSearch(command, "json")
+		var _, received = tar.SelectSearch(command, "json", "tardigrade.db")
 		bytes := received
 		var dt []tardigrade.MyStruct
 		json.Unmarshal(bytes, &dt)
@@ -420,7 +420,7 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if save {
-			status = tar.AddField(command, description)
+			status = tar.AddField(command, description, "tardigrade.db")
 			data.Status = fmt.Sprintf("%t", status)
 		} else {
 			data.Status = fmt.Sprintf("%v", "(false) Duplicate command!")
@@ -471,7 +471,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		} else {
 			WriteLogToFile(webLog, "SEARCH: "+pattern)
 
-			var _, received = tar.SelectSearch(pattern, "raw")
+			var _, received = tar.SelectSearch(pattern, "raw", "tardigrade.db")
 			bytes := received
 			var dt []BuildStruct
 			json.Unmarshal(bytes, &dt)
