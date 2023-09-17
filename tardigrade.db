@@ -488,77 +488,77 @@
 {"id":488,"key":"$ go help testflag","data":"Go help on testing flags options"}
 {"id":489,"key":"$ go help testfunc","data":"Go help testing functions options"}
 {"id":490,"key":"$ go help vcs","data":"Go help info on controlling version control with GOVCS"}
-{"id":491,"key":"$ dpkg-query -W --showformat=format","data":"Basic Debian Query installed packages, format e.g. ${Package} ${Version} ${Installed-Size}"}
-{"id":492,"key":"$ dpkg --get-selections > file","data":"Basic Debian Write package selections to file."}
-{"id":493,"key":"$ dpkg --set-selections < file","data":"Basic Debian Set package selections from file."}
-{"id":494,"key":"$ if [up][down] device","data":"Basic Debian Start, stop network interfaces according to the file above."}
-{"id":495,"key":"$ ip","data":"Basic Debian Show and manipulatenetwork interfaces and routing, needs iproute2."}
-{"id":496,"key":"$ ssh -X user@host","data":"Basic Debian Login at another machine."}
-{"id":497,"key":"$ scp files user@host:path","data":"Basic Debian Copy files to other machine and vice versa."}
-{"id":498,"key":"$ man page or man bash","data":"Read online help for every command and many configuration files."}
-{"id":499,"key":"$ command [--help, -h]","data":"Basic Debian Brief help for most commands."}
-{"id":500,"key":"$ ls /usr/share/ doc/package-name/","data":"Basic Debian Find all documentation here, optional file README.Debian contains specifics."}
-{"id":501,"key":"> boot: expert","data":"Basic Debian E.g. to set up the network w/o DHCP or to adapt bootloader installation."}
-{"id":502,"key":"$ dpkg-reconfigure package-name","data":"Basic Debian Reconfigure a package, e.g. keyboard-configuration (keyboard), locales (localization)."}
-{"id":503,"key":"$ update-alternatives options","data":"Basic Debian Manage command alternatives."}
-{"id":504,"key":"$ update-grub","data":"Basic Debian After changing /etc/default/grub."}
-{"id":505,"key":"$ systemctl restart name.service","data":"Basic Debian Restart a service, system daemon."}
-{"id":506,"key":"$ systemctl stop name.service","data":"Basic Debian Stop a service, system daemon."}
-{"id":507,"key":"$ systemctl start name.service","data":"Basic Debian Start a service, system daemon."}
-{"id":508,"key":"$ systemctl halt","data":"Basic Debian Halts system."}
-{"id":509,"key":"$ systemctl reboot","data":"Basic Debian Reboots system."}
-{"id":510,"key":"$ systemctl poweroff","data":"Basic Debian Shuts down system."}
-{"id":511,"key":"$ systemctl suspend\t","data":"Basic Debian Suspends system."}
-{"id":512,"key":"$ systemctl hibernate","data":"Basic Debian Hibernates system."}
-{"id":513,"key":"$ ls /var/log/","data":"Basic Debian All log files are under this directory."}
-{"id":514,"key":"$ ls /etc/default/","data":"Basic Debian Default values for many daemons and services."}
-{"id":515,"key":"$ cat files","data":"Generic Linux Print files to screen."}
-{"id":516,"key":"$ cp files dest","data":"Generic Linux Copy files and directories."}
-{"id":517,"key":"$ echo string","data":"Generic Linux Echo / show string to screen."}
-{"id":518,"key":"$ gzip, bzip2, xz [-d]\tfiles","data":"Generic Linux \tCompress, uncompress files."}
-{"id":519,"key":"$ pager files","data":"Generic Linux Show contents of files."}
-{"id":520,"key":"$ ls [files]","data":"Generic Linux List files."}
-{"id":521,"key":"$ mkdir directory-names","data":"Generic Linux Create directories."}
-{"id":522,"key":"$ mv file1 file2","data":"Generic Linux Move, rename files."}
-{"id":523,"key":"$ rm files","data":"Generic Linux Remove & delete files."}
-{"id":524,"key":"$ rmdir dirs","data":"Generic Linux Remove empty directories."}
-{"id":525,"key":"$ tar [c][x][t][z][j][J] -f file.tar [files]","data":"Generic Linux Create (c), extract (x), list table of (t) archive file, z for .gz, j for .bz2, J for .xz."}
-{"id":526,"key":"$ find directories expressions","data":"Generic Linux Find files like -name name or -size +1000, etc."}
-{"id":527,"key":"$ grep search-string files","data":"Generic Linux Find search-string in files."}
-{"id":528,"key":"$ ln -s file link","data":"Generic Linux Create a symbolic link to a file."}
-{"id":529,"key":"$ ps [options]","data":"Generic Linux Show current processes."}
-{"id":530,"key":"$ kill [-9] PID","data":"Generic Linux Send signal to process (e.g. terminate it). Use ps for PID."}
-{"id":531,"key":"$ su - [username]","data":"Generic Linux Become another user, / change user e.g. root."}
-{"id":532,"key":"$ sudo command","data":"Generic Linux Execute a command as root as normal user, see /etc/sudoers."}
-{"id":533,"key":"$ command > file","data":"Generic Linux Overwrite file with output of command."}
-{"id":534,"key":"$ command >> file","data":"Generic Linux Append output of command to file."}
-{"id":535,"key":"$ cmd1 | cmd2","data":"Generic Linux Use output of command 1 as input of command 2."}
-{"id":536,"key":"$ command < file","data":"Generic Linux Use file as input for command."}
-{"id":537,"key":"$ apt update","data":"Basic Debian Update packages listings from package repositories as listed in /etc/apt/sources.list. Required whenever that file or the contents of the repositories change."}
-{"id":538,"key":"$ apt search","data":"Basic Debian search-string\tSearch packages and descriptions for search-string."}
-{"id":539,"key":"$ apt list -a","data":"Basic Debian package-name\tShow versions and archive areas of available packages."}
-{"id":540,"key":"$ apt show -a","data":"Basic Debian package-name\tShow package information incl. description."}
-{"id":541,"key":"$ apt install","data":"Basic Debian package-names\tInstall packages from repositories with all dependencies."}
-{"id":542,"key":"$ apt upgrade","data":"Basic Debian Install newest versions of all packages currently installed."}
-{"id":543,"key":"$ apt full-upgrade","data":"Basic Debian Like apt upgrade, but with advanced conflict resolution."}
-{"id":544,"key":"$ apt remove","data":"Basic Debian package-names\tRemove packages."}
-{"id":545,"key":"$ apt autoremove","data":"Basic Debian Remove packages that no other packages depend on."}
-{"id":546,"key":"$ apt depends","data":"Basic Debian package-name\tList all packages needed by the one given."}
-{"id":547,"key":"$ apt rdepends","data":"Basic Debian package-name\tList all packages that need the one given."}
-{"id":548,"key":"$ apt-file update","data":"Basic Debian Update content listings from package repositories, see apt update."}
-{"id":549,"key":"$ apt-file search","data":"Basic Debian file-name\tSearch packages for file."}
-{"id":550,"key":"$ apt-file list","data":"Basic Debian package-name\tList contents of a package."}
-{"id":551,"key":"$ aptitude","data":"Basic Debian Console interface to APT, needs aptitude."}
-{"id":552,"key":"$ synaptic","data":"Basic Debian GUI interface to APT, needs synaptic."}
-{"id":553,"key":"$ dpkg -l [names]","data":"Basic Debian List packages."}
-{"id":554,"key":"$ dpkg -I pkg.deb","data":"Basic Debian Show package information."}
-{"id":555,"key":"$ dpkg -c pkg.deb","data":"Basic Debian List contents of package file."}
-{"id":556,"key":"$ dpkg -S filename","data":"Basic Debian Show which package a file belongs to."}
-{"id":557,"key":"$ dpkg -i pkg.deb","data":"Basic Debian Install package files."}
-{"id":558,"key":"$ dpkg -V [package-names]","data":"Basic Debian Audit check sums of installed packages."}
-{"id":559,"key":"$ dpkg-divert [options] file","data":"Basic Debian Override a package’s version of a file."}
-{"id":560,"key":"$ dpkg --compare-versions v1 gt v2","data":"Basic Debian Compare version numbers; view results with echo $?."}
-{"id":561,"key":"$ compress","data":"compress is a Unix shell compression program based on the LZW compression algorithm. Compared to gzip's fastest setting, compress is slightly slower at compression, slightly faster at decompression, and has a significantly lower compression ratio"}
+{"id":491,"key":"$ dpkg-query -W --showformat=format","data":"bash Basic Debian Query installed packages, format e.g. ${Package} ${Version} ${Installed-Size}"}
+{"id":492,"key":"$ dpkg --get-selections > file","data":"bash Basic Debian Write package selections to file."}
+{"id":493,"key":"$ dpkg --set-selections < file","data":"bash Basic Debian Set package selections from file."}
+{"id":494,"key":"$ if [up][down] device","data":"bash Basic Debian Start, stop network interfaces according to the file above."}
+{"id":495,"key":"$ ip","data":"bash Basic Debian Show and manipulatenetwork interfaces and routing, needs iproute2."}
+{"id":496,"key":"$ ssh -X user@host","data":"bash Basic Debian Login at another machine."}
+{"id":497,"key":"$ scp files user@host:path","data":"bash Basic Debian Copy files to other machine and vice versa."}
+{"id":498,"key":"$ man page or man bash","data":"bash Read online help for every command and many configuration files."}
+{"id":499,"key":"$ command [--help, -h]","data":"bash Basic Debian Brief help for most commands."}
+{"id":500,"key":"$ ls /usr/share/ doc/package-name/","data":"bash Basic Debian Find all documentation here, optional file README.Debian contains specifics."}
+{"id":501,"key":"> boot: expert","data":"bash Basic Debian E.g. to set up the network w/o DHCP or to adapt bootloader installation."}
+{"id":502,"key":"$ dpkg-reconfigure package-name","data":"bash Basic Debian Reconfigure a package, e.g. keyboard-configuration (keyboard), locales (localization)."}
+{"id":503,"key":"$ update-alternatives options","data":"bash Basic Debian Manage command alternatives."}
+{"id":504,"key":"$ update-grub","data":"bash Basic Debian After changing /etc/default/grub."}
+{"id":505,"key":"$ systemctl restart name.service","data":"bash Basic Debian Restart a service, system daemon."}
+{"id":506,"key":"$ systemctl stop name.service","data":"bash Basic Debian Stop a service, system daemon."}
+{"id":507,"key":"$ systemctl start name.service","data":"bash Basic Debian Start a service, system daemon."}
+{"id":508,"key":"$ systemctl halt","data":"bash Basic Debian Halts system."}
+{"id":509,"key":"$ systemctl reboot","data":"bash Basic Debian Reboots system."}
+{"id":510,"key":"$ systemctl poweroff","data":"bash Basic Debian Shuts down system."}
+{"id":511,"key":"$ systemctl suspend\t","data":"bash Basic Debian Suspends system."}
+{"id":512,"key":"$ systemctl hibernate","data":"bash Basic Debian Hibernates system."}
+{"id":513,"key":"$ ls /var/log/","data":"bash Basic Debian All log files are under this directory."}
+{"id":514,"key":"$ ls /etc/default/","data":"bash Basic Debian Default values for many daemons and services."}
+{"id":515,"key":"$ cat files","data":"bash Generic Linux Print files to screen."}
+{"id":516,"key":"$ cp files dest","data":"bash Generic Linux Copy files and directories."}
+{"id":517,"key":"$ echo string","data":"bash Generic Linux Echo / show string to screen."}
+{"id":518,"key":"$ gzip, bzip2, xz [-d]\tfiles","data":"bash Generic Linux \tCompress, uncompress files."}
+{"id":519,"key":"$ pager files","data":"bash Generic Linux Show contents of files."}
+{"id":520,"key":"$ ls [files]","data":"bash Generic Linux List files."}
+{"id":521,"key":"$ mkdir directory-names","data":"bash Generic Linux Create directories."}
+{"id":522,"key":"$ mv file1 file2","data":"bash Generic Linux Move, rename files."}
+{"id":523,"key":"$ rm files","data":"bash Generic Linux Remove & delete files."}
+{"id":524,"key":"$ rmdir dirs","data":"bash Generic Linux Remove empty directories."}
+{"id":525,"key":"$ tar [c][x][t][z][j][J] -f file.tar [files]","data":"bash Generic Linux Create (c), extract (x), list table of (t) archive file, z for .gz, j for .bz2, J for .xz."}
+{"id":526,"key":"$ find directories expressions","data":"bash Generic Linux Find files like -name name or -size +1000, etc."}
+{"id":527,"key":"$ grep search-string files","data":"bash Generic Linux Find search-string in files."}
+{"id":528,"key":"$ ln -s file link","data":"bash Generic Linux Create a symbolic link to a file."}
+{"id":529,"key":"$ ps [options]","data":"bash Generic Linux Show current processes."}
+{"id":530,"key":"$ kill [-9] PID","data":"bash Generic Linux Send signal to process (e.g. terminate it). Use ps for PID."}
+{"id":531,"key":"$ su - [username]","data":"bash Generic Linux Become another user, / change user e.g. root."}
+{"id":532,"key":"$ sudo command","data":"bash Generic Linux Execute a command as root as normal user, see /etc/sudoers."}
+{"id":533,"key":"$ command > file","data":"bash Generic Linux Overwrite file with output of command."}
+{"id":534,"key":"$ command >> file","data":"bash Generic Linux Append output of command to file."}
+{"id":535,"key":"$ cmd1 | cmd2","data":"bash Generic Linux Use output of command 1 as input of command 2."}
+{"id":536,"key":"$ command < file","data":"bash Generic Linux Use file as input for command."}
+{"id":537,"key":"$ apt update","data":"bash Basic Debian Update packages listings from package repositories as listed in /etc/apt/sources.list. Required whenever that file or the contents of the repositories change."}
+{"id":538,"key":"$ apt search","data":"bash Basic Debian search-string\tSearch packages and descriptions for search-string."}
+{"id":539,"key":"$ apt list -a","data":"bash Basic Debian package-name\tShow versions and archive areas of available packages."}
+{"id":540,"key":"$ apt show -a","data":"bash Basic Debian package-name\tShow package information incl. description."}
+{"id":541,"key":"$ apt install","data":"bash Basic Debian package-names\tInstall packages from repositories with all dependencies."}
+{"id":542,"key":"$ apt upgrade","data":"bash Basic Debian Install newest versions of all packages currently installed."}
+{"id":543,"key":"$ apt full-upgrade","data":"bash Basic Debian Like apt upgrade, but with advanced conflict resolution."}
+{"id":544,"key":"$ apt remove","data":"bash Basic Debian package-names\tRemove packages."}
+{"id":545,"key":"$ apt autoremove","data":"bash Basic Debian Remove packages that no other packages depend on."}
+{"id":546,"key":"$ apt depends","data":"bash Basic Debian package-name\tList all packages needed by the one given."}
+{"id":547,"key":"$ apt rdepends","data":"bash Basic Debian package-name\tList all packages that need the one given."}
+{"id":548,"key":"$ apt-file update","data":"bash Basic Debian Update content listings from package repositories, see apt update."}
+{"id":549,"key":"$ apt-file search","data":"bash Basic Debian file-name\tSearch packages for file."}
+{"id":550,"key":"$ apt-file list","data":"bash Basic Debian package-name\tList contents of a package."}
+{"id":551,"key":"$ aptitude","data":"bash Basic Debian Console interface to APT, needs aptitude."}
+{"id":552,"key":"$ synaptic","data":"bash Basic Debian GUI interface to APT, needs synaptic."}
+{"id":553,"key":"$ dpkg -l [names]","data":"bash Basic Debian List packages."}
+{"id":554,"key":"$ dpkg -I pkg.deb","data":"bash Basic Debian Show package information."}
+{"id":555,"key":"$ dpkg -c pkg.deb","data":"bash Basic Debian List contents of package file."}
+{"id":556,"key":"$ dpkg -S filename","data":"bash Basic Debian Show which package a file belongs to."}
+{"id":557,"key":"$ dpkg -i pkg.deb","data":"bash Basic Debian Install package files."}
+{"id":558,"key":"$ dpkg -V [package-names]","data":"bash Basic Debian Audit check sums of installed packages."}
+{"id":559,"key":"$ dpkg-divert [options] file","data":"bash Basic Debian Override a package’s version of a file."}
+{"id":560,"key":"$ dpkg --compare-versions v1 gt v2","data":"bash Basic Debian Compare version numbers; view results with echo $?."}
+{"id":561,"key":"$ compress","data":"bash compress is a Unix shell compression program based on the LZW compression algorithm. Compared to gzip's fastest setting, compress is slightly slower at compression, slightly faster at decompression, and has a significantly lower compression ratio"}
 {"id":562,"key":"<html>","data":"html beginning and end of an HTML document."}
 {"id":563,"key":"<head>","data":"html header information of the document."}
 {"id":564,"key":"<title>","data":"html specifies the title of the page."}
