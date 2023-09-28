@@ -55,12 +55,11 @@
         <hr>
 
         <div class="container text-center">
-            <div class="row" style="width: 100%; background-color: white;">
+            <div class="row" style="width: 90%; background-color: white;">
               <div class="col font-monospace">
                 <BR>
-                This is the SCMD game challange, test you command line knowledge and see if you get listed at the top 10 experts
-                <BR> you have 60 seconds to type as many commands or syntax using 
-                  <BR> "go" and "Bash" and "Java"
+                This is the SCMD game challange, test your command line knowledge and see if you get listed with the top 10 experts!
+                <BR> You have 60 seconds to type as many commands or syntax using - "go" and "Bash" and "Java"
                 <BR><BR>
               </div>
             </div>
@@ -69,10 +68,13 @@
               <table style="height: 100px;">
                 <tbody>
                   <tr>
-                    <td class="align-text-bottom"> $ 
-                      <input class="hide-clear" type="search" style="background-color:black; color: white; border: none; outline:none;" placeholder="_" name="commands" autofocus>
-                      <input autocomplete="false" type="hidden" name="hidden">
-                    </td>
+                    <form action="/" method="post" autocomplete="off" class="d-inline-flex" role="search">
+                      <td class="align-text-bottom"> $ 
+                        <input class="hide-clear" type="search" style="background-color:black; color: white; border: none; outline:none;" placeholder="_" name="game_cmd" autofocus>
+                        <input autocomplete="false" type="hidden" name="hidden">
+                      </td>
+                      <button style="background:transparent; border:0;" type="submit"></button>
+                    </form>
                   </tr>
                 </tbody>
               </table>
