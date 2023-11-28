@@ -14,7 +14,11 @@ func main() {
 	msg, _, _ := versionRemote()
 	count := len(os.Args)
 
-	if count == 2 {
+	if count == 2 || count == 1 {
+		if count == 1 {
+			helpHere(getName())
+			os.Exit(0)
+		}
 		arg1 := os.Args[1]
 		if arg1 == "--help" {
 			helpHere(getName())

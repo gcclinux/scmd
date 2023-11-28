@@ -224,14 +224,14 @@ func routes() {
 	if browser {
 		if SSL {
 			log.Println("Starting scmd web HTTPS UI on port", HTTP)
-			openBrowser(fmt.Sprintf("https://localhost:%v", HTTP))
+			openBrowser(fmt.Sprintf("https://%s:%v", GetOutboundIP(), HTTP))
 			err := http.ListenAndServeTLS(fmt.Sprintf(":%v", HTTP), CRT, KEY, nil)
 			if err != nil {
 				log.Println(err)
 			}
 		} else {
 			log.Println("Starting scmd web HTTP UI on port", HTTP)
-			openBrowser(fmt.Sprintf("http://localhost:%v", HTTP))
+			openBrowser(fmt.Sprintf("http://%s:%v", GetOutboundIP(), HTTP))
 			err := http.ListenAndServe(fmt.Sprintf(":%v", HTTP), nil)
 			if err != nil {
 				log.Println(err)
@@ -533,7 +533,14 @@ func GamePage(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		tmpl.Execute(w, data)
+		log.Println("Test 1")
 	} else {
+
+		log.Println("Test 2")
+
 		r.ParseForm()
+		var commands = r.Form["commands"][0]
+
+		WriteLogToFile(webLog, "SEARCH: "+commands)
 	}
 }

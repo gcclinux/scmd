@@ -30,6 +30,18 @@ func isCode(in string) (value bool) {
 		}
 	}
 
+	if strings.Contains(in, "<html>") {
+		if strings.Contains(in, "<body>") {
+			value = true
+		}
+	}
+
+	if strings.Contains(in, "<script>") {
+		if strings.Contains(in, "</script>") {
+			value = true
+		}
+	}
+
 	if strings.Contains(in, "stdio.h") {
 		if strings.Contains(in, "scanf") {
 			value = true
