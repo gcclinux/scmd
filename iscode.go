@@ -52,5 +52,11 @@ func isCode(in string) (value bool) {
 		value = true
 	}
 
+	if strings.Contains(in, "#") {
+		if strings.Contains(in, "/usr/bin/python") {
+			value = true
+		}
+	}
+
 	return value
 }
