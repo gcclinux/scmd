@@ -8,3 +8,6 @@
 
 # Remove use log
 *.log
+
+scmd-Linux-aarch64
+run-scmd.bash
