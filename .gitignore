@@ -9,5 +9,6 @@
 # Remove use log
 *.log
 
-scmd-Linux-aarch64
-run-scmd.bash
+*scmd-Linux-aarch64
+*scmd-MINGW64_NT-10.0-19045-x86_64
+*run-scmd.bash
