@@ -58,5 +58,12 @@ func isCode(in string) (value bool) {
 		}
 	}
 
+	if strings.Contains(in, "import") {
+		if strings.Contains(in, "{") {
+			value = true
+		}
+	}
+
+
 	return value
 }
