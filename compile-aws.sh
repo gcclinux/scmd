@@ -13,6 +13,8 @@ echo "Starting the SCMD re-compiled services"
 /usr/bin/screen -dmS SCMD80 /home/ubuntu/scmd/scmd-Linux-x86_64 --web -port 80 -service
 sleep 1
 #
-/usr/bin/screen --list | grep SCMD
+echo ""
+/usr/bin/screen -list | grep SCMD
+echo ""
 
 
