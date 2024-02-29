@@ -48,6 +48,10 @@ func isCode(in string) (value bool) {
 		}
 	}
 
+	if strings.Contains(in, "{{instructions}}") {
+		value = true
+	}
+
 	if strings.Contains(in, "{{end}}") {
 		value = true
 	}
@@ -63,7 +67,6 @@ func isCode(in string) (value bool) {
 			value = true
 		}
 	}
-
 
 	return value
 }
