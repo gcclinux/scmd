@@ -48,7 +48,7 @@ func isCode(in string) (value bool) {
 		}
 	}
 
-	if strings.Contains(in, "{instructions}") {
+	if strings.Contains(in, "##instructions##") {
 		value = true
 	}
 
