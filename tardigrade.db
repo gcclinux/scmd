@@ -645,3 +645,9 @@
 {"id":645,"key":"##instructions##\r\n## How do enable the firewalld?\r\n$ sudo systemctl unmask --now firewalld\r\n$ sudo systemctl enable firewalld\r\n$ sudo systemctl start firewalld\r\n## verify that the firewalld started ##\r\nsudo firewall-cmd --state","data":"Linux How do enable the firewalld"}
 {"id":646,"key":"##instructions## \r\n## How do disable the firewalld?\r\n$ sudo firewall-cmd --state\r\n$ sudo systemctl stop firewalld\r\n$ sudo systemctl disable firewalld\r\n$ sudo systemctl mask --now firewalld","data":"How do disable the firewalld"}
 {"id":647,"key":"PS> code --list-extensions | ForEach-Object { [PSCustomObject]@{Extension=$_} } | Export-Csv -Path extensions.csv -NoTypeInformation","data":"PowerShell export a list of all extensions installed in VSC and save it in a CSV format"}
+{"id":648,"key":"$ chmod 777 filename","data":"chmod 777: Everything for everyone"}
+{"id":649,"key":"$ chmod 755 /path/to/file","data":"chmod 755: Only owner can write, read and execute for everyone"}
+{"id":650,"key":"$ chmod 700 /path/to/file","data":"chmod 700: Everything for owner only"}
+{"id":651,"key":"$ chmod 666 /path/to/file","data":"chmod 666: No one executes"}
+{"id":652,"key":"$ chmod 644 /path/to/file","data":"chmod 644: Everyone can read, only owner can write"}
+{"id":653,"key":"$ chmod 600 /path/to/file","data":"chmod 600: Owner can read and write, nothing else for anyone"}
