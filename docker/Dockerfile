@@ -2,7 +2,7 @@
 FROM golang:1.17
 
 # Add Maintainer Info
-LABEL maintainer="Ricardo Wagemaker <java@wagemaker.co.uk>"
+LABEL maintainer="Ricardo Wagemaker"
 LABEL app.name="SCMD"
 LABEL app.version="1.3.7"
 LABEL app.release="2024-02-25"

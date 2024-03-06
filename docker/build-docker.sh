@@ -1,12 +1,6 @@
 #!/usr/bin/env sh
 #
 #
-echo "### Building docker will rename .git folder temporarely to exclude it from the docker container."
-echo "### Press any key to continue or Ctrl+C to stop."
-read -n 1 -s -r
-echo ""
-set -e
-mv -fv ../.git ../thisisgit
 echo "Copying files to docker folder..."
 cp -rv ../download.go ./
 cp -rv ../go.mod ./
@@ -30,7 +24,6 @@ cp -rv ../version.go ./
 echo ""
 echo "Building docker container..."
 docker buildx build . -t scmd:latest
-mv -fv ../thisisgit ../.git
 echo ""
 echo "Done building docker container."
 echo "To run local container, execute:"
