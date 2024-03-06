@@ -1,35 +1,15 @@
 #!/usr/bin/env sh
 #
 #
-echo "Copying files to docker folder..."
-cp -rv ../download.go ./
-cp -rv ../go.mod ./
-cp -rv ../go.sum ./
-cp -rv ../helpmenu.go ./
-cp -rv ../iscode.go ./
-cp -rv ../LICENSE ./
-cp -rv ../main.go ./
-cp -rv ../openurl.go ./
-cp -rv ../README.md ./
-cp -rv ../release ./
-cp -rv ../release.go ./
-cp -rv ../savecmd.go ./
-cp -rv ../search.go ./
-cp -rv ../server.go ./
-cp -rv ../tardigrade.db ./
-cp -rv ../templates/ ./
-cp -rv ../tools.go ./
-cp -rv ../upgrade.go ./
-cp -rv ../version.go ./
 echo ""
 echo "Building docker container..."
-docker buildx build . -t scmd:latest
+docker buildx build . -t gcclinux/scmd:latest
 echo ""
 echo "Done building docker container."
 echo "To run local container, execute:"
 echo "......"
 echo "
-$ docker run -it --publish 8080:8080 --name SCMD-WEB scmd:latest --web -port 8080 -service
+$ docker run -it --publish 8080:8080 --name SCMD-WEB gcclinux/scmd:latest --web -port 8080 -service
 "
 echo "......"
 echo "
