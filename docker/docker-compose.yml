@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+    scmd:
+        command: '--web -port 8080 -service'
+        image: 'gcclinux/scmd:latest'
+        container_name: SCMD-WEB
+        ports:
+            - '8080:8080'
+        tty: true
+        stdin_open: true
