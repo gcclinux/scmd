@@ -1,0 +1,8 @@
+.git
+.gitignore
+.gitattributes
+.gitmodules
+git_url.txt
+*bkp/
+*.sh
+*.log
