@@ -653,9 +653,3 @@
 {"id":653,"key":"$ chmod 600 /path/to/file","data":"chmod 600: Owner can read and write, nothing else for anyone"}
 {"id":654,"key":"$ docker inspect scmd:latest","data":"Run the docker inspect command followed by the name and tag of your image to list the full details of the docker container"}
 {"id":655,"key":"$ docker exec -it container_id sh -c 'ls /app/'","data":"List the files in the /app/ directory of a running Docker container"}
-{"id":656,"key":"$ docker container start [OPTIONS] CONTAINER [CONTAINER...]","data":"Start existing configured docker containers"}
-{"id":657,"key":"PS> (Get-NetIPAddress | Where-Object {$_.AddressState -eq \"Preferred\" -and $_.ValidLifetime -lt \"24:00:00\"}).IPAddress","data":"Powershell get only the local IP address Using Get-NetIPAddress"}
-{"id":658,"key":"PS> Get-NetIPAddress | Where-Object {$_.AddressState -eq \"Preferred\" -and $_.ValidLifetime -lt \"24:00:00\"}","data":"Powershell get the local IP address and details Using Get-NetIPAddress"}
-{"id":659,"key":"$ sudo docker exec -it gitea sh -c 'ls /usr/bin/git'\r\n","data":"Docker check if file is inside docker container here container name gitea and file is git"}
-{"id":660,"key":"$ sudo docker exec -it gitea sh -c 'git --version'","data":"Docker execute command inside the docker container here container name gitea and command is git"}
-{"id":661,"key":"$ sudo docker exec -it gitea /bin/sh","data":"Docker open command line inside the container for any editing or viewing requirements."}
