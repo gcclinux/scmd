@@ -217,10 +217,8 @@ func routes() {
 	if os.Args[count-1] != "-block" {
 		http.HandleFunc("/add", AddPage)
 	}
-
 	http.HandleFunc("/game", GamePage)
 	http.HandleFunc("/help", HelpPage)
-	http.Handle("/img/", addCacheControl(http.StripPrefix("/img/", http.FileServer(http.Dir("img")))))
 
 	if browser {
 		if SSL {
@@ -263,6 +261,7 @@ func routes() {
 func HelpPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/help.html"))
+
 	data := BuildStruct{
 		PageTitle: "(HELP)",
 	}
@@ -391,6 +390,9 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 		PageTitle: "(SCMD)",
 	}
 
+	fs := http.FS(tplFolder)
+	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(fs)))
+
 	remoteAddr := r.RemoteAddr
 	WriteLogToFile(webLog, "ADD: "+remoteAddr)
 
@@ -443,6 +445,13 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	tar := tardigrade.Tardigrade{}
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/home.html"))
+
+	// Assuming tplFolder is your embed.FS
+	dirEntries, _ := tplFolder.ReadDir(".")
+
+	for _, entry := range dirEntries {
+		fmt.Println(entry.Name())
+	}
 
 	remoteAddr := r.RemoteAddr
 	WriteLogToFile(webLog, "HOME: "+remoteAddr)

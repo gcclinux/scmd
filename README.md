@@ -13,6 +13,8 @@ Release: 1.3.2 - (01-04-2023) Created the Help page and added search login.<BR>
 Release: 1.3.3 - (05-04-2023) Minor cosmetics on help page (before annual leave).<BR>
 Release: 1.3.5 - (29-08-2023) Added TLS capabilities for HTTPS.<BR>
 Release: 1.3.6 - (09-09-2023) Added -block "DISABLES" add commands page.<BR>
+Release: 1.3.7 - (16-12-2023) Started a command game page.<BR>
+Release: 1.3.8 - (20-03-2024) Pauzed game but added favicon.<BR>
 
 > Display this help menu
 ```
