@@ -220,6 +220,7 @@ func routes() {
 
 	http.HandleFunc("/game", GamePage)
 	http.HandleFunc("/help", HelpPage)
+	http.Handle("/img/", addCacheControl(http.StripPrefix("/img/", http.FileServer(http.Dir("img")))))
 
 	if browser {
 		if SSL {
@@ -543,4 +544,13 @@ func GamePage(w http.ResponseWriter, r *http.Request) {
 
 		WriteLogToFile(webLog, "SEARCH: "+commands)
 	}
+}
+
+func addCacheControl(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "immutable") // 1 day
+		w.Header().Set("Pragma", "no-cache")         // HTTP 1.0.
+		w.Header().Set("Expires", "0")               // Proxies.
+		next.ServeHTTP(w, r)
+	})
 }
