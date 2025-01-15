@@ -641,7 +641,7 @@
 {"id":641,"key":"$ sudo ss -tuln | grep -i Plex","data":"You can check which port a service is running on in Linux by using the `netstat` command or the `ss` command. Here's how you can do it:"}
 {"id":642,"key":"##instructions##\r\n# Set Up Docker’s Package Repository:\r\nsudo dnf -y install dnf-plugins-core\r\nsudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo\r\n\r\n#Install Docker Engine:\r\nsudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin\r\n\r\n# Start Docker:\r\nsudo systemctl start docker\r\n\r\n# Enable and start the Docker service:\r\nsudo systemctl enable --now docker","data":"Install Docker on Fedora for the aarch64 or x86_64 architecture. "}
 {"id":643,"key":"##instructions##\r\n# Update Software Repositories\r\nsudo pacman -Syu\r\n\r\n#Install Docker:\r\nsudo pacman -S docker\r\n\r\n# Start Docker:\r\nsudo systemctl start docker\r\n\r\n# Enable and start the Docker service:\r\nsudo systemctl enable --now docker","data":"Install Docker on ArchLinux for the aarch64 or x86_64 architecture. "}
-{"id":644,"key":"$ sudo blkid","data":"blkid will  list block devices including USB devices attached to our host and provide device details"}
+{"id":644,"key":"$ sudo blkid","data":"blkid will list block devices including USB devices attached to our host and provide device details like PARTUUID"}
 {"id":645,"key":"##instructions##\r\n## How do enable the firewalld?\r\n$ sudo systemctl unmask --now firewalld\r\n$ sudo systemctl enable firewalld\r\n$ sudo systemctl start firewalld\r\n## verify that the firewalld started ##\r\nsudo firewall-cmd --state","data":"Linux How do enable the firewalld"}
 {"id":646,"key":"##instructions## \r\n## How do disable the firewalld?\r\n$ sudo firewall-cmd --state\r\n$ sudo systemctl stop firewalld\r\n$ sudo systemctl disable firewalld\r\n$ sudo systemctl mask --now firewalld","data":"How do disable the firewalld"}
 {"id":647,"key":"PS> code --list-extensions | ForEach-Object { [PSCustomObject]@{Extension=$_} } | Export-Csv -Path extensions.csv -NoTypeInformation","data":"PowerShell export a list of all extensions installed in VSC and save it in a CSV format"}
@@ -667,3 +667,63 @@
 {"id":667,"key":"$ sudo docker update --restart=always container_name_or_id","data":"Docker container update the restart policy of a running Docker container using the `docker update` command."}
 {"id":668,"key":"$ tar xC ${HOME}/ -f android-studio-2023.2.1.24-linux.tar","data":"Extract tar into a specific folder in this case home drive"}
 {"id":669,"key":"##instructions##\r\ntouch README.md\r\ngit init\r\ngit checkout -b main\r\ngit add README.md\r\ngit commit -m \"first commit\"\r\ngit remote add origin https://gitea-server:3000/ricardo/wpowertop.git\r\ngit push -u origin main","data":"Gitea or Git Creating a new repository on the command line "}
+{"id":670,"key":"$ sudo docker exec -u www-data DOCKER_IMAGE php occ config:system:get trusted_domains","data":"Docker check nextcloud trusted domains with occ"}
+{"id":671,"key":"$ sudo -u www-data php occ config:system:get trusted_domains","data":"Check nextcloud trusted domains with occ"}
+{"id":672,"key":"$ sudo docker exec -u www-data NEXTCLOUD php occ config:system:set trusted_domains 1 --value=yourdomain.com","data":"Docker add new trusted domain to Nextcloud and NEXTCLOUD is the container name"}
+{"id":673,"key":"$ sudo -u www-data php occ config:system:set trusted_domains 1 --value=yourdomain.com","data":"Nextcloud add new trusted domain using occ"}
+{"id":674,"key":"$ sudo -u www-data php occ user:lastseen ricardo","data":"To display the last login of users in Nextcloud using the `occ` command, you can use the `user:lastseen` command. This command will display the username and the last login date and time of all users. Please replace `php` and `occ` with the actual path if they are not in the system's PATH."}
+{"id":675,"key":"$ sudo -u www-data php occ files:transfer-ownership <source-user> <destination-user>","data":"To transfer files from one user to another in Nextcloud using the `occ` command, you can use the `files:transfer-ownership` command."}
+{"id":676,"key":"$ ip -json route get 8.8.8.8 | jq -r '.[].prefsrc'","data":"In Linux, you can use the `ip` utility to retrieve your public IP address by sending a request to an external service that provides it"}
+{"id":677,"key":"PS> $shell = New-Object -ComObject \"Shell.Application\"; $shell.minimizeall();","data":"Powershell minimise current window through command line"}
+{"id":678,"key":"$ sudo docker stop <container_name> && sudo docker pull dpage/pgadmin4:latest && sudo docker start<container_name>","data":"Docker refresh, update existing container in this case example how to upgrade pgadmin4 docker"}
+{"id":679,"key":"$ docker-compose -f docker-compose.yml up --build -d","data":"Using docker-compose build container it requires Dockerfile & docker-compose.yml"}
+{"id":680,"key":"$ sudo snap refresh <package>","data":"snap upgrade and downgrade Snap packages"}
+{"id":681,"key":"PS> $i=2700; while ($i -gt 0){; write-host -nonewline \"Seconds $i until Shutdown\"; sleep 1;  $i--; cls }; $shell = New-Object -ComObject \"Shell.Application\"; $shell.minimizeall(); rundll32.exe powrprof.dll,SetSuspendState Shutdown","data":"PowerShell Shutdown windows after 45 minutes"}
+{"id":682,"key":"PS> Start-Sleep -Seconds 2700; rundll32.exe powrprof.dll,SetSuspendState Shutdown","data":"PowerShell Shutdown windows after 45 minutes"}
+{"id":683,"key":"$ sudo zypper update","data":"\"OpenSuse - SuseLinux update command\""}
+{"id":684,"key":"$ systemctl --user start docker-desktop","data":"Ubuntu start docker desktop daemon"}
+{"id":685,"key":"$ echo 'export EDITOR=/usr/bin/vi' >> $HOME/.bashrc && source $HOME/.bashrc","data":"Bash Linux default editor "}
+{"id":686,"key":"$ git add . && git commit -m \"windows\" && git push -u -f origin main","data":"Single command git add & push remotely"}
+{"id":687,"key":"$ inxi -c 0 -ACdGMNSz","data":"Linux command display all device hardware configured in a system"}
+{"id":688,"key":"##instructions##\r\n-- Step 2: Retrieve the maximum value of the primary key column\r\nSELECT MAX(id) FROM api_weather;\r\n\r\n-- Assuming the result of the above query is 'X', proceed to step 3\r\n\r\n-- Step 3: Update the sequence\r\n-- Replace 'X' with the actual maximum value retrieved from the table\r\n-- Replace 'api_weather_id_seq' with the actual sequence name if it's different\r\nSELECT setval('api_weather_id_seq', (SELECT MAX(id) FROM api_weather), true);","data":"update the PostgreSQL unique key_sequence based on the last entry in the database, you can follow these steps:"}
+{"id":689,"key":":s/^M$//","data":"Edit file and remove the ^M is a carriage-return character Press Ctrl+V Ctrl+M to insert that ^M"}
+{"id":690,"key":":%s/^M//g","data":"Press Ctrl+V Ctrl+M to insert that ^M and remove the ^M is a carriage-return character global in the file"}
+{"id":691,"key":"$ sudo mkfs.ext4 /dev/sdb1","data":"Format USB device must first unmount and then create ext4 filesystem"}
+{"id":692,"key":"$ getent passwd gitea | grep -q '/usr/sbin/nologin' && echo \"nologin enabled\" || echo \"nologin not enabled\"","data":"To check if a user has [`nologin`]enabled as their shell, you can use the `getent` command to query the user database and then check the shell field."}
+{"id":693,"key":"$ sudo docker run --rm -v docker_data:/data -v /server/docker/docker_data:/backup busybox sh -c \"cp -r /data/* /backup\"","data":"Docker using cp move the data from docker volume docker_data into system volume /server/docker/docker_data "}
+{"id":694,"key":"$ sudo lsof | grep (your device name here)","data":"Which process is causing \"device busy\" when doing unmount?"}
+{"id":695,"key":"$ sysbench --test=cpu run","data":"Benchmark Your Linux, Debian, Fedora, Suse System"}
+{"id":696,"key":"$ sysbench --test=memory run","data":"Benchmark Your Linux, Debian, Fedora, Suse System"}
+{"id":697,"key":"$ sysbench --test=fileio --file-test-mode=seqwr run","data":"Benchmark IO on your Linux, Debian, Fedora, Suse System"}
+{"id":698,"key":"$ pip install python-kasa==0.6.2.1","data":"Install TP-link kasa KP115 Smart WI-FI with plug Energy Monitoring support"}
+{"id":699,"key":"PS> Expand-Archive -LiteralPath \"C:\\path\\to\\archive.zip\" -DestinationPath \"C:\\path\\to\\destination\"","data":"PowerShell command to extract a zip file"}
+{"id":700,"key":"PS> wsl --list","data":"Windows Subsystem Linux (WSL) list installed images"}
+{"id":701,"key":"PS> wsl --list --running","data":"Windows Subsystem Linux (WSL) list running images"}
+{"id":702,"key":"PS> wsl -d TEST","data":"Windows Subsystem Linux (WSL) start specific image called TEST"}
+{"id":703,"key":"PS> wsl --export Ubuntu E:\\BACKUP\\WSL-Ubuntu-20241213.vhdx --vhd","data":"Windows Subsystem Linux (WSL) export / backup particular image"}
+{"id":704,"key":"PS> wsl --import --vhd TEST E:\\LIVE\\  E:\\BACKUP\\WSL-Ubuntu-20241213.vhdx","data":"Windows Subsystem Linux (WSL) import/ restore image naming it TEST"}
+{"id":705,"key":"PS> wsl --unregister TEST","data":"Windows Subsystem Linux (WSL) delete particular image called TEST"}
+{"id":706,"key":"$ borg create --stats --progress --compression lz4 /media/samba/Fedora/Vorta::$(date +%F.%R) ~/Documents","data":"Borg backup run manual backup example "}
+{"id":707,"key":"$ borg init -e repokey /media/samba/Fedora/Vorta","data":"Initialize a new backup repository (see borg init --help for encryption options)"}
+{"id":708,"key":"$ borg list /media/samba/Fedora/Vorta/","data":"The command to list all backups in a Borg repository"}
+{"id":709,"key":"$ borg extract /media/samba/Fedora/Vorta::2024-12-30.15:00 --list","data":"This will display a list of files and directories within the Borg Backup archive for restore - 2024-12-30.15:00 is the ARCHIVE_ID"}
+{"id":710,"key":"$ cd /tmp/restore && borg extract /media/samba/Fedora/Vorta::2024-12-30.15:35","data":"Borg restore from archive by creating a restore folder: (mkdir /tmp/restore), then change into it and run the extract or the archive - 2024-12-30.15:35 = ARCHIVE_ID"}
+{"id":711,"key":"$ borg mount /media/samba/Fedora/Vorta /tmp/backups/","data":"Mount the Archive: Use the borg mount command to mount the archive as a FUSE filesystem - borg mount BORG_REPO SOME_FOLDER"}
+{"id":712,"key":"$ fusermount -u /tmp/restore","data":"Unmount the Archive: When you're done with borg archive or browsing backups, unmount the archive using the fusermount or umount command, depending on your system"}
+{"id":713,"key":"$ borg delete /media/samba/Fedora/Vorta::2025-01-01.13:47","data":"This will delete a backup/archive within the Borg Backup database & content - 2025-01-01.13:47 is the ARCHIVE_ID"}
+{"id":714,"key":"PS> Set-ExecutionPolicy RemoteSigned -Scope CurrentUser","data":"Fix PowerShell's execution policy restricted setting that runs scripts by default. To fix this, you'll need to change the execution policy like this"}
+{"id":715,"key":"PS> dism /online /disable-feature /featurename:Microsoft-Hyper-V-All","data":"Powershell disable Hyper-V in windows 11"}
+{"id":716,"key":"PS> Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Hypervisor","data":"Powershell disable Hyper-V from starting again after reboot in windows 11 "}
+{"id":717,"key":"PS> Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All","data":"Powershell disable Hyper-V from starting again after reboot in windows 11"}
+{"id":718,"key":"PS> Set-Alias -Name menu -Value \"D:\\Programming\\Batch\\menu.ps1\"","data":"PowersShell example set up alias \"menu\" to a script alternatively run notepad $PROFILE to setup alias"}
+{"id":719,"key":"$ echo $XDG_CURRENT_DESKTOP","data":"Linux Check which desktop environment you are using"}
+{"id":720,"key":"$ sudo apt install screenfetch","data":"Ubuntu Linux command to install a package called screenfetch"}
+{"id":721,"key":" $ sudo pacman -Sy screenfetch --noconfirm","data":"EndeavourOS ArchlLinux command to install a package called screenfetch"}
+{"id":722,"key":"$ dpkg -S /usr/bin/lite-desktop","data":"Find Which Package a File Belongs to in Debian/Ubuntu"}
+{"id":723,"key":"$  sudo docker logs NEXTCLOUD","data":"How to Check Docker Container Logs"}
+{"id":724,"key":"$ sudo docker exec -it NEXTCLOUD sh -c '/etc/init.d/apache2 restart'","data":"Restart nextcloud apache2 inside docker without restarting the container"}
+{"id":725,"key":"PS> Install-Module PSWindowsUpdate","data":"PowerShell Enable Get-WindowsUpdate - Part 1"}
+{"id":726,"key":"PS> Import-Module PSWindowsUpdate","data":"PowerShell Enable Get-WindowsUpdate - Part 2"}
+{"id":727,"key":"PS> Get-WindowsUpdate","data":"PowerShell List Windows 11 available updates "}
+{"id":728,"key":"PS> Install-WindowsUpdate","data":"PowerShell Install Windows 11 available updates"}
+{"id":729,"key":"PS> scoop install fastfetch","data":"Windows scoop command to install a package called fastfetch equivalent for windows as the Linux neofetch and screenfetch"}
