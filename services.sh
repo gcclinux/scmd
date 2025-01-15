@@ -6,7 +6,7 @@ echo ""
 case $1 in
     start)
         echo "Starting the LOCAL SCMD screen Services" 
-        cd $DIR && /usr/bin/screen -dmS SCMD-SHARED $DIR/scmd-Linux-aarch64 --ssl -port 3333 -service /server/cernbot/wagemaker.no-ip.co.uk/cert.pem /server/cernbot/wagemaker.no-ip.co.uk/privkey.pem -block
+        cd $DIR && /usr/bin/screen -dmS SCMD-SHARED $DIR/scmd-Linux-aarch64 --ssl -port 3333 -service /server/cernbot/domain.uk/cert.pem /server/cernbot/domain.uk/privkey.pem -block
         cd $DIR && /usr/bin/screen -dmS SCMD-EDIT $DIR/scmd-Linux-aarch64 --web -port 4444 -service
         sleep 1
         ;;
@@ -24,7 +24,7 @@ case $1 in
         /usr/bin/screen -S SCMD-EDIT -X quit
         sleep 1
         echo "Starting the LOCAL SCMD services"
-        cd $DIR && /usr/bin/screen -dmS SCMD-SHARED $DIR/scmd-Linux-aarch64 --ssl -port 3333 -service /server/cernbot/wagemaker.no-ip.co.uk/cert.pem /server/cernbot/wagemaker.no-ip.co.uk/privkey.pem -block
+        cd $DIR && /usr/bin/screen -dmS SCMD-SHARED $DIR/scmd-Linux-aarch64 --ssl -port 3333 -service /server/cernbot/domain.uk/cert.pem /server/cernbot/domain.uk/privkey.pem -block
         cd $DIR && /usr/bin/screen -dmS SCMD-EDIT $DIR/scmd-Linux-aarch64 --web -port 4444 -service
         sleep 1
         ;;
