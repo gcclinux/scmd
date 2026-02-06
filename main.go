@@ -36,6 +36,33 @@ func main() {
 			routes()
 		} else if arg1 == "--interactive" || arg1 == "-i" || arg1 == "--cli" {
 			StartInteractiveMode()
+		} else if arg1 == "--generate-embeddings" {
+			// Initialize providers
+			InitGemini()
+			InitOllama()
+			// Initialize database
+			if err := InitDB(); err != nil {
+				fmt.Printf("Failed to connect to database: %v\n", err)
+				os.Exit(1)
+			}
+			defer CloseDB()
+			// Generate embeddings
+			if err := GenerateEmbeddingsForAll(); err != nil {
+				fmt.Printf("Error: %v\n", err)
+				os.Exit(1)
+			}
+		} else if arg1 == "--embedding-stats" {
+			// Initialize database
+			if err := InitDB(); err != nil {
+				fmt.Printf("Failed to connect to database: %v\n", err)
+				os.Exit(1)
+			}
+			defer CloseDB()
+			// Show stats
+			if err := CheckEmbeddingStats(); err != nil {
+				fmt.Printf("Error: %v\n", err)
+				os.Exit(1)
+			}
 		} else {
 			wrongSyntax()
 		}

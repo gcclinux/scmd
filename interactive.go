@@ -17,7 +17,8 @@ func StartInteractiveMode() {
 	}
 	defer CloseDB()
 
-	// Initialize Ollama
+	// Initialize embedding providers (Gemini first, then Ollama)
+	InitGemini()
 	InitOllama()
 
 	reader := bufio.NewReader(os.Stdin)
@@ -68,6 +69,17 @@ func printWelcome() {
 	fmt.Println("║                    Version", Release, "                           ║")
 	fmt.Println("╚════════════════════════════════════════════════════════════════╝")
 	fmt.Println()
+
+	// Show embedding provider status
+	if IsGeminiAvailable() {
+		fmt.Println("🚀 Gemini API: Active (vector search enabled)")
+	} else if IsOllamaAvailable() {
+		fmt.Println("🤖 Ollama: Active (vector search enabled)")
+	} else {
+		fmt.Println("⚠️  No embedding provider (traditional search only)")
+	}
+	fmt.Println()
+
 	fmt.Println("Type '/help' or 'help' for available commands")
 	fmt.Println("Type '/exit' or 'exit' to quit")
 	fmt.Println()
@@ -89,6 +101,7 @@ func printInteractiveHelp() {
 	fmt.Println("  /count                - Show total number of commands")
 	fmt.Println("  /ai                   - Show AI/Ollama status")
 	fmt.Println("  /embeddings           - Check embedding statistics")
+	fmt.Println("  /generate             - Generate embeddings for all commands")
 	fmt.Println("  /clear or /cls        - Clear the screen")
 	fmt.Println("  /exit, /quit, or /q   - Exit interactive mode")
 	fmt.Println()
@@ -98,8 +111,12 @@ func printInteractiveHelp() {
 	fmt.Println("  clear or cls          - Clear the screen")
 	fmt.Println("  exit, quit, or q      - Exit interactive mode")
 	fmt.Println()
-	if IsOllamaAvailable() {
-		fmt.Println("🤖 AI Features (Ollama Active):")
+	if IsGeminiAvailable() || IsOllamaAvailable() {
+		aiProvider := "Gemini"
+		if !IsGeminiAvailable() && IsOllamaAvailable() {
+			aiProvider = "Ollama"
+		}
+		fmt.Printf("🤖 AI Features (%s Active):\n", aiProvider)
 		fmt.Println("──────────────────────────────────────────────────────────────")
 		fmt.Println("  - Vector similarity search for better relevance")
 		fmt.Println("  - AI-generated explanations and context")
@@ -197,10 +214,13 @@ func handleSlashCommand(input string) {
 		handleCountCommand()
 
 	case "/ai":
-		handleAIToggle(args)
+		handleAIStatus(args)
 
 	case "/embeddings":
 		handleEmbeddingsCheck()
+
+	case "/generate":
+		handleGenerateEmbeddings()
 
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
@@ -238,14 +258,6 @@ func performInteractiveSearch(pattern string) {
 		return
 	}
 
-	if len(results) == 0 {
-		fmt.Println()
-		fmt.Printf("No results found for: %s\n", pattern)
-		fmt.Println("Try different keywords or use /search with comma-separated patterns")
-		fmt.Println()
-		return
-	}
-
 	fmt.Println()
 
 	// If we have an AI response, show it first
@@ -255,6 +267,15 @@ func performInteractiveSearch(pattern string) {
 		fmt.Println(aiResponse)
 		fmt.Println("══════════════════════════════════════════════════════════════")
 		fmt.Println()
+	}
+
+	if len(results) == 0 {
+		if aiResponse == "" {
+			fmt.Printf("No results found for: %s\n", pattern)
+			fmt.Println("Try different keywords or use /search with comma-separated patterns")
+			fmt.Println()
+		}
+		return
 	}
 
 	fmt.Printf("Found %d result(s) for: %s\n", len(results), pattern)
@@ -281,7 +302,9 @@ func performInteractiveSearch(pattern string) {
 		if len(results) > 0 {
 			fmt.Printf("Found %d results but all had less than %d%% match.\n", len(results), minMatchThreshold)
 		}
-		fmt.Println("Try different or more specific keywords.")
+		if aiResponse == "" {
+			fmt.Println("Try different or more specific keywords.")
+		}
 		fmt.Println()
 		return
 	}
@@ -436,23 +459,31 @@ func clearScreen() {
 	printWelcome()
 }
 
-func handleAIToggle(args string) {
-	if !IsOllamaAvailable() {
+func handleAIStatus(args string) {
+	if IsGeminiAvailable() {
 		fmt.Println()
-		fmt.Println("⚠ Ollama is not available")
+		fmt.Println("🚀 Gemini API is available and active")
+		fmt.Printf("  Model: %s\n", os.Getenv("GEMINIMODEL"))
+		fmt.Printf("  Embedding: %s\n", os.Getenv("GEMINI_EMBEDDING_MODEL"))
+		fmt.Println()
+	}
+
+	if IsOllamaAvailable() {
+		fmt.Println()
+		fmt.Println("🤖 Ollama is available and active")
 		fmt.Printf("  Host: %s\n", os.Getenv("OLLAMA"))
 		fmt.Printf("  Model: %s\n", os.Getenv("MODEL"))
 		fmt.Println()
-		fmt.Println("Make sure Ollama is running and accessible.")
+	}
+
+	if !IsGeminiAvailable() && !IsOllamaAvailable() {
+		fmt.Println()
+		fmt.Println("⚠ No AI providers available")
+		fmt.Println("To enable AI features, set GEMINIAPI in .env or run Ollama locally.")
 		fmt.Println()
 		return
 	}
 
-	fmt.Println()
-	fmt.Println("✓ Ollama is available and active")
-	fmt.Printf("  Host: %s\n", os.Getenv("OLLAMA"))
-	fmt.Printf("  Model: %s\n", os.Getenv("MODEL"))
-	fmt.Println()
 	fmt.Println("AI-enhanced search is automatically used when available.")
 	fmt.Println("Features:")
 	fmt.Println("  - Vector similarity search for better relevance")
@@ -504,5 +535,24 @@ func handleEmbeddingsCheck() {
 		fmt.Println("✓ All records have embeddings!")
 		fmt.Println("Vector search will work optimally.")
 		fmt.Println()
+	}
+}
+
+func handleGenerateEmbeddings() {
+	fmt.Println()
+	fmt.Println("This will generate embeddings for all commands without them.")
+	fmt.Print("Continue? (y/n): ")
+
+	reader := bufio.NewReader(os.Stdin)
+	response, _ := reader.ReadString('\n')
+	response = strings.TrimSpace(strings.ToLower(response))
+
+	if response != "y" && response != "yes" {
+		fmt.Println("Cancelled.")
+		return
+	}
+
+	if err := GenerateEmbeddingsForAll(); err != nil {
+		fmt.Printf("Error: %v\n", err)
 	}
 }

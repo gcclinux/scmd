@@ -31,7 +31,7 @@ func InitDB() error {
 	}
 	execDir := filepath.Dir(execPath)
 	envPath := filepath.Join(execDir, ".env")
-	
+
 	if loadErr := godotenv.Load(envPath); loadErr != nil {
 		log.Printf("Warning: .env file not found at %s, using environment variables\n", envPath)
 	} else {
@@ -182,10 +182,60 @@ func AddCommand(command, description string) (bool, error) {
 		tableName = "scmd"
 	}
 
-	query := fmt.Sprintf("INSERT INTO %s (key, data) VALUES ($1, $2)", tableName)
-	_, err := db.Exec(query, command, description)
-	if err != nil {
-		return false, fmt.Errorf("error inserting command: %v", err)
+	var embedding []float64
+	var embeddingErr error
+	hasEmbedding := false
+
+	// Try Ollama first
+	if IsOllamaAvailable() {
+		text := command + " " + description
+		embedding, embeddingErr = GetEmbedding(text)
+		if embeddingErr != nil {
+			log.Printf("Warning: Ollama embedding failed: %v\n", embeddingErr)
+		} else {
+			hasEmbedding = true
+			log.Println("✓ Generated embedding using Ollama")
+		}
+	}
+
+	// Fallback to Gemini if Ollama failed or unavailable
+	if !hasEmbedding && IsGeminiAvailable() {
+		text := command + " " + description
+		embedding, embeddingErr = GetGeminiEmbedding(text)
+		if embeddingErr != nil {
+			log.Printf("Warning: Gemini embedding failed: %v\n", embeddingErr)
+		} else {
+			hasEmbedding = true
+			log.Println("✓ Generated embedding using Gemini API")
+		}
+	}
+
+	// Insert command with or without embedding
+	if hasEmbedding {
+		// Convert embedding to PostgreSQL vector format
+		embeddingStr := "["
+		for i, val := range embedding {
+			if i > 0 {
+				embeddingStr += ","
+			}
+			embeddingStr += fmt.Sprintf("%f", val)
+		}
+		embeddingStr += "]"
+
+		// Insert with embedding
+		query := fmt.Sprintf("INSERT INTO %s (key, data, embedding) VALUES ($1, $2, $3::vector)", tableName)
+		_, err := db.Exec(query, command, description, embeddingStr)
+		if err != nil {
+			return false, fmt.Errorf("error inserting command with embedding: %v", err)
+		}
+	} else {
+		// Insert without embedding
+		log.Println("⚠ No embedding provider available, saving without vector")
+		query := fmt.Sprintf("INSERT INTO %s (key, data) VALUES ($1, $2)", tableName)
+		_, err := db.Exec(query, command, description)
+		if err != nil {
+			return false, fmt.Errorf("error inserting command: %v", err)
+		}
 	}
 
 	return true, nil

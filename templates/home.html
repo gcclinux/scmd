@@ -50,6 +50,21 @@
             </form>
           </div>
         </div>       
+          {{if .AIResponse}}
+          <div class="row mt-4">
+            <div class="col-12">
+              <div class="card border-info ms-5 me-5 pe-2">
+                <div class="card-header bg-info text-white fw-bold">
+                  🤖 AI Assistant
+                </div>
+                <div class="card-body bg-light text-dark">
+                  <p class="card-text text-start" style="white-space: pre-wrap;">{{.AIResponse}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {{end}}
+
           {{if not .Code}}
             {{if not .AllData}}
               {{if not .Pattern}}

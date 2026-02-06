@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -14,20 +13,21 @@ import (
 )
 
 type BuildStruct struct {
-	PageTitle string
-	Pattern   string
-	Id        int
-	Key       string
-	Data      string
-	CmdTitle  string
-	DescTitle string
-	Version   string
-	Return    string
-	Status    string
-	CmdFunc   string
-	AllData   []string
-	Code      []string
-	Insert    bool
+	PageTitle  string
+	Pattern    string
+	Id         int
+	Key        string
+	Data       string
+	CmdTitle   string
+	DescTitle  string
+	Version    string
+	Return     string
+	Status     string
+	CmdFunc    string
+	AllData    []string
+	Code       []string
+	Insert     bool
+	AIResponse string
 }
 
 //go:embed templates
@@ -448,13 +448,6 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/home.html"))
 
-	// Assuming tplFolder is your embed.FS
-	dirEntries, _ := tplFolder.ReadDir(".")
-
-	for _, entry := range dirEntries {
-		fmt.Println(entry.Name())
-	}
-
 	remoteAddr := r.RemoteAddr
 	WriteLogToFile(webLog, "HOME: "+remoteAddr)
 
@@ -485,7 +478,8 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		} else {
 			WriteLogToFile(webLog, "SEARCH: "+pattern)
 
-			received, err := SearchCommands(pattern, "raw")
+			// Use SmartSearch instead of basic SearchCommands
+			results, aiResponse, err := SmartSearch(pattern, true)
 			if err != nil {
 				log.Printf("Error searching commands: %v", err)
 				data.Pattern = "Error searching database"
@@ -493,31 +487,30 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			var dt []CommandRecord
-			json.Unmarshal(received, &dt)
+			data.AIResponse = aiResponse
 
-			data.Pattern = checkDB(received)
+			if len(results) == 0 && aiResponse == "" {
+				data.Pattern = "No matches found"
+			}
 
-			for x := range dt {
-
-				code := isCode(dt[x].Key)
-
+			for _, record := range results {
+				code := isCode(record.Key)
 				if code {
-					funccmd := dt[x].Key
+					funccmd := record.Key
 					if !strings.HasSuffix(funccmd, "{{end}}") {
 						funccmd = replaceLast(funccmd, "}", "\n}")
 					}
 					funccmd = strings.ReplaceAll(funccmd, "\n\t\n\t", "\n\n\t")
-					scode = append(scode, "//ID: "+strconv.Itoa(dt[x].Id)+" - "+dt[x].Data)
+					scode = append(scode, "//ID: "+strconv.Itoa(record.Id)+" - "+record.Data)
 					scode = append(scode, funccmd)
 				} else {
 					sc = append(sc, "----------------------------------------------------------------------")
 					sc = append(sc, "# ID: ")
-					sc = append(sc, strconv.Itoa(dt[x].Id))
+					sc = append(sc, strconv.Itoa(record.Id))
 					sc = append(sc, "# Description: ")
-					sc = append(sc, fmt.Sprintf("\"%s\"", string(dt[x].Data)))
+					sc = append(sc, fmt.Sprintf("\"%s\"", string(record.Data)))
 					sc = append(sc, "# Command : ")
-					sc = append(sc, string(dt[x].Key))
+					sc = append(sc, string(record.Key))
 					sc = append(sc, "")
 				}
 			}

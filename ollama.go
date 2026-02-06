@@ -167,12 +167,10 @@ func GetEmbedding(text string) ([]float64, error) {
 	return embedding, nil
 }
 
-// SearchWithOllama performs a vector similarity search using Ollama embeddings
-func SearchWithOllama(query string, limit int) ([]CommandRecord, error) {
-	// Get embedding for the query
-	embedding, err := GetEmbedding(query)
-	if err != nil {
-		return nil, fmt.Errorf("error getting embedding: %v", err)
+// SearchVectorInDB performs a vector similarity search in the database using a given embedding
+func SearchVectorInDB(embedding []float64, limit int) ([]CommandRecord, error) {
+	if db == nil {
+		return nil, fmt.Errorf("database connection is null")
 	}
 
 	// Convert embedding to PostgreSQL vector format
@@ -191,7 +189,7 @@ func SearchWithOllama(query string, limit int) ([]CommandRecord, error) {
 	}
 
 	// Use vector similarity search (cosine distance)
-	query = fmt.Sprintf(`
+	query := fmt.Sprintf(`
 		SELECT id, key, data, 
 		       1 - (embedding <=> $1::vector) as similarity
 		FROM %s
@@ -223,14 +221,41 @@ func SearchWithOllama(query string, limit int) ([]CommandRecord, error) {
 	return results, nil
 }
 
+// SearchWithOllama performs a vector similarity search prioritizing Ollama
+func SearchWithOllama(query string, limit int) ([]CommandRecord, error) {
+	var embedding []float64
+	var err error
+
+	// Priority: Ollama then Gemini
+	if IsOllamaAvailable() {
+		embedding, err = GetEmbedding(query)
+		if err != nil {
+			fmt.Printf("⚠ Ollama embedding failed: %v, trying Gemini...\n", err)
+		}
+	}
+
+	if embedding == nil && IsGeminiAvailable() {
+		embedding, err = GetGeminiEmbedding(query)
+	}
+
+	if embedding == nil {
+		return nil, fmt.Errorf("no embedding provider available")
+	}
+
+	return SearchVectorInDB(embedding, limit)
+}
+
 // AskOllama sends a question to Ollama and gets a response
 func AskOllama(question string, context []CommandRecord) (string, error) {
 	url := fmt.Sprintf("http://%s:%s/api/chat", ollamaConfig.Host, ollamaConfig.Port)
 
 	// Build context from command records
-	contextStr := "Here are some relevant commands from the database:\n\n"
-	for i, cmd := range context {
-		contextStr += fmt.Sprintf("%d. Description: %s\n   Command: %s\n\n", i+1, cmd.Data, cmd.Key)
+	contextStr := ""
+	if len(context) > 0 {
+		contextStr = "Here are some relevant commands from the database:\n\n"
+		for i, cmd := range context {
+			contextStr += fmt.Sprintf("%d. Description: %s\n   Command: %s\n\n", i+1, cmd.Data, cmd.Key)
+		}
 	}
 
 	// Create the prompt
@@ -281,99 +306,177 @@ You have access to a database of commands. When answering questions:
 	return response.Message.Content, nil
 }
 
-// SmartSearch performs an intelligent search using Ollama if available, falls back to traditional search
-func SmartSearch(query string, useOllama bool) ([]CommandRecord, string, error) {
+// AskAI sends a question to the best available AI provider
+func AskAI(question string, context []CommandRecord) (string, error) {
+	var errs []error
+
+	// Try Ollama first
+	if IsOllamaAvailable() {
+		response, err := AskOllama(question, context)
+		if err == nil {
+			return response, nil
+		}
+		errs = append(errs, fmt.Errorf("Ollama failed: %v", err))
+	}
+
+	// Fallback to Gemini
+	if IsGeminiAvailable() {
+		response, err := AskGemini(question, context)
+		if err == nil {
+			return response, nil
+		}
+		errs = append(errs, fmt.Errorf("Gemini failed: %v", err))
+	}
+
+	if len(errs) > 0 {
+		return "", fmt.Errorf("all AI providers failed: %v", errs)
+	}
+	return "", fmt.Errorf("no AI provider available")
+}
+
+// SmartSearch performs an intelligent search following the priority:
+// 1. PostgreSQL plain text (keyword) search (using cleaned query)
+// 2. Ollama vector search + chat
+// 3. Gemini vector search + chat
+func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, error) {
+	// Clean the query to remove "how do i", "show me", etc.
+	// This makes database keyword search much more accurate.
+	cleanedQuery := extractKeywords(query)
+	if cleanedQuery == "" {
+		cleanedQuery = query
+	}
+
 	var results []CommandRecord
 	var aiResponse string
 
-	// First, always do traditional search to get candidates
-	jsonData, err := SearchCommands(query, "json")
+	// --- 1st PRIORITY: Cleaned Keyword Search ---
+	jsonData, err := SearchCommands(cleanedQuery, "json")
 	if err != nil {
 		return nil, "", err
 	}
+	var keywordResults []CommandRecord
+	json.Unmarshal(jsonData, &keywordResults)
+	scoredKeywords := ScoreCommands(keywordResults, cleanedQuery)
 
-	var traditionalResults []CommandRecord
-	json.Unmarshal(jsonData, &traditionalResults)
-
-	// Score the traditional results
-	scored := ScoreCommands(traditionalResults, query)
-
-	// Check if we have good matches (50%+ score)
-	hasGoodMatches := HasGoodMatches(scored, 50)
-
-	if hasGoodMatches {
-		// We have good traditional matches, use them
-		fmt.Println("✓ Found good matches in database")
-
-		// Get best matches (top 10)
-		bestScored := GetBestMatches(scored, 10)
+	// If we have very high quality matches, return them immediately
+	if HasGoodMatches(scoredKeywords, 60) {
+		fmt.Println("✓ Found high-quality matches in database")
+		bestScored := GetBestMatches(scoredKeywords, 10)
 		for _, s := range bestScored {
 			results = append(results, s.Record)
 		}
-
-		// Only invoke AI if Ollama is available and we have results
-		if useOllama && IsOllamaAvailable() && len(results) > 0 {
-			// Use top 5 for AI context
-			contextResults := results
-			if len(contextResults) > 5 {
-				contextResults = contextResults[:5]
-			}
-			var aiErr error
-			aiResponse, aiErr = AskOllama(query, contextResults)
-			if aiErr != nil {
-				fmt.Printf("⚠ Ollama chat failed: %v\n", aiErr)
-				aiResponse = ""
-			}
+		// Get AI explanation
+		if useEmbeddings {
+			aiResponse, _ = AskAI(query, results)
 		}
-	} else if useOllama && IsOllamaAvailable() {
-		// No good traditional matches, try vector search
-		fmt.Println("⚠ No strong keyword matches, trying vector search...")
+		return results, aiResponse, nil
+	}
 
-		vectorResults, vectorErr := SearchWithOllama(query, 10)
-		if vectorErr != nil {
-			// Vector search failed, use whatever traditional results we have
-			fmt.Printf("⚠ Vector search failed: %v\n", vectorErr)
-			bestScored := GetBestMatches(scored, 10)
-			for _, s := range bestScored {
+	if !useEmbeddings {
+		// Not using AI, return whatever decent keyword matches we found
+		bestScored := GetBestMatches(scoredKeywords, 10)
+		for _, s := range bestScored {
+			if s.Score >= 25 {
 				results = append(results, s.Record)
 			}
-		} else {
-			// Combine vector and traditional results
-			results = vectorResults
+		}
+		return results, "", nil
+	}
 
-			// Add traditional results that aren't in vector results
-			vectorIDs := make(map[int]bool)
-			for _, r := range vectorResults {
-				vectorIDs[r.Id] = true
-			}
-
-			for _, s := range scored {
-				if !vectorIDs[s.Record.Id] && len(results) < 10 {
-					results = append(results, s.Record)
+	// --- 2nd PRIORITY: Ollama Vector Search ---
+	if IsOllamaAvailable() {
+		fmt.Println("⚠ Trying Ollama (Vector Search & Chat)...")
+		emb, err := GetEmbedding(query)
+		if err == nil {
+			vResults, err := SearchVectorInDB(emb, 10)
+			if err == nil && len(vResults) > 0 {
+				// Score vector results to filter unrelated garbage
+				scoredVector := ScoreCommands(vResults, cleanedQuery)
+				var filteredVector []CommandRecord
+				for _, s := range scoredVector {
+					if s.Score > 0 {
+						filteredVector = append(filteredVector, s.Record)
+					}
 				}
-			}
 
-			// Get AI response
-			if len(results) > 0 {
-				contextResults := results
-				if len(contextResults) > 5 {
-					contextResults = contextResults[:5]
-				}
-				var aiErr error
-				aiResponse, aiErr = AskOllama(query, contextResults)
-				if aiErr != nil {
-					fmt.Printf("⚠ Ollama chat failed: %v\n", aiErr)
-					aiResponse = ""
+				if len(filteredVector) > 0 {
+					results = filteredVector
+					aiResponse, _ = AskOllama(query, results)
+					if aiResponse != "" {
+						return results, aiResponse, nil
+					}
 				}
 			}
 		}
-	} else {
-		// No Ollama, just use traditional results
-		bestScored := GetBestMatches(scored, 10)
-		for _, s := range bestScored {
-			results = append(results, s.Record)
+
+		// If vector matched nothing, try AI chat with top keyword results anyway
+		if aiResponse == "" && len(scoredKeywords) > 0 {
+			var contextResults []CommandRecord
+			for _, s := range GetBestMatches(scoredKeywords, 5) {
+				if s.Score > 0 {
+					contextResults = append(contextResults, s.Record)
+				}
+			}
+			aiResponse, _ = AskOllama(query, contextResults)
+			if aiResponse != "" {
+				return contextResults, aiResponse, nil
+			}
 		}
 	}
 
-	return results, aiResponse, nil
+	// --- 3rd PRIORITY: Gemini Vector Search ---
+	if IsGeminiAvailable() {
+		fmt.Println("⚠ Trying Gemini (Vector Search & Chat)...")
+		emb, err := GetGeminiEmbedding(query)
+		if err == nil {
+			vResults, err := SearchVectorInDB(emb, 10)
+			if err == nil && len(vResults) > 0 {
+				scoredVector := ScoreCommands(vResults, cleanedQuery)
+				var filteredVector []CommandRecord
+				for _, s := range scoredVector {
+					if s.Score > 0 {
+						filteredVector = append(filteredVector, s.Record)
+					}
+				}
+
+				if len(filteredVector) > 0 {
+					results = filteredVector
+					aiResponse, _ = AskGemini(query, results)
+					if aiResponse != "" {
+						return results, aiResponse, nil
+					}
+				}
+			}
+		}
+
+		// Fallback to Gemini chat with keyword context
+		if aiResponse == "" && len(scoredKeywords) > 0 {
+			var contextResults []CommandRecord
+			for _, s := range GetBestMatches(scoredKeywords, 5) {
+				if s.Score > 0 {
+					contextResults = append(contextResults, s.Record)
+				}
+			}
+			aiResponse, _ = AskGemini(query, contextResults)
+			if aiResponse != "" {
+				return contextResults, aiResponse, nil
+			}
+		}
+	}
+
+	// --- 4th PRIORITY: Last Resort AI chat with no context ---
+	if aiResponse == "" {
+		aiResponse, _ = AskAI(query, nil)
+	}
+
+	// FINAL CLEANUP: Make sure we only return results that actually have some keyword relevance
+	finalResults := []CommandRecord{}
+	scoredFinal := ScoreCommands(results, cleanedQuery)
+	for _, s := range scoredFinal {
+		if s.Score > 0 {
+			finalResults = append(finalResults, s.Record)
+		}
+	}
+
+	return finalResults, aiResponse, nil
 }
