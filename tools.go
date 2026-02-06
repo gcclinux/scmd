@@ -31,19 +31,42 @@ func isInt(in string) (result bool) {
 	return result
 }
 
-// copyDB function is deprecated - PostgreSQL backups should be done using pg_dump
-func copyDB(db string) {
+// copyDB exports all commands from PostgreSQL to a JSON file in the home directory
+func copyDB(filename string) {
 	fmt.Println()
-	fmt.Println("Note: Database backup functionality has changed.")
-	fmt.Println("For PostgreSQL backups, please use pg_dump:")
-	fmt.Println()
-	fmt.Printf("  pg_dump -h %s -p %s -U %s -d %s > backup.sql\n",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_NAME"))
-	fmt.Println()
-	fmt.Println("Or use PostgreSQL's built-in backup tools.")
+	fmt.Println("Exporting PostgreSQL database to JSON...")
+	
+	// Initialize database connection
+	if err := InitDB(); err != nil {
+		fmt.Printf("Error connecting to database: %v\n", err)
+		return
+	}
+	defer CloseDB()
+	
+	// Get all commands (empty pattern returns all)
+	jsonData, err := SearchCommands("", "json")
+	if err != nil {
+		fmt.Printf("Error exporting data: %v\n", err)
+		return
+	}
+	
+	// Determine output file path
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Printf("Error getting home directory: %v\n", err)
+		return
+	}
+	
+	outputFile := fmt.Sprintf("%s/%s", homeDir, filename)
+	
+	// Write JSON to file
+	err = os.WriteFile(outputFile, jsonData, 0644)
+	if err != nil {
+		fmt.Printf("Error writing file: %v\n", err)
+		return
+	}
+	
+	fmt.Printf("Successfully exported database to: %s\n", outputFile)
 	fmt.Println()
 }
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -22,9 +23,19 @@ var db *sql.DB
 
 // InitDB initializes the PostgreSQL database connection
 func InitDB() error {
-	// Load .env file
-	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
+	// Load .env file from executable's directory
+	execPath, err := os.Executable()
+	if err != nil {
+		log.Println("Warning: could not determine executable path, trying current directory")
+		execPath = "."
+	}
+	execDir := filepath.Dir(execPath)
+	envPath := filepath.Join(execDir, ".env")
+	
+	if loadErr := godotenv.Load(envPath); loadErr != nil {
+		log.Printf("Warning: .env file not found at %s, using environment variables\n", envPath)
+	} else {
+		log.Printf("Loaded .env from: %s\n", envPath)
 	}
 
 	// Get database configuration from environment
@@ -38,7 +49,6 @@ func InitDB() error {
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
-	var err error
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		return fmt.Errorf("error opening database: %v", err)

@@ -9,16 +9,13 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"github.com/gcclinux/tardigrade-mod"
 )
 
 // runUpgrade function will check release note for current version and then upgrade if available.
 // upgrades will only work for compiled binaries available in https://github.com/gcclinux/scmd/raw/main/bin/
 func runUpgrade() string {
 
-	tar := tardigrade.Tardigrade{}
-	path := tar.GetOS()
+	path := string(os.PathSeparator)
 	file := getFile()
 	remote_version := ""
 
