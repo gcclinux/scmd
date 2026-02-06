@@ -65,8 +65,8 @@ func StartInteractiveMode() {
 func printWelcome() {
 	fmt.Println()
 	fmt.Println("╔════════════════════════════════════════════════════════════════╗")
-	fmt.Println("║          SCMD Interactive CLI - PostgreSQL Edition             ║")
-	fmt.Println("║                    Version", Release, "                             ║")
+	fmt.Println("║           SCMD Interactive CLI - PostgreSQL Edition            ║")
+	fmt.Println("║                      Version", Release, "                            ║")
 	fmt.Println("╚════════════════════════════════════════════════════════════════╝")
 	fmt.Println()
 
