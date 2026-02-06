@@ -217,6 +217,10 @@ func routes() {
 		}
 	}
 
+	// Register static file handler
+	fs := http.FS(tplFolder)
+	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(fs)))
+
 	http.HandleFunc("/", HomePage)
 	if os.Args[count-1] != "-block" {
 		http.HandleFunc("/add", AddPage)
@@ -392,9 +396,6 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 	data := BuildStruct{
 		PageTitle: "(SCMD)",
 	}
-
-	fs := http.FS(tplFolder)
-	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(fs)))
 
 	remoteAddr := r.RemoteAddr
 	WriteLogToFile(webLog, "ADD: "+remoteAddr)

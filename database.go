@@ -210,6 +210,14 @@ func AddCommand(command, description string) (bool, error) {
 		}
 	}
 
+	// Get next available id
+	var nextID int
+	idQuery := fmt.Sprintf("SELECT COALESCE(MAX(id), 0) + 1 FROM %s", tableName)
+	err := db.QueryRow(idQuery).Scan(&nextID)
+	if err != nil {
+		return false, fmt.Errorf("error getting next id: %v", err)
+	}
+
 	// Insert command with or without embedding
 	if hasEmbedding {
 		// Convert embedding to PostgreSQL vector format
@@ -223,16 +231,16 @@ func AddCommand(command, description string) (bool, error) {
 		embeddingStr += "]"
 
 		// Insert with embedding
-		query := fmt.Sprintf("INSERT INTO %s (key, data, embedding) VALUES ($1, $2, $3::vector)", tableName)
-		_, err := db.Exec(query, command, description, embeddingStr)
+		query := fmt.Sprintf("INSERT INTO %s (id, key, data, embedding) VALUES ($1, $2, $3, $4::vector)", tableName)
+		_, err := db.Exec(query, nextID, command, description, embeddingStr)
 		if err != nil {
 			return false, fmt.Errorf("error inserting command with embedding: %v", err)
 		}
 	} else {
 		// Insert without embedding
 		log.Println("⚠ No embedding provider available, saving without vector")
-		query := fmt.Sprintf("INSERT INTO %s (key, data) VALUES ($1, $2)", tableName)
-		_, err := db.Exec(query, command, description)
+		query := fmt.Sprintf("INSERT INTO %s (id, key, data) VALUES ($1, $2, $3)", tableName)
+		_, err := db.Exec(query, nextID, command, description)
 		if err != nil {
 			return false, fmt.Errorf("error inserting command: %v", err)
 		}
