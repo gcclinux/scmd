@@ -17,6 +17,9 @@ func StartInteractiveMode() {
 	}
 	defer CloseDB()
 
+	// Initialize Ollama
+	InitOllama()
+
 	reader := bufio.NewReader(os.Stdin)
 
 	printWelcome()
@@ -84,6 +87,8 @@ func printInteractiveHelp() {
 	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | as separator)")
 	fmt.Println("  /list                 - List recent commands")
 	fmt.Println("  /count                - Show total number of commands")
+	fmt.Println("  /ai                   - Show AI/Ollama status")
+	fmt.Println("  /embeddings           - Check embedding statistics")
 	fmt.Println("  /clear or /cls        - Clear the screen")
 	fmt.Println("  /exit, /quit, or /q   - Exit interactive mode")
 	fmt.Println()
@@ -93,6 +98,15 @@ func printInteractiveHelp() {
 	fmt.Println("  clear or cls          - Clear the screen")
 	fmt.Println("  exit, quit, or q      - Exit interactive mode")
 	fmt.Println()
+	if IsOllamaAvailable() {
+		fmt.Println("🤖 AI Features (Ollama Active):")
+		fmt.Println("──────────────────────────────────────────────────────────────")
+		fmt.Println("  - Vector similarity search for better relevance")
+		fmt.Println("  - AI-generated explanations and context")
+		fmt.Println("  - Natural language understanding")
+		fmt.Println("  - Automatic fallback to traditional search")
+		fmt.Println()
+	}
 	fmt.Println("Natural Language Queries:")
 	fmt.Println("──────────────────────────────────────────────────────────────")
 	fmt.Println("  Just type your question naturally:")
@@ -182,6 +196,12 @@ func handleSlashCommand(input string) {
 	case "/count":
 		handleCountCommand()
 
+	case "/ai":
+		handleAIToggle(args)
+
+	case "/embeddings":
+		handleEmbeddingsCheck()
+
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		fmt.Println("Type '/help' for available commands")
@@ -211,15 +231,10 @@ func extractKeywords(input string) string {
 }
 
 func performInteractiveSearch(pattern string) {
-	received, err := SearchCommands(pattern, "json")
+	// Use smart search with Ollama if available
+	results, aiResponse, err := SmartSearch(pattern, true)
 	if err != nil {
 		fmt.Printf("Error searching: %v\n", err)
-		return
-	}
-
-	var results []CommandRecord
-	if err := json.Unmarshal(received, &results); err != nil {
-		fmt.Printf("Error parsing results: %v\n", err)
 		return
 	}
 
@@ -232,12 +247,66 @@ func performInteractiveSearch(pattern string) {
 	}
 
 	fmt.Println()
+
+	// If we have an AI response, show it first
+	if aiResponse != "" {
+		fmt.Println("🤖 AI Assistant:")
+		fmt.Println("══════════════════════════════════════════════════════════════")
+		fmt.Println(aiResponse)
+		fmt.Println("══════════════════════════════════════════════════════════════")
+		fmt.Println()
+	}
+
 	fmt.Printf("Found %d result(s) for: %s\n", len(results), pattern)
+
+	// Score results to show match quality
+	scored := ScoreCommands(results, pattern)
+
+	// Filter out weak matches (less than 25%)
+	var filteredResults []CommandRecord
+	var filteredScored []CommandScore
+	minMatchThreshold := 25 // Minimum 25% match required
+
+	for i, s := range scored {
+		if s.Score >= minMatchThreshold {
+			filteredResults = append(filteredResults, results[i])
+			filteredScored = append(filteredScored, s)
+		}
+	}
+
+	// If no results after filtering, show message
+	if len(filteredResults) == 0 {
+		fmt.Println()
+		fmt.Printf("No relevant results found for: %s\n", pattern)
+		if len(results) > 0 {
+			fmt.Printf("Found %d results but all had less than %d%% match.\n", len(results), minMatchThreshold)
+		}
+		fmt.Println("Try different or more specific keywords.")
+		fmt.Println()
+		return
+	}
+
+	// Update count to show filtered results
+	filteredCount := len(results) - len(filteredResults)
+	if filteredCount > 0 {
+		fmt.Printf("(Showing %d results with ≥%d%% match, filtered %d weak matches)\n", len(filteredResults), minMatchThreshold, filteredCount)
+	}
+
+	if len(filteredScored) > 0 && filteredScored[0].Score > 0 {
+		fmt.Printf("(Best match: %d%% - %d/%d words matched)\n", filteredScored[0].Score, filteredScored[0].MatchCount, filteredScored[0].TotalWords)
+	}
 	fmt.Println("══════════════════════════════════════════════════════════════")
 
-	for _, result := range results {
+	for i, result := range filteredResults {
 		fmt.Println()
-		fmt.Printf("ID: %d\n", result.Id)
+
+		// Show match score
+		if i < len(filteredScored) {
+			fmt.Printf("ID: %d (Match: %d%%)\n", result.Id, filteredScored[i].Score)
+		} else {
+			fmt.Printf("ID: %d\n", result.Id)
+		}
+
 		fmt.Printf("Description: %s\n", result.Data)
 		fmt.Println("Command:")
 
@@ -365,4 +434,75 @@ func clearScreen() {
 	// Windows
 	fmt.Print("\033[H\033[2J")
 	printWelcome()
+}
+
+func handleAIToggle(args string) {
+	if !IsOllamaAvailable() {
+		fmt.Println()
+		fmt.Println("⚠ Ollama is not available")
+		fmt.Printf("  Host: %s\n", os.Getenv("OLLAMA"))
+		fmt.Printf("  Model: %s\n", os.Getenv("MODEL"))
+		fmt.Println()
+		fmt.Println("Make sure Ollama is running and accessible.")
+		fmt.Println()
+		return
+	}
+
+	fmt.Println()
+	fmt.Println("✓ Ollama is available and active")
+	fmt.Printf("  Host: %s\n", os.Getenv("OLLAMA"))
+	fmt.Printf("  Model: %s\n", os.Getenv("MODEL"))
+	fmt.Println()
+	fmt.Println("AI-enhanced search is automatically used when available.")
+	fmt.Println("Features:")
+	fmt.Println("  - Vector similarity search for better relevance")
+	fmt.Println("  - AI-generated explanations and context")
+	fmt.Println("  - Automatic fallback to traditional search if needed")
+	fmt.Println()
+}
+
+func handleEmbeddingsCheck() {
+	tableName := os.Getenv("TB_NAME")
+	if tableName == "" {
+		tableName = "scmd"
+	}
+
+	// Count records with and without embeddings
+	query := fmt.Sprintf(`
+		SELECT 
+			COUNT(*) as total,
+			COUNT(embedding) as with_embeddings,
+			COUNT(*) - COUNT(embedding) as without_embeddings
+		FROM %s
+	`, tableName)
+
+	var total, withEmbeddings, withoutEmbeddings int
+	err := db.QueryRow(query).Scan(&total, &withEmbeddings, &withoutEmbeddings)
+	if err != nil {
+		fmt.Printf("Error checking embeddings: %v\n", err)
+		return
+	}
+
+	fmt.Println()
+	fmt.Println("Embedding Statistics:")
+	fmt.Println("══════════════════════════════════════════════════════════════")
+	fmt.Printf("Total records:              %d\n", total)
+	fmt.Printf("Records with embeddings:    %d (%.1f%%)\n", withEmbeddings, float64(withEmbeddings)/float64(total)*100)
+	fmt.Printf("Records without embeddings: %d (%.1f%%)\n", withoutEmbeddings, float64(withoutEmbeddings)/float64(total)*100)
+	fmt.Println()
+
+	if withoutEmbeddings > 0 {
+		fmt.Println("⚠ Warning: Some records don't have embeddings!")
+		fmt.Println("Vector search only works on records with embeddings.")
+		fmt.Println("Traditional keyword search will be used as fallback.")
+		fmt.Println()
+		fmt.Println("To generate embeddings for all records, you need to:")
+		fmt.Println("1. Use a script to generate embeddings for each record")
+		fmt.Println("2. Update the embedding column in PostgreSQL")
+		fmt.Println()
+	} else {
+		fmt.Println("✓ All records have embeddings!")
+		fmt.Println("Vector search will work optimally.")
+		fmt.Println()
+	}
 }
