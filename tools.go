@@ -7,8 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/gcclinux/tardigrade-mod"
 )
 
 const webLog = "scmdweb.log"
@@ -33,12 +31,19 @@ func isInt(in string) (result bool) {
 	return result
 }
 
-// copyDB function create a copy of your current saved commands database and store it in your ${HOME} drive
+// copyDB function is deprecated - PostgreSQL backups should be done using pg_dump
 func copyDB(db string) {
 	fmt.Println()
-	tar := tardigrade.Tardigrade{}
-	msg, status := tar.CreatedDBCopy(db)
-	fmt.Println(msg, "(", status, ")")
+	fmt.Println("Note: Database backup functionality has changed.")
+	fmt.Println("For PostgreSQL backups, please use pg_dump:")
+	fmt.Println()
+	fmt.Printf("  pg_dump -h %s -p %s -U %s -d %s > backup.sql\n",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_NAME"))
+	fmt.Println()
+	fmt.Println("Or use PostgreSQL's built-in backup tools.")
 	fmt.Println()
 }
 

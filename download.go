@@ -7,14 +7,16 @@ import (
 	"os"
 )
 
-// download function is the caller to download the online tardigrade.db
+// download function is deprecated - data is now stored in PostgreSQL
 func download() {
-
-	file := "tardigrade.db"
-	remote := "https://raw.githubusercontent.com/gcclinux/scmd/main/tardigrade.db"
-
-	downloadFile(file, remote)
-
+	fmt.Println()
+	fmt.Println("Note: Database download functionality is no longer available.")
+	fmt.Println("This application now uses PostgreSQL instead of tardigrade.db")
+	fmt.Println()
+	fmt.Println("To import data into PostgreSQL, use the CLI tools in the cli/ directory:")
+	fmt.Println("  cd cli/")
+	fmt.Println("  python import_to_postgres.py")
+	fmt.Println()
 }
 
 // downloadFile take a url and a filename, downloads and save it locally in this case used for tardigrade.db

@@ -2,16 +2,24 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/gcclinux/tardigrade-mod"
+	"log"
 )
 
-// saveCMD takes the cmd and details (string) and parse it to tardigrade-mod to save it to the database.
+// saveCMD takes the cmd and details (string) and saves it to PostgreSQL database
 func saveCmd(cmd, details string, db string) {
-	tar := tardigrade.Tardigrade{}
+	// Initialize database connection
+	if err := InitDB(); err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer CloseDB()
 
-	status := tar.AddField(cmd, details, "tardigrade.db")
-	fmt.Println("returned: (", status, ")")
+	// Add command to database
+	status, err := AddCommand(cmd, details)
+	if err != nil {
+		fmt.Println("Error saving command:", err)
+		fmt.Println("returned: ( false )")
+	} else {
+		fmt.Println("returned: (", status, ")")
+	}
 	fmt.Println()
-
 }

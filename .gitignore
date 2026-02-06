@@ -13,3 +13,4 @@
 *scmd-MINGW64_NT-10.0-19045-x86_64
 *run-scmd.bash
 *scmd-Linux-x86_64
+*.env

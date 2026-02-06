@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/gcclinux/tardigrade-mod"
 )
 
 type BuildStruct struct {
@@ -36,6 +34,12 @@ type BuildStruct struct {
 var tplFolder embed.FS // embeds the templates folder into variable tplFolder
 
 func routes() {
+
+	// Initialize database connection at startup
+	if err := InitDB(); err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer CloseDB()
 
 	// create a WaitGroup
 	wg := new(sync.WaitGroup)
@@ -384,7 +388,6 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 
 func AddPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	tar := tardigrade.Tardigrade{}
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/add.html"))
 	data := BuildStruct{
 		PageTitle: "(SCMD)",
@@ -409,26 +412,26 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 
 		save := true
 		status := false
-		var _, received = tar.SelectSearch(command, "json", "tardigrade.db")
-		bytes := received
-		var dt []tardigrade.MyStruct
-		json.Unmarshal(bytes, &dt)
 
-		checkDB(received)
-
-		for x := range dt {
-			cmd := string(dt[x].Key)
-			check := strings.Contains(command, cmd)
-			if check {
-				save = false
-			}
+		// Check if command already exists
+		exists, err := CheckCommandExists(command)
+		if err != nil {
+			log.Printf("Error checking command existence: %v", err)
+			data.Status = fmt.Sprintf("(false) Error checking database!")
+		} else if exists {
+			save = false
+			data.Status = fmt.Sprintf("%v", "(false) Duplicate command!")
 		}
 
 		if save {
-			status = tar.AddField(command, description, "tardigrade.db")
-			data.Status = fmt.Sprintf("%t", status)
-		} else {
-			data.Status = fmt.Sprintf("%v", "(false) Duplicate command!")
+			success, err := AddCommand(command, description)
+			if err != nil {
+				log.Printf("Error adding command: %v", err)
+				data.Status = fmt.Sprintf("(false) Error saving command!")
+			} else {
+				status = success
+				data.Status = fmt.Sprintf("%t", status)
+			}
 		}
 
 		data.Return = "Return Status: "
@@ -443,7 +446,6 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	tar := tardigrade.Tardigrade{}
 	tmpl := template.Must(template.ParseFS(tplFolder, "templates/home.html"))
 
 	// Assuming tplFolder is your embed.FS
@@ -483,10 +485,16 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		} else {
 			WriteLogToFile(webLog, "SEARCH: "+pattern)
 
-			var _, received = tar.SelectSearch(pattern, "raw", "tardigrade.db")
-			bytes := received
-			var dt []BuildStruct
-			json.Unmarshal(bytes, &dt)
+			received, err := SearchCommands(pattern, "raw")
+			if err != nil {
+				log.Printf("Error searching commands: %v", err)
+				data.Pattern = "Error searching database"
+				tmpl.Execute(w, data)
+				return
+			}
+
+			var dt []CommandRecord
+			json.Unmarshal(received, &dt)
 
 			data.Pattern = checkDB(received)
 

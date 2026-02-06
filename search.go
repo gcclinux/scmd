@@ -3,27 +3,33 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
-
-	"github.com/gcclinux/tardigrade-mod"
 )
 
-// search prints the result returned by the Tardigrade mod
+// search prints the result returned from PostgreSQL database
 func search(pattern string) {
 
 	WriteLogToFile(webLog, "CLI: "+pattern)
 
-	tar := tardigrade.Tardigrade{}
+	// Initialize database connection
+	if err := InitDB(); err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer CloseDB()
 
-	var _, received = tar.SelectSearch(pattern, "json", "tardigrade.db")
-	bytes := received
-	var dt []tardigrade.MyStruct
-	json.Unmarshal(bytes, &dt)
+	// Search commands
+	received, err := SearchCommands(pattern, "json")
+	if err != nil {
+		log.Fatalf("Error searching commands: %v", err)
+	}
+
+	var dt []CommandRecord
+	json.Unmarshal(received, &dt)
 
 	checkDB(received)
 
 	for x := range dt {
-		out, _ := tar.MyIndent(&dt[x], "", "  ")
 		cmd := string(dt[x].Key)
 		check := isCode(dt[x].Key)
 		if check {
@@ -36,6 +42,8 @@ func search(pattern string) {
 			fmt.Println(cmd)
 			fmt.Println()
 		} else {
+			// Pretty print the result
+			out, _ := json.MarshalIndent(&dt[x], "", "  ")
 			fmt.Println(string(out))
 		}
 	}

@@ -1,6 +1,24 @@
 # scmd (Search Command)
 
-Simple search command App that gives the possibility to find commands or store commands locally, this app will evolve and have a web interface in the near future.<BR>
+Simple search command App that gives the possibility to find commands or store commands in a PostgreSQL database. This app features both CLI and Web UI interfaces.<BR>
+
+## Database Migration Notice
+**Version 2.0.0+** now uses PostgreSQL instead of SQLite (tardigrade.db). See [POSTGRESQL_MIGRATION.md](POSTGRESQL_MIGRATION.md) for migration details.
+
+## Configuration
+
+Create a `.env` file in the project root with your PostgreSQL connection details:
+
+```env
+DB_HOST=192.168.1.4
+DB_PORT=5432
+DB_USER=user_name
+DB_PASS=password
+DB_NAME=database_name
+TB_NAME=scmd
+```
+
+## Release History
 
 Release: 1.0.0 - (18-02-2023) Initial SCMD CLI & Web UI<BR>
 Release: 1.0.1 - (19-02-2023) Recompiled with updated tardigrade-mod v0.2.0<BR>
@@ -15,6 +33,7 @@ Release: 1.3.5 - (29-08-2023) Added TLS capabilities for HTTPS.<BR>
 Release: 1.3.6 - (09-09-2023) Added -block "DISABLES" add commands page.<BR>
 Release: 1.3.7 - (16-12-2023) Started a command game page.<BR>
 Release: 1.3.8 - (20-03-2024) Pauzed game but added favicon.<BR>
+Release: 2.0.0 - (2026) **Migrated to PostgreSQL database**<BR>
 
 > Display this help menu
 ```
@@ -96,16 +115,20 @@ Usage: 	 scmd-Linux-x86_64(exe) --save "command" "description"
 This app is also enriched by utilising the "tardigrade-mod" database available for download from github.com
 
 Build and compile scmd from source code will require
->go get [github.com/gcclinux/tardigrade-mod](https://github.com/gcclinux/tardigrade-mod)
+>go get github.com/lib/pq
+>go get github.com/joho/godotenv
 
 
 \* Download and Install - https://go.dev/dl/ <BR>
 \* Download and Install - https://git-scm.com/downloads
+\* Setup PostgreSQL database and import data from tardigrade.db
 
 ```
 $ git clone https://github.com/gcclinux/scmd.git
 $ cd scmd/
-$ go get github.com/gcclinux/tardigrade-mod
-$ go build -o scmd-$(uname)-$(uname -m) *.go
+$ cp .env.example .env
+$ # Edit .env with your PostgreSQL credentials
+$ go mod tidy
+$ go build -o scmd-$(uname)-$(uname -m) .
 $ scmd-$(uname)-$(uname -m) --help
 ```
