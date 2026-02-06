@@ -14,3 +14,4 @@
 *run-scmd.bash
 *scmd-Linux-x86_64
 *.env
+.local

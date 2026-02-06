@@ -18,6 +18,51 @@ DB_NAME=database_name
 TB_NAME=scmd
 ```
 
+## Usage Modes
+
+### 1. Interactive CLI Mode (NEW!)
+
+Start an interactive session with natural language support:
+
+```bash
+scmd.exe --interactive
+# or
+scmd.exe -i
+# or
+scmd.exe --cli
+```
+
+**Features:**
+- Natural language queries: "provide me with postgresql replication example"
+- Direct keyword search: "postgresql replication"
+- Slash commands: `/search`, `/add`, `/list`, `/count`
+- User-friendly prompts and formatted output
+
+See [INTERACTIVE_MODE.md](INTERACTIVE_MODE.md) for detailed documentation.
+
+### 2. Traditional CLI
+
+**Search for commands:**
+```bash
+scmd.exe --search "postgresql replication"
+scmd.exe --search "docker,kubernetes"
+```
+
+**Add new commands:**
+```bash
+scmd.exe --save "docker ps -a" "List all containers"
+```
+
+### 3. Web Interface
+
+**Start web server:**
+```bash
+scmd.exe --web                    # Default port 3333
+scmd.exe --web -port 8080         # Custom port
+scmd.exe --web -block             # Read-only mode
+scmd.exe --web -service           # Background mode (no browser)
+```
+
 ## Release History
 
 Release: 1.0.0 - (18-02-2023) Initial SCMD CLI & Web UI<BR>

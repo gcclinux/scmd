@@ -67,22 +67,75 @@ func SearchCommands(pattern string, format string) ([]byte, error) {
 		tableName = "scmd"
 	}
 
-	// Split pattern by comma for multiple search terms
-	patterns := strings.Split(pattern, ",")
-	var conditions []string
+	var query string
 	var args []interface{}
 
-	for i, p := range patterns {
-		p = strings.TrimSpace(p)
-		if p != "" {
-			conditions = append(conditions, fmt.Sprintf("(key ILIKE $%d OR data ILIKE $%d)", i*2+1, i*2+2))
-			searchPattern := "%" + p + "%"
-			args = append(args, searchPattern, searchPattern)
+	// If pattern is empty, return all commands
+	if pattern == "" {
+		query = fmt.Sprintf("SELECT id, key, data FROM %s ORDER BY id", tableName)
+	} else {
+		// Check if pattern contains comma (OR search) or spaces (AND search)
+		if strings.Contains(pattern, ",") {
+			// Comma-separated: OR logic (match any pattern)
+			patterns := strings.Split(pattern, ",")
+			var conditions []string
+
+			for _, p := range patterns {
+				p = strings.TrimSpace(p)
+				if p != "" {
+					// For each comma-separated pattern, check if it contains spaces
+					if strings.Contains(p, " ") {
+						// Multiple words in this pattern - all must match (AND)
+						words := strings.Fields(p)
+						var wordConditions []string
+						for _, word := range words {
+							argIndex := len(args) + 1
+							wordConditions = append(wordConditions,
+								fmt.Sprintf("(key ILIKE $%d OR data ILIKE $%d)", argIndex, argIndex+1))
+							searchPattern := "%" + word + "%"
+							args = append(args, searchPattern, searchPattern)
+						}
+						conditions = append(conditions, "("+strings.Join(wordConditions, " AND ")+")")
+					} else {
+						// Single word pattern
+						argIndex := len(args) + 1
+						conditions = append(conditions, fmt.Sprintf("(key ILIKE $%d OR data ILIKE $%d)", argIndex, argIndex+1))
+						searchPattern := "%" + p + "%"
+						args = append(args, searchPattern, searchPattern)
+					}
+				}
+			}
+
+			if len(conditions) == 0 {
+				query = fmt.Sprintf("SELECT id, key, data FROM %s ORDER BY id", tableName)
+			} else {
+				query = fmt.Sprintf("SELECT id, key, data FROM %s WHERE %s ORDER BY id",
+					tableName, strings.Join(conditions, " OR "))
+			}
+		} else {
+			// No comma: space-separated words - AND logic (all words must match)
+			words := strings.Fields(pattern)
+			var conditions []string
+
+			for _, word := range words {
+				word = strings.TrimSpace(word)
+				if word != "" {
+					argIndex := len(args) + 1
+					conditions = append(conditions, fmt.Sprintf("(key ILIKE $%d OR data ILIKE $%d)", argIndex, argIndex+1))
+					searchPattern := "%" + word + "%"
+					args = append(args, searchPattern, searchPattern)
+				}
+			}
+
+			if len(conditions) == 0 {
+				query = fmt.Sprintf("SELECT id, key, data FROM %s ORDER BY id", tableName)
+			} else {
+				// Use AND to ensure all words are present
+				query = fmt.Sprintf("SELECT id, key, data FROM %s WHERE %s ORDER BY id",
+					tableName, strings.Join(conditions, " AND "))
+			}
 		}
 	}
-
-	query := fmt.Sprintf("SELECT id, key, data FROM %s WHERE %s ORDER BY id",
-		tableName, strings.Join(conditions, " OR "))
 
 	rows, err := db.Query(query, args...)
 	if err != nil {

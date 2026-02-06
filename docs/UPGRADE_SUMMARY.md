@@ -46,6 +46,9 @@ Your SCMD project has been successfully upgraded from SQLite (tardigrade.db) to 
 2. **POSTGRESQL_MIGRATION.md** - Detailed migration guide
 3. **UPGRADE_SUMMARY.md** - This file
 4. **test_connection.go** - Connection test utility
+5. **interactive.go** - NEW Interactive CLI mode with natural language support
+6. **INTERACTIVE_MODE.md** - Interactive mode documentation
+7. **QUICKSTART.md** - Quick start guide
 
 ### Files Updated
 
@@ -75,6 +78,29 @@ go run test_connection.go database.go
 ```
 
 ### 3. Use the Application
+
+#### NEW: Interactive Mode
+
+Start an interactive CLI session:
+
+```bash
+scmd.exe --interactive
+# or
+scmd.exe -i
+```
+
+Then use natural language or commands:
+```
+scmd> provide me with postgresql replication example
+scmd> /search docker,kubernetes
+scmd> /add docker ps -a | List all containers
+scmd> /list
+scmd> exit
+```
+
+See [INTERACTIVE_MODE.md](INTERACTIVE_MODE.md) for full documentation.
+
+#### Traditional CLI
 
 All existing commands work the same:
 

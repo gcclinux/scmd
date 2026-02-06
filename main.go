@@ -34,6 +34,8 @@ func main() {
 			routes()
 		} else if arg1 == "--ssl" {
 			routes()
+		} else if arg1 == "--interactive" || arg1 == "-i" || arg1 == "--cli" {
+			StartInteractiveMode()
 		} else {
 			wrongSyntax()
 		}
