@@ -10,7 +10,7 @@ import (
 
 // content holds our static web server content.
 func main() {
-
+	LoadEnv()
 	msg, _, _ := versionRemote()
 	count := len(os.Args)
 
@@ -81,12 +81,14 @@ func main() {
 			routes()
 		} else if os.Args[1] == "--ssl" {
 			routes()
+		} else if os.Args[1] == "--save" {
+			saveCmd(os.Args[2], os.Args[3])
 		} else {
 			wrongSyntax()
 		}
 	} else if count == 5 {
 		if (os.Args[1]) == "--save" {
-			saveCmd(os.Args[2], os.Args[3], os.Args[4])
+			saveCmd(os.Args[2], os.Args[3])
 		} else {
 			routes()
 		}

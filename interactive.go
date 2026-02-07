@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -97,6 +98,7 @@ func printInteractiveHelp() {
 	fmt.Println("  /help or /?           - Show this help message")
 	fmt.Println("  /search <pattern>     - Search for commands matching pattern")
 	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | as separator)")
+	fmt.Println("  /delete <id>          - Delete a command by ID")
 	fmt.Println("  /list                 - List recent commands")
 	fmt.Println("  /count                - Show total number of commands")
 	fmt.Println("  /ai                   - Show AI/Ollama status")
@@ -206,6 +208,14 @@ func handleSlashCommand(input string) {
 			return
 		}
 		handleAddCommand(args)
+
+	case "/delete":
+		if args == "" {
+			fmt.Println("Usage: /delete <id>")
+			fmt.Println("Example: /delete 123")
+			return
+		}
+		handleDeleteCommand(args)
 
 	case "/list":
 		handleListCommand()
@@ -392,6 +402,53 @@ func handleAddCommand(args string) {
 		fmt.Println()
 	} else {
 		fmt.Println("Failed to add command")
+	}
+}
+
+func handleDeleteCommand(args string) {
+	idStr := strings.TrimSpace(args)
+	if idStr == "" {
+		fmt.Println("Error: ID required")
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		fmt.Println("Error: Invalid ID. Please provide a number.")
+		return
+	}
+
+	// Verify command exists and show it before deleting
+	// We need a way to get a single command by ID.
+	// SearchCommands doesn't support ID lookup directly but we can query DB.
+
+	// Let's first implementation just try to delete and report success/fail
+	// Better UX: Show what we are deleting.
+
+	// We'll trust the user knows the ID from /list or /search for now to keep it simple,
+	// or we can quickly implement a GetCommandById in database.go if needed.
+	// But let's just do the delete for now with a confirmation.
+
+	fmt.Printf("Are you sure you want to delete command with ID %d? (y/n): ", id)
+	reader := bufio.NewReader(os.Stdin)
+	response, _ := reader.ReadString('\n')
+	response = strings.TrimSpace(strings.ToLower(response))
+
+	if response != "y" && response != "yes" {
+		fmt.Println("Cancelled.")
+		return
+	}
+
+	success, err := DeleteCommand(id)
+	if err != nil {
+		fmt.Printf("Error deleting command: %v\n", err)
+		return
+	}
+
+	if success {
+		fmt.Printf("✓ Command %d deleted successfully.\n", id)
+	} else {
+		fmt.Printf("Command %d not found or could not be deleted.\n", id)
 	}
 }
 

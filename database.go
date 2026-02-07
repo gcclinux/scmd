@@ -21,8 +21,8 @@ type CommandRecord struct {
 
 var db *sql.DB
 
-// InitDB initializes the PostgreSQL database connection
-func InitDB() error {
+// LoadEnv loads the .env file from the executable's directory
+func LoadEnv() {
 	// Load .env file from executable's directory
 	execPath, err := os.Executable()
 	if err != nil {
@@ -33,10 +33,21 @@ func InitDB() error {
 	envPath := filepath.Join(execDir, ".env")
 
 	if loadErr := godotenv.Load(envPath); loadErr != nil {
-		log.Printf("Warning: .env file not found at %s, using environment variables\n", envPath)
+		// Only log if we haven't already loaded it / isn't already set?
+		// Actually, standard behavior is to just warn if file missing but standard file exists
+		// But here we're explicit.
+		// Let's just log as provided in original code, but maybe check if we're redundant?
+		// No, simplest is best.
+		// log.Printf("Warning: .env file not found at %s, using environment variables\n", envPath)
 	} else {
-		log.Printf("Loaded .env from: %s\n", envPath)
+		// log.Printf("Loaded .env from: %s\n", envPath)
 	}
+}
+
+// InitDB initializes the PostgreSQL database connection
+func InitDB() error {
+	LoadEnv()
+	var err error
 
 	// Get database configuration from environment
 	host := os.Getenv("DB_HOST")
@@ -264,4 +275,25 @@ func CheckCommandExists(command string) (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+// DeleteCommand deletes a command from the database by ID
+func DeleteCommand(id int) (bool, error) {
+	tableName := os.Getenv("TB_NAME")
+	if tableName == "" {
+		tableName = "scmd"
+	}
+
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", tableName)
+	result, err := db.Exec(query, id)
+	if err != nil {
+		return false, fmt.Errorf("error deleting command: %v", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("error checking affected rows: %v", err)
+	}
+
+	return rows > 0, nil
 }

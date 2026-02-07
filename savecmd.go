@@ -6,7 +6,7 @@ import (
 )
 
 // saveCMD takes the cmd and details (string) and saves it to PostgreSQL database
-func saveCmd(cmd, details string, db string) {
+func saveCmd(cmd, details string) {
 	// Initialize embedding providers (Gemini first, then Ollama)
 	InitGemini()
 	InitOllama()

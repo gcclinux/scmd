@@ -1,2 +1,1 @@
-@echo off
-"C:\Users\ricardo\Programming\scmd\scmd.exe" --cli
+"%~dp0scmd.exe" --cli %*
