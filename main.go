@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -73,6 +74,22 @@ func main() {
 			routes()
 		} else if os.Args[1] == "--copydb" {
 			copyDB(os.Args[2])
+		} else if os.Args[1] == "--save" {
+			// Check if there is data in stdin
+			stat, _ := os.Stdin.Stat()
+			if (stat.Mode() & os.ModeCharDevice) == 0 {
+				stdin, err := io.ReadAll(os.Stdin)
+				if err != nil {
+					fmt.Println("Error reading from stdin:", err)
+					return
+				}
+				// When piping, the Stdin content is the Command (Key),
+				// and the argument provided is the Description (Data/Details).
+				saveCmd(string(stdin), os.Args[2])
+			} else {
+				fmt.Println("Usage: scmd --save [command] [description]")
+				fmt.Println("To save a large script/command: scmd --save [description] < script.sh")
+			}
 		} else {
 			wrongSyntax()
 		}
