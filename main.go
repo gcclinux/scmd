@@ -64,6 +64,8 @@ func main() {
 				fmt.Printf("Error: %v\n", err)
 				os.Exit(1)
 			}
+		} else if arg1 == "--copydb" {
+			copyDB("scmd_export.json")
 		} else {
 			wrongSyntax()
 		}

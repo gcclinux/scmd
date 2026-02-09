@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -35,37 +36,37 @@ func isInt(in string) (result bool) {
 func copyDB(filename string) {
 	fmt.Println()
 	fmt.Println("Exporting PostgreSQL database to JSON...")
-	
+
 	// Initialize database connection
 	if err := InitDB(); err != nil {
 		fmt.Printf("Error connecting to database: %v\n", err)
 		return
 	}
 	defer CloseDB()
-	
+
 	// Get all commands (empty pattern returns all)
 	jsonData, err := SearchCommands("", "json")
 	if err != nil {
 		fmt.Printf("Error exporting data: %v\n", err)
 		return
 	}
-	
+
 	// Determine output file path
-	homeDir, err := os.UserHomeDir()
+	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error getting home directory: %v\n", err)
+		fmt.Printf("Error getting current directory: %v\n", err)
 		return
 	}
-	
-	outputFile := fmt.Sprintf("%s/%s", homeDir, filename)
-	
+
+	outputFile := filepath.Join(currentDir, filename)
+
 	// Write JSON to file
 	err = os.WriteFile(outputFile, jsonData, 0644)
 	if err != nil {
 		fmt.Printf("Error writing file: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("Successfully exported database to: %s\n", outputFile)
 	fmt.Println()
 }

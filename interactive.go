@@ -296,7 +296,7 @@ func performInteractiveSearch(pattern string) {
 	// Filter out weak matches (less than 25%)
 	var filteredResults []CommandRecord
 	var filteredScored []CommandScore
-	minMatchThreshold := 25 // Minimum 25% match required
+	minMatchThreshold := 60 // Minimum 60% match required
 
 	for i, s := range scored {
 		if s.Score >= minMatchThreshold {
