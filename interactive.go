@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -101,6 +103,7 @@ func printInteractiveHelp() {
 	fmt.Println("  /delete <id>          - Delete a command by ID")
 	fmt.Println("  /list                 - List recent commands")
 	fmt.Println("  /count                - Show total number of commands")
+	fmt.Println("  /run <command>        - Execute a system command")
 	fmt.Println("  /ai                   - Show AI/Ollama status")
 	fmt.Println("  /embeddings           - Check embedding statistics")
 	fmt.Println("  /import <path>        - Import a markdown document")
@@ -241,6 +244,14 @@ func handleSlashCommand(input string) {
 		}
 		handleImportCommand(args)
 
+	case "/run":
+		if args == "" {
+			fmt.Println("Usage: /run <command>")
+			fmt.Println("Example: /run ollama show qwen2.5-coder:1.5b")
+			return
+		}
+		handleRunCommand(args)
+
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		fmt.Println("Type '/help' for available commands")
@@ -314,17 +325,8 @@ func performInteractiveSearch(pattern string) {
 		}
 	}
 
-	// If no results after filtering, show message
+	// If no results after filtering, return silently
 	if len(filteredResults) == 0 {
-		fmt.Println()
-		fmt.Printf("No relevant results found for: %s\n", pattern)
-		if len(results) > 0 {
-			fmt.Printf("Found %d results but all had less than %d%% match.\n", len(results), minMatchThreshold)
-		}
-		if aiResponse == "" {
-			fmt.Println("Try different or more specific keywords.")
-		}
-		fmt.Println()
 		return
 	}
 
@@ -644,5 +646,78 @@ func handleImportCommand(args string) {
 	fmt.Println()
 	fmt.Println("✓ Document imported successfully!")
 	fmt.Printf("  Title: %s\n", title)
+	fmt.Println()
+}
+func handleRunCommand(args string) {
+	fmt.Println()
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Println("  SYSTEM COMMAND EXECUTION")
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Printf("  Command: %s\n", args)
+	fmt.Println("───────────────────────────────────────────────────────────────")
+	fmt.Println()
+
+	// Split the command into parts for exec.Command
+	cmdParts := strings.Fields(args)
+	if len(cmdParts) == 0 {
+		fmt.Println("Error: No command provided")
+		return
+	}
+
+	// Block interactive commands
+	blockedCommands := []string{
+		"vi", "vim", "nvim", "nano", "emacs", "pico",
+		"less", "more", "top", "htop", "man",
+		"ssh", "telnet", "ftp", "sftp",
+		"python", "python3", "node", "irb", "ruby",
+		"mysql", "psql", "mongo", "redis-cli",
+	}
+
+	baseCommand := strings.ToLower(cmdParts[0])
+	// Remove path if present (e.g., /usr/bin/vi -> vi)
+	if strings.Contains(baseCommand, "/") {
+		parts := strings.Split(baseCommand, "/")
+		baseCommand = parts[len(parts)-1]
+	}
+
+	for _, blocked := range blockedCommands {
+		if baseCommand == blocked {
+			fmt.Printf("Error: Interactive command '%s' is not allowed\n", cmdParts[0])
+			fmt.Println("The /run command only supports non-interactive commands.")
+			fmt.Println()
+			fmt.Println("═══════════════════════════════════════════════════════════════")
+			fmt.Println()
+			return
+		}
+	}
+
+	// Create the command
+	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+	
+	// Capture both stdout and stderr
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	// Run the command
+	err := cmd.Run()
+
+	// Display the output
+	if stdout.Len() > 0 {
+		fmt.Print(stdout.String())
+	}
+	
+	if stderr.Len() > 0 {
+		fmt.Fprintf(os.Stderr, "%s", stderr.String())
+	}
+
+	// Display error if command failed
+	if err != nil {
+		fmt.Println()
+		fmt.Printf("Command exited with error: %v\n", err)
+	}
+
+	fmt.Println()
+	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 }
