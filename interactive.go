@@ -103,6 +103,7 @@ func printInteractiveHelp() {
 	fmt.Println("  /count                - Show total number of commands")
 	fmt.Println("  /ai                   - Show AI/Ollama status")
 	fmt.Println("  /embeddings           - Check embedding statistics")
+	fmt.Println("  /import <path>        - Import a markdown document")
 	fmt.Println("  /generate             - Generate embeddings for all commands")
 	fmt.Println("  /clear or /cls        - Clear the screen")
 	fmt.Println("  /exit, /quit, or /q   - Exit interactive mode")
@@ -232,6 +233,14 @@ func handleSlashCommand(input string) {
 	case "/generate":
 		handleGenerateEmbeddings()
 
+	case "/import":
+		if args == "" {
+			fmt.Println("Usage: /import <path>")
+			fmt.Println("Example: /import ~/docs/setup.md")
+			return
+		}
+		handleImportCommand(args)
+
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		fmt.Println("Type '/help' for available commands")
@@ -340,19 +349,30 @@ func performInteractiveSearch(pattern string) {
 			fmt.Printf("ID: %d\n", result.Id)
 		}
 
-		fmt.Printf("Description: %s\n", result.Data)
-		fmt.Println("Command:")
-
-		// Check if it's code
-		if isCode(result.Key) {
-			cmd := result.Key
-			if !strings.HasSuffix(cmd, "{{end}}") {
-				cmd = replaceLast(cmd, "}", "\n}")
-			}
-			cmd = strings.ReplaceAll(cmd, "\n\t\n\t", "\n\t\t")
-			fmt.Println(cmd)
+		// Display description — render as markdown if detected
+		if isMarkdownContent(result.Data) {
+			fmt.Printf("Description:\n%s", RenderMarkdown(result.Data))
 		} else {
-			fmt.Println(result.Key)
+			fmt.Printf("Description: %s\n", result.Data)
+		}
+
+		// Display key/command — render as markdown if detected
+		if isMarkdownContent(result.Key) {
+			fmt.Println("Content:")
+			fmt.Print(RenderMarkdown(result.Key))
+		} else {
+			fmt.Println("Command:")
+			// Check if it's code
+			if isCode(result.Key) {
+				cmd := result.Key
+				if !strings.HasSuffix(cmd, "{{end}}") {
+					cmd = replaceLast(cmd, "}", "\n}")
+				}
+				cmd = strings.ReplaceAll(cmd, "\n\t\n\t", "\n\t\t")
+				fmt.Println(cmd)
+			} else {
+				fmt.Println(result.Key)
+			}
 		}
 		fmt.Println("──────────────────────────────────────────────────────────────")
 	}
@@ -612,4 +632,17 @@ func handleGenerateEmbeddings() {
 	if err := GenerateEmbeddingsForAll(); err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
+}
+
+func handleImportCommand(args string) {
+	title, err := ImportMarkdown(args)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	fmt.Println()
+	fmt.Println("✓ Document imported successfully!")
+	fmt.Printf("  Title: %s\n", title)
+	fmt.Println()
 }

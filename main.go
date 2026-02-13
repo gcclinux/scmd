@@ -72,6 +72,23 @@ func main() {
 	} else if count == 3 {
 		if (os.Args[1]) == "--search" {
 			search(os.Args[2])
+		} else if os.Args[1] == "--import" {
+			// Initialize providers
+			InitGemini()
+			InitOllama()
+			// Initialize database
+			if err := InitDB(); err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to connect to database: %v\n", err)
+				os.Exit(1)
+			}
+			defer CloseDB()
+			// Import markdown file
+			title, err := ImportMarkdown(os.Args[2])
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Printf("✓ Document imported successfully: %s\n", title)
 		} else if (os.Args[1]) == "--web" && (os.Args[2]) == "-block" {
 			routes()
 		} else if os.Args[1] == "--copydb" {
