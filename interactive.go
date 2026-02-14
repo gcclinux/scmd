@@ -28,6 +28,10 @@ func StartInteractiveMode() {
 
 	printWelcome()
 
+	// Track last AI response for saving
+	var lastAIResponse string
+	var lastQuery string
+
 	for {
 		fmt.Print("scmd> ")
 		input, err := reader.ReadString('\n')
@@ -39,6 +43,40 @@ func StartInteractiveMode() {
 		input = strings.TrimSpace(input)
 
 		if input == "" {
+			continue
+		}
+
+		// Check if user is providing feedback on last AI response
+		if lastAIResponse != "" && (input == "1" || input == "2") {
+			if input == "1" {
+				// Good answer - save it
+				if err := saveAIResponse(lastQuery, lastAIResponse); err != nil {
+					fmt.Printf("Error saving response: %v\n", err)
+				} else {
+					fmt.Println("✓ Response saved to database!")
+					fmt.Println()
+				}
+				// Clear the last response
+				lastAIResponse = ""
+				lastQuery = ""
+			} else if input == "2" {
+				// Bad answer - regenerate
+				fmt.Println("Regenerating response...")
+				fmt.Println()
+				
+				// Force a new AI response by calling the AI directly
+				aiResp := regenerateAIResponse(lastQuery)
+				if aiResp != "" {
+					lastAIResponse = aiResp
+					// Prompt for feedback again
+					fmt.Println("Good Answer [1], Bad Answer [2]")
+				} else {
+					fmt.Println("Failed to regenerate response.")
+					fmt.Println()
+					lastAIResponse = ""
+					lastQuery = ""
+				}
+			}
 			continue
 		}
 
@@ -60,8 +98,18 @@ func StartInteractiveMode() {
 			continue
 		}
 
-		// Process the command
-		processInteractiveCommand(input)
+		// Process the command and capture AI response
+		aiResp := processInteractiveCommand(input)
+		if aiResp != "" {
+			lastAIResponse = aiResp
+			lastQuery = input
+			// Prompt for feedback
+			fmt.Println("Good Answer [1], Bad Answer [2]")
+		} else {
+			// Clear tracking if no AI response
+			lastAIResponse = ""
+			lastQuery = ""
+		}
 	}
 }
 
@@ -110,6 +158,12 @@ func printInteractiveHelp() {
 	fmt.Println("  /generate             - Generate embeddings for all commands")
 	fmt.Println("  /clear or /cls        - Clear the screen")
 	fmt.Println("  /exit, /quit, or /q   - Exit interactive mode")
+	fmt.Println()
+	fmt.Println("AI Response Feedback:")
+	fmt.Println("──────────────────────────────────────────────────────────────")
+	fmt.Println("  After an AI response, you can rate it:")
+	fmt.Println("  [1] - Good answer (saves to database for future searches)")
+	fmt.Println("  [2] - Bad answer (discards without saving)")
 	fmt.Println()
 	fmt.Println("Quick Shortcuts (without slash):")
 	fmt.Println("──────────────────────────────────────────────────────────────")
@@ -160,11 +214,11 @@ func printInteractiveHelp() {
 	fmt.Println()
 }
 
-func processInteractiveCommand(input string) {
+func processInteractiveCommand(input string) string {
 	// Handle slash commands
 	if strings.HasPrefix(input, "/") {
 		handleSlashCommand(input)
-		return
+		return ""
 	}
 
 	// Extract keywords from natural language or use direct input
@@ -172,11 +226,11 @@ func processInteractiveCommand(input string) {
 
 	if keywords == "" {
 		fmt.Println("Could not extract search terms. Try using /search <pattern>")
-		return
+		return ""
 	}
 
-	// Perform search
-	performInteractiveSearch(keywords)
+	// Perform search and return AI response if any
+	return performInteractiveSearch(keywords)
 }
 
 func handleSlashCommand(input string) {
@@ -280,43 +334,40 @@ func extractKeywords(input string) string {
 	return input
 }
 
-func performInteractiveSearch(pattern string) {
+func performInteractiveSearch(pattern string) string {
 	// Use smart search with Ollama if available
 	results, aiResponse, err := SmartSearch(pattern, true)
 	if err != nil {
 		fmt.Printf("Error searching: %v\n", err)
-		return
+		return ""
 	}
 
 	fmt.Println()
 
-	// If we have an AI response, show it first
+	// If we have an AI response, show it
 	if aiResponse != "" {
 		fmt.Println("🤖 AI Assistant:")
 		fmt.Println("══════════════════════════════════════════════════════════════")
 		fmt.Println(aiResponse)
 		fmt.Println("══════════════════════════════════════════════════════════════")
 		fmt.Println()
+		return aiResponse
 	}
 
 	if len(results) == 0 {
-		if aiResponse == "" {
-			fmt.Printf("No results found for: %s\n", pattern)
-			fmt.Println("Try different keywords or use /search with comma-separated patterns")
-			fmt.Println()
-		}
-		return
+		return ""
 	}
 
+	// If no AI response, format results naturally ourselves
 	fmt.Printf("Found %d result(s) for: %s\n", len(results), pattern)
 
 	// Score results to show match quality
 	scored := ScoreCommands(results, pattern)
 
-	// Filter out weak matches (less than 25%)
+	// Filter out weak matches (less than 60%)
 	var filteredResults []CommandRecord
 	var filteredScored []CommandScore
-	minMatchThreshold := 60 // Minimum 60% match required
+	minMatchThreshold := 60
 
 	for i, s := range scored {
 		if s.Score >= minMatchThreshold {
@@ -327,7 +378,7 @@ func performInteractiveSearch(pattern string) {
 
 	// If no results after filtering, return silently
 	if len(filteredResults) == 0 {
-		return
+		return ""
 	}
 
 	// Update count to show filtered results
@@ -341,44 +392,34 @@ func performInteractiveSearch(pattern string) {
 	}
 	fmt.Println("══════════════════════════════════════════════════════════════")
 
-	for i, result := range filteredResults {
+	// Display results in natural format
+	for _, result := range filteredResults {
 		fmt.Println()
-
-		// Show match score
-		if i < len(filteredScored) {
-			fmt.Printf("ID: %d (Match: %d%%)\n", result.Id, filteredScored[i].Score)
-		} else {
-			fmt.Printf("ID: %d\n", result.Id)
-		}
-
-		// Display description — render as markdown if detected
+		
+		// Show description naturally (no "Description:" label)
 		if isMarkdownContent(result.Data) {
-			fmt.Printf("Description:\n%s", RenderMarkdown(result.Data))
+			fmt.Print(RenderMarkdown(result.Data))
 		} else {
-			fmt.Printf("Description: %s\n", result.Data)
+			fmt.Println(result.Data)
 		}
-
-		// Display key/command — render as markdown if detected
+		
+		fmt.Println()
+		
+		// Show command in code block with language detection
 		if isMarkdownContent(result.Key) {
-			fmt.Println("Content:")
 			fmt.Print(RenderMarkdown(result.Key))
 		} else {
-			fmt.Println("Command:")
-			// Check if it's code
-			if isCode(result.Key) {
-				cmd := result.Key
-				if !strings.HasSuffix(cmd, "{{end}}") {
-					cmd = replaceLast(cmd, "}", "\n}")
-				}
-				cmd = strings.ReplaceAll(cmd, "\n\t\n\t", "\n\t\t")
-				fmt.Println(cmd)
-			} else {
-				fmt.Println(result.Key)
-			}
+			// Detect command type and format with appropriate language tag
+			lang := detectCommandLanguage(result.Key, result.Data)
+			fmt.Printf("```%s\n%s\n```\n", lang, strings.TrimSpace(result.Key))
 		}
+		
 		fmt.Println("──────────────────────────────────────────────────────────────")
 	}
 	fmt.Println()
+	
+	// No AI response, return empty string
+	return ""
 }
 
 func handleAddCommand(args string) {
@@ -720,4 +761,190 @@ func handleRunCommand(args string) {
 	fmt.Println()
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
+}
+
+// detectCommandLanguage detects the appropriate language tag for code blocks
+func detectCommandLanguage(command, description string) string {
+	combined := strings.ToLower(command + " " + description)
+	
+	// Check for specific command types
+	if strings.Contains(combined, "docker") {
+		return "docker"
+	}
+	if strings.Contains(combined, "kubectl") || strings.Contains(combined, "kubernetes") {
+		return "bash"
+	}
+	if strings.Contains(combined, "firebase") {
+		return "bash"
+	}
+	if strings.Contains(combined, "psql") || strings.Contains(combined, "postgresql") || 
+	   strings.Contains(command, "SELECT") || strings.Contains(command, "INSERT") ||
+	   strings.Contains(command, "UPDATE") || strings.Contains(command, "DELETE") ||
+	   strings.Contains(command, "CREATE TABLE") {
+		return "postgresql"
+	}
+	if strings.Contains(combined, "mysql") {
+		return "sql"
+	}
+	if strings.Contains(combined, "mongo") {
+		return "javascript"
+	}
+	if strings.Contains(command, "import ") || strings.Contains(command, "def ") ||
+	   strings.Contains(command, "print(") {
+		return "python"
+	}
+	if strings.Contains(command, "const ") || strings.Contains(command, "let ") ||
+	   strings.Contains(command, "function ") || strings.Contains(command, "=>") {
+		return "javascript"
+	}
+	if strings.Contains(combined, "powershell") || strings.Contains(command, "Get-") ||
+	   strings.Contains(command, "Set-") || strings.Contains(command, "$_") {
+		return "powershell"
+	}
+	if strings.Contains(command, "git ") {
+		return "bash"
+	}
+	if strings.Contains(command, "npm ") || strings.Contains(command, "yarn ") ||
+	   strings.Contains(command, "node ") {
+		return "bash"
+	}
+	
+	// Default to bash for shell commands
+	if strings.HasPrefix(command, "$") || strings.HasPrefix(command, "sudo") ||
+	   strings.Contains(command, " | ") || strings.Contains(command, " && ") {
+		return "bash"
+	}
+	
+	return "bash"
+}
+
+// saveAIResponse saves an AI-generated response to the database
+func saveAIResponse(query, response string) error {
+	// Get table name from environment
+	tableName := os.Getenv("TB_NAME")
+	if tableName == "" {
+		tableName = "scmd"
+	}
+	
+	// The AI response (with code blocks) goes in the 'key' field
+	// The query/description goes in the 'data' field
+	command := response
+	description := fmt.Sprintf("AI-generated response for: %s", query)
+	
+	var embedding []float64
+	var embeddingErr error
+	hasEmbedding := false
+
+	// Try Ollama first
+	if IsOllamaAvailable() {
+		text := command + " " + description
+		embedding, embeddingErr = GetEmbedding(text)
+		if embeddingErr == nil {
+			hasEmbedding = true
+		}
+	}
+
+	// Fallback to Gemini if Ollama failed or unavailable
+	if !hasEmbedding && IsGeminiAvailable() {
+		text := command + " " + description
+		embedding, embeddingErr = GetGeminiEmbedding(text)
+		if embeddingErr == nil {
+			hasEmbedding = true
+		}
+	}
+
+	// Get next available id
+	var nextID int
+	idQuery := fmt.Sprintf("SELECT COALESCE(MAX(id), 0) + 1 FROM %s", tableName)
+	err := db.QueryRow(idQuery).Scan(&nextID)
+	if err != nil {
+		return fmt.Errorf("error getting next id: %v", err)
+	}
+
+	// Insert command with or without embedding
+	if hasEmbedding {
+		// Convert embedding to PostgreSQL vector format
+		embeddingStr := "["
+		for i, val := range embedding {
+			if i > 0 {
+				embeddingStr += ","
+			}
+			embeddingStr += fmt.Sprintf("%f", val)
+		}
+		embeddingStr += "]"
+
+		// Insert with embedding
+		query := fmt.Sprintf("INSERT INTO %s (id, key, data, embedding) VALUES ($1, $2, $3, $4::vector)", tableName)
+		_, err := db.Exec(query, nextID, command, description, embeddingStr)
+		if err != nil {
+			return fmt.Errorf("error inserting with embedding: %v", err)
+		}
+	} else {
+		// Insert without embedding
+		query := fmt.Sprintf("INSERT INTO %s (id, key, data) VALUES ($1, $2, $3)", tableName)
+		_, err := db.Exec(query, nextID, command, description)
+		if err != nil {
+			return fmt.Errorf("error inserting: %v", err)
+		}
+	}
+	
+	return nil
+}
+
+// regenerateAIResponse forces a new AI response for the given query
+func regenerateAIResponse(query string) string {
+	// Search the database for context
+	cleanedQuery := extractKeywords(query)
+	if cleanedQuery == "" {
+		cleanedQuery = query
+	}
+	
+	jsonData, err := SearchCommands(cleanedQuery, "json")
+	if err != nil {
+		fmt.Printf("Error searching: %v\n", err)
+		return ""
+	}
+	
+	var results []CommandRecord
+	json.Unmarshal(jsonData, &results)
+	
+	// Get top results for context
+	scored := ScoreCommands(results, cleanedQuery)
+	var contextResults []CommandRecord
+	for _, s := range GetBestMatches(scored, 5) {
+		if s.Score > 0 {
+			contextResults = append(contextResults, s.Record)
+		}
+	}
+	
+	// Call AI directly to get a fresh response
+	var aiResponse string
+	
+	if IsOllamaAvailable() {
+		fmt.Println("⚠ Regenerating with Ollama...")
+		aiResponse, err = AskOllama(query, contextResults)
+		if err == nil && aiResponse != "" {
+			fmt.Println("🤖 AI Assistant:")
+			fmt.Println("══════════════════════════════════════════════════════════════")
+			fmt.Println(aiResponse)
+			fmt.Println("══════════════════════════════════════════════════════════════")
+			fmt.Println()
+			return aiResponse
+		}
+	}
+	
+	if IsGeminiAvailable() {
+		fmt.Println("⚠ Regenerating with Gemini...")
+		aiResponse, err = AskGemini(query, contextResults)
+		if err == nil && aiResponse != "" {
+			fmt.Println("🤖 AI Assistant:")
+			fmt.Println("══════════════════════════════════════════════════════════════")
+			fmt.Println(aiResponse)
+			fmt.Println("══════════════════════════════════════════════════════════════")
+			fmt.Println()
+			return aiResponse
+		}
+	}
+	
+	return ""
 }
