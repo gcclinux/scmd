@@ -79,6 +79,7 @@ Release: 1.3.6 - (09-09-2023) Added -block "DISABLES" add commands page.<BR>
 Release: 1.3.7 - (16-12-2023) Started a command game page.<BR>
 Release: 1.3.8 - (20-03-2024) Pauzed game but added favicon.<BR>
 Release: 2.0.0 - (2026) **Migrated to PostgreSQL database**<BR>
+Release: 2.0.1 - (14-04-2026) **Several features added to interractive cli**<br>
 
 > Display this help menu
 ```

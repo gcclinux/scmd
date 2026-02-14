@@ -63,7 +63,7 @@ func StartInteractiveMode() {
 				// Bad answer - regenerate
 				fmt.Println("Regenerating response...")
 				fmt.Println()
-				
+
 				// Force a new AI response by calling the AI directly
 				aiResp := regenerateAIResponse(lastQuery)
 				if aiResp != "" {
@@ -149,6 +149,7 @@ func printInteractiveHelp() {
 	fmt.Println("  /search <pattern>     - Search for commands matching pattern")
 	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | as separator)")
 	fmt.Println("  /delete <id>          - Delete a command by ID")
+	fmt.Println("  /show <id>            - Show the command and description by ID")
 	fmt.Println("  /list                 - List recent commands")
 	fmt.Println("  /count                - Show total number of commands")
 	fmt.Println("  /run <command>        - Execute a system command")
@@ -290,6 +291,14 @@ func handleSlashCommand(input string) {
 	case "/generate":
 		handleGenerateEmbeddings()
 
+	case "/show":
+		if args == "" {
+			fmt.Println("Usage: /show <id>")
+			fmt.Println("Example: /show 42")
+			return
+		}
+		handleShowCommand(args)
+
 	case "/import":
 		if args == "" {
 			fmt.Println("Usage: /import <path>")
@@ -395,16 +404,16 @@ func performInteractiveSearch(pattern string) string {
 	// Display results in natural format
 	for _, result := range filteredResults {
 		fmt.Println()
-		
+
 		// Show description naturally (no "Description:" label)
 		if isMarkdownContent(result.Data) {
 			fmt.Print(RenderMarkdown(result.Data))
 		} else {
 			fmt.Println(result.Data)
 		}
-		
+
 		fmt.Println()
-		
+
 		// Show command in code block with language detection
 		if isMarkdownContent(result.Key) {
 			fmt.Print(RenderMarkdown(result.Key))
@@ -413,11 +422,11 @@ func performInteractiveSearch(pattern string) string {
 			lang := detectCommandLanguage(result.Key, result.Data)
 			fmt.Printf("```%s\n%s\n```\n", lang, strings.TrimSpace(result.Key))
 		}
-		
+
 		fmt.Println("──────────────────────────────────────────────────────────────")
 	}
 	fmt.Println()
-	
+
 	// No AI response, return empty string
 	return ""
 }
@@ -689,6 +698,56 @@ func handleImportCommand(args string) {
 	fmt.Printf("  Title: %s\n", title)
 	fmt.Println()
 }
+
+func handleShowCommand(args string) {
+	idStr := strings.TrimSpace(args)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		fmt.Println("Error: Invalid ID. Please provide a number.")
+		return
+	}
+
+	record, err := GetCommandByID(id)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	fmt.Println()
+	fmt.Printf("ID: %d\n", record.Id)
+	fmt.Println("══════════════════════════════════════════════════════════════")
+
+	// Display description
+	fmt.Println("Description:")
+	if isMarkdownContent(record.Data) {
+		fmt.Print(RenderMarkdown(record.Data))
+	} else {
+		fmt.Printf("  %s\n", record.Data)
+	}
+
+	fmt.Println("──────────────────────────────────────────────────────────────")
+
+	// Display command/content
+	if isMarkdownContent(record.Key) {
+		fmt.Println("Content:")
+		fmt.Print(RenderMarkdown(record.Key))
+	} else {
+		fmt.Println("Command:")
+		if isCode(record.Key) {
+			cmd := record.Key
+			if !strings.HasSuffix(cmd, "{{end}}") {
+				cmd = replaceLast(cmd, "}", "\n}")
+			}
+			cmd = strings.ReplaceAll(cmd, "\n\t\n\t", "\n\t\t")
+			fmt.Println(cmd)
+		} else {
+			fmt.Println(record.Key)
+		}
+	}
+
+	fmt.Println("══════════════════════════════════════════════════════════════")
+	fmt.Println()
+}
 func handleRunCommand(args string) {
 	fmt.Println()
 	fmt.Println("═══════════════════════════════════════════════════════════════")
@@ -734,7 +793,7 @@ func handleRunCommand(args string) {
 
 	// Create the command
 	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-	
+
 	// Capture both stdout and stderr
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -747,7 +806,7 @@ func handleRunCommand(args string) {
 	if stdout.Len() > 0 {
 		fmt.Print(stdout.String())
 	}
-	
+
 	if stderr.Len() > 0 {
 		fmt.Fprintf(os.Stderr, "%s", stderr.String())
 	}
@@ -766,7 +825,7 @@ func handleRunCommand(args string) {
 // detectCommandLanguage detects the appropriate language tag for code blocks
 func detectCommandLanguage(command, description string) string {
 	combined := strings.ToLower(command + " " + description)
-	
+
 	// Check for specific command types
 	if strings.Contains(combined, "docker") {
 		return "docker"
@@ -777,10 +836,10 @@ func detectCommandLanguage(command, description string) string {
 	if strings.Contains(combined, "firebase") {
 		return "bash"
 	}
-	if strings.Contains(combined, "psql") || strings.Contains(combined, "postgresql") || 
-	   strings.Contains(command, "SELECT") || strings.Contains(command, "INSERT") ||
-	   strings.Contains(command, "UPDATE") || strings.Contains(command, "DELETE") ||
-	   strings.Contains(command, "CREATE TABLE") {
+	if strings.Contains(combined, "psql") || strings.Contains(combined, "postgresql") ||
+		strings.Contains(command, "SELECT") || strings.Contains(command, "INSERT") ||
+		strings.Contains(command, "UPDATE") || strings.Contains(command, "DELETE") ||
+		strings.Contains(command, "CREATE TABLE") {
 		return "postgresql"
 	}
 	if strings.Contains(combined, "mysql") {
@@ -790,31 +849,31 @@ func detectCommandLanguage(command, description string) string {
 		return "javascript"
 	}
 	if strings.Contains(command, "import ") || strings.Contains(command, "def ") ||
-	   strings.Contains(command, "print(") {
+		strings.Contains(command, "print(") {
 		return "python"
 	}
 	if strings.Contains(command, "const ") || strings.Contains(command, "let ") ||
-	   strings.Contains(command, "function ") || strings.Contains(command, "=>") {
+		strings.Contains(command, "function ") || strings.Contains(command, "=>") {
 		return "javascript"
 	}
 	if strings.Contains(combined, "powershell") || strings.Contains(command, "Get-") ||
-	   strings.Contains(command, "Set-") || strings.Contains(command, "$_") {
+		strings.Contains(command, "Set-") || strings.Contains(command, "$_") {
 		return "powershell"
 	}
 	if strings.Contains(command, "git ") {
 		return "bash"
 	}
 	if strings.Contains(command, "npm ") || strings.Contains(command, "yarn ") ||
-	   strings.Contains(command, "node ") {
+		strings.Contains(command, "node ") {
 		return "bash"
 	}
-	
+
 	// Default to bash for shell commands
 	if strings.HasPrefix(command, "$") || strings.HasPrefix(command, "sudo") ||
-	   strings.Contains(command, " | ") || strings.Contains(command, " && ") {
+		strings.Contains(command, " | ") || strings.Contains(command, " && ") {
 		return "bash"
 	}
-	
+
 	return "bash"
 }
 
@@ -825,12 +884,12 @@ func saveAIResponse(query, response string) error {
 	if tableName == "" {
 		tableName = "scmd"
 	}
-	
+
 	// The AI response (with code blocks) goes in the 'key' field
 	// The query/description goes in the 'data' field
 	command := response
 	description := fmt.Sprintf("AI-generated response for: %s", query)
-	
+
 	var embedding []float64
 	var embeddingErr error
 	hasEmbedding := false
@@ -887,7 +946,7 @@ func saveAIResponse(query, response string) error {
 			return fmt.Errorf("error inserting: %v", err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -898,16 +957,16 @@ func regenerateAIResponse(query string) string {
 	if cleanedQuery == "" {
 		cleanedQuery = query
 	}
-	
+
 	jsonData, err := SearchCommands(cleanedQuery, "json")
 	if err != nil {
 		fmt.Printf("Error searching: %v\n", err)
 		return ""
 	}
-	
+
 	var results []CommandRecord
 	json.Unmarshal(jsonData, &results)
-	
+
 	// Get top results for context
 	scored := ScoreCommands(results, cleanedQuery)
 	var contextResults []CommandRecord
@@ -916,10 +975,10 @@ func regenerateAIResponse(query string) string {
 			contextResults = append(contextResults, s.Record)
 		}
 	}
-	
+
 	// Call AI directly to get a fresh response
 	var aiResponse string
-	
+
 	if IsOllamaAvailable() {
 		fmt.Println("⚠ Regenerating with Ollama...")
 		aiResponse, err = AskOllama(query, contextResults)
@@ -932,7 +991,7 @@ func regenerateAIResponse(query string) string {
 			return aiResponse
 		}
 	}
-	
+
 	if IsGeminiAvailable() {
 		fmt.Println("⚠ Regenerating with Gemini...")
 		aiResponse, err = AskGemini(query, contextResults)
@@ -945,6 +1004,6 @@ func regenerateAIResponse(query string) string {
 			return aiResponse
 		}
 	}
-	
+
 	return ""
 }

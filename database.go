@@ -297,3 +297,23 @@ func DeleteCommand(id int) (bool, error) {
 
 	return rows > 0, nil
 }
+
+// GetCommandByID retrieves a single command record by its ID
+func GetCommandByID(id int) (*CommandRecord, error) {
+	tableName := os.Getenv("TB_NAME")
+	if tableName == "" {
+		tableName = "scmd"
+	}
+
+	query := fmt.Sprintf("SELECT id, key, data FROM %s WHERE id = $1", tableName)
+	var record CommandRecord
+	err := db.QueryRow(query, id).Scan(&record.Id, &record.Key, &record.Data)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("no command found with ID %d", id)
+		}
+		return nil, fmt.Errorf("error querying command: %v", err)
+	}
+
+	return &record, nil
+}
