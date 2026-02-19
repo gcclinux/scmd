@@ -9,14 +9,7 @@ Simple search command App that gives the possibility to find commands or store c
 
 Create a `.env` file in the project root with your PostgreSQL connection details:
 
-```env
-DB_HOST=192.168.1.4
-DB_PORT=5432
-DB_USER=user_name
-DB_PASS=password
-DB_NAME=database_name
-TB_NAME=scmd
-```
+[.env Example](.env.example ".env Example")
 
 ## Usage Modes
 
@@ -35,8 +28,11 @@ scmd.exe --cli
 **Features:**
 - Natural language queries: "provide me with postgresql replication example"
 - Direct keyword search: "postgresql replication"
-- Slash commands: `/search`, `/add`, `/list`, `/count`
+- Slash commands: `/search`, `/add`, `/list`, `/count`, `/show`
 - User-friendly prompts and formatted output
+
+### Example of the extended functions menu
+![SCMD v2.0.0 Interactive CLI](images/smcd-2.0.0-show.png)
 
 See [INTERACTIVE_MODE.md](INTERACTIVE_MODE.md) for detailed documentation.
 
@@ -157,8 +153,6 @@ Usage: 	 scmd-Linux-x86_64(exe) --search "patterns"
 ```
 Usage: 	 scmd-Linux-x86_64(exe) --save "command" "description"
 ```
-
-This app is also enriched by utilising the "tardigrade-mod" database available for download from github.com
 
 Build and compile scmd from source code will require
 >go get github.com/lib/pq
