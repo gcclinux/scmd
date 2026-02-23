@@ -1,122 +1,205 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{.PageTitle}} - {{.Version}}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-    <link rel="icon" href="scmd_icon.ico" type="image/x-icon">
-    <style>
-      pre {
-        border:2px solid gray
-      }
-    </style>
-  </head>
-  <body>
 
-    <nav class="navbar navbar-expand-lg p-3 mb-2 bg-primary text-white" data-bs-theme="dark">
-      <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/">{{.PageTitle}}</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active fw-bold" aria-current="page" href="/">Home</a>
-              {{if .Insert}}
-                <li class="nav-item">
-                  <a class="nav-link active fw-bold" aria-current="page" href="/add">Add</a>
-                </li>
-                {{end}}
-            <li class="nav-item">
-              <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
-            </li>            
-          </ul>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.PageTitle}} - {{.Version}}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  <link rel="icon" href="scmd_icon.ico" type="image/x-icon">
+  <style>
+    pre {
+      border: 2px solid gray
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg p-3 mb-2 bg-primary text-white" data-bs-theme="dark">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="/">{{.PageTitle}}</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active fw-bold" aria-current="page" href="/">Home</a>
+            {{if .Insert}}
+          <li class="nav-item">
+            <a class="nav-link active fw-bold" aria-current="page" href="/add">Add</a>
+          </li>
+          {{end}}
+          <li class="nav-item">
+            <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid mt-3">
+    Version: {{.Version}}
+  </div>
+  <hr>
+
+  <div class="container-fluid mt-2 d-flex justify-content-center">
+    <div class="position-relative text-center w-75">
+      <form action="/" method="post" autocomplete="off" class="d-flex flex-column align-items-center w-100"
+        id="searchForm" role="search"
+        onsubmit="document.getElementById('loadingIndicator').classList.remove('d-none');">
+        <div class="position-relative w-100 mb-3">
+          <textarea class="form-control border border-2 border-secondary shadow-sm"
+            style="resize: none; padding-bottom: 24px;" rows="2"
+            placeholder="Query (Press Enter to search, Shift+Enter for new line)" aria-label="Query" name="pattern"
+            onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); document.getElementById('loadingIndicator').classList.remove('d-none'); this.form.submit(); }"></textarea>
+
+          <div id="loadingIndicator" class="d-none position-absolute text-muted small fw-bold"
+            style="bottom: 8px; left: 12px; pointer-events: none; opacity: 0.8;">
+            {{if .AIProviderLabel}}
+            ⚡ {{.AIProviderLabel}} &nbsp; ⏳ generating...
+            {{else}}
+            ⏳ searching database...
+            {{end}}
+          </div>
+        </div>
+
+        <input autocomplete="false" type="hidden" name="hidden">
+        <button class="btn btn-outline-success text-black fw-bold" type="submit">Query</button>
+      </form>
+    </div>
+  </div>
+  {{if not .Pages}}
+  {{if not .Pattern}}
+  <div class="position-relative text-center mt-5">
+    <H2>Start your technical query by inputting your search criteria in the searchbar.</H2>
+    <H4 class="text-muted">Search based on comma or space separated pattern(s) or phrases</H4>
+  </div>
+  {{else}}
+  <div class="position-relative text-center mt-5">
+    <h4 class="text-danger fw-bold">No matches found for "{{.Pattern}}"</h4><BR>
+    <h6>Option 1: <I> Click <a href="/help">(Help)</a> &#8608; (Download) to download the latest database</I></h6>
+    <h6>Option 2: <I> Start your own database by saving (Add) your own commands!</I></h6>
+  </div>
+  {{end}}
+  {{else}}
+  <div class="container mt-4 mb-5 w-75">
+    <div id="pages-container">
+      {{range $index, $page := .Pages}}
+      <div class="page-content card shadow-sm {{if ne $index 0}}d-none{{end}}" id="page-{{$index}}"
+        data-page-index="{{$index}}" data-is-ai="{{if eq $index 0}}yes{{else}}no{{end}}">
+        <div class="card-body p-4 bg-dark text-white rounded">
+          <div class="raw-markdown d-none">{{$page}}</div>
+          <div class="rendered-markdown"></div>
         </div>
       </div>
-    </nav>
-    <div class="container-fluid mt-3">
-      Version: {{.Version}}
+      {{end}}
     </div>
-        <hr>
 
-        <div class="container-fluid ms-n5 mt-2">
-          <div class="position-relative text-center">
-            <form action="/" method="post" autocomplete="off" class="d-inline-flex" role="search">
-              <input class="form-control me-4" type="search" placeholder="Search" aria-label="Search" name="pattern">
-              <input autocomplete="false" type="hidden" name="hidden">
-              <button class="btn btn-outline-success text-black fw-bold" type="submit">Search</button>
-            </form>
-          </div>
-        </div>       
-          {{if .AIResponse}}
-          <div class="row mt-4">
-            <div class="col-12">
-              <div class="card border-info ms-5 me-5 pe-2">
-                <div class="card-header bg-info text-white fw-bold">
-                  🤖 AI Assistant
-                </div>
-                <div class="card-body bg-light text-dark">
-                  <p class="card-text text-start" style="white-space: pre-wrap;">{{.AIResponse}}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          {{end}}
+    <div class="d-flex justify-content-between mt-3 px-2">
+      <button class="btn btn-secondary fw-bold px-4" id="btnPrev" onclick="changePage(-1)" disabled>&#8592;
+        Previous</button>
+      <span class="align-self-center fw-bold fs-5 text-dark" id="pageIndicator">Page 1 of {{len .Pages}}</span>
+      <button class="btn btn-secondary fw-bold px-4" id="btnNext" onclick="changePage(1)">Next &#8594;</button>
+    </div>
 
-          {{if not .Code}}
-            {{if not .AllData}}
-              {{if not .Pattern}}
-                  <div class="position-relative text-center">
-                    <BR>
-                    <H2>Start your technical query by inputing your search criteria in the searchbar.</H2>
-                    <H4>Search based on comma or space separated pattern(s) or phrases</H4>
-                  </div>
-                {{end}}
-            {{end}}
-          {{end}}
+    {{if .PageQuery}}
+    {{if .SaveStatus}}
+    {{if eq .SaveStatus "saved"}}
+    <div class="alert alert-success mt-3 fw-bold text-center" role="alert">✅ Answer saved to database!</div>
+    {{else if eq .SaveStatus "already"}}
+    <div class="alert alert-info mt-3 fw-bold text-center" role="alert">ℹ️ This result is already stored in the
+      database.</div>
+    {{else}}
+    <div class="alert alert-danger mt-3 fw-bold text-center" role="alert">❌ Error saving answer.</div>
+    {{end}}
+    {{end}}
+    <div id="ai-feedback-bar" class="d-none mt-3">
+      <div class="d-flex gap-2 justify-content-center">
+        <form method="POST" action="/answer-feedback">
+          <input type="hidden" name="action" value="save">
+          <input type="hidden" name="query" value="{{.PageQuery}}">
+          <textarea name="airesponse" id="hiddenAiText" class="d-none"></textarea>
+          <button type="submit" class="btn btn-success fw-bold px-4">👍 Good Answer &ndash; Save to DB</button>
+        </form>
+        <form method="POST" action="/answer-feedback">
+          <input type="hidden" name="action" value="retry">
+          <input type="hidden" name="query" value="{{.PageQuery}}">
+          <button type="submit" class="btn btn-danger fw-bold px-4">👎 Bad Answer &ndash; Try Again</button>
+        </form>
+      </div>
+    </div>
+    {{end}}
+  </div>
 
-            {{if .AllData}}
-            <div class="bg-dark text-white ms-5 ps-5 mt-5 me-5 pe-5">
-              {{$odd := true}}
-                {{range $data := .AllData}}
-                  {{if $odd}}
-                      <I>{{ $data }}</I><BR>
-                  {{else}}
-                      <B>{{ $data }}</B>
-                  {{end}}
-                {{$odd = not $odd}}
-              {{end}}
-            <p> &nbsp; </p>
-          </div>
-          {{end}}
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const markdownElements = document.querySelectorAll('.page-content');
+      markdownElements.forEach(function (el) {
+        const rawObj = el.querySelector('.raw-markdown');
+        const renderObj = el.querySelector('.rendered-markdown');
+        if (rawObj && renderObj) {
+          renderObj.innerHTML = marked.parse(rawObj.textContent);
+        }
+      });
+      updateButtons();
+      updateFeedbackBar();
+    });
 
-          {{if .Code}}
-          <div>
-            {{$odd := true}}
-              {{range $datac := .Code}}
-                {{if $odd}}
-                    <pre class="bg-white text-black ms-5 ps-2 mt-5 me-5 pe-2"><B>{{ $datac }}</B></pre>
-                  {{else}}
-                    <pre class="bg-black text-white ms-5 ps-2 mt-5 me-5 pe-2">{{ $datac }}</pre>
-                  {{end}}
-                {{$odd = not $odd}}
-            {{end}}
-          </div>
-          {{end}}
-            
-          {{if .Pattern}}
-          <div class="position-relative text-center">
-            WARNING: No data found!!!  {{.Pattern}}<BR><BR>
-              <h6>Option 1: <I> Click <a href="/help">(Help)</a> &#8608; (Download) to download the latest scmd-database</I></h6>
-              <h6>Option 2: <I> Start your own database by saving (Add) your own commands!</I></h6>
-          </div>
-          {{end}}
-        </div>
+    let currentPageIdx = 0;
+    const totalPages = parseInt("{{len .Pages}}") || 0;
 
-        <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js" crossorigin="anonymous"></script>
-          <script type="importmap">
+    function changePage(delta) {
+      if (totalPages === 0) return;
+
+      const prevEl = document.getElementById('page-' + currentPageIdx);
+      if (prevEl) prevEl.classList.add('d-none');
+
+      currentPageIdx += delta;
+
+      const nextEl = document.getElementById('page-' + currentPageIdx);
+      if (nextEl) nextEl.classList.remove('d-none');
+
+      updateButtons();
+      updateFeedbackBar();
+    }
+
+    function updateButtons() {
+      if (totalPages === 0) return;
+      document.getElementById('pageIndicator').innerText = `Page ${currentPageIdx + 1} of ${totalPages}`;
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      if (btnPrev) btnPrev.disabled = (currentPageIdx === 0);
+      if (btnNext) btnNext.disabled = (currentPageIdx === totalPages - 1);
+    }
+
+    function updateFeedbackBar() {
+      const feedbackBar = document.getElementById('ai-feedback-bar');
+      if (!feedbackBar) return;
+
+      // Always show the feedback bar — on every page (AI or DB result)
+      feedbackBar.classList.remove('d-none');
+
+      // Populate hidden textarea with whatever the current page's raw content is
+      const currentPage = document.getElementById('page-' + currentPageIdx);
+      const hiddenText = document.getElementById('hiddenAiText');
+      if (hiddenText && currentPage) {
+        const rawEl = currentPage.querySelector('.raw-markdown');
+        if (rawEl) {
+          hiddenText.value = rawEl.textContent;
+        }
+      }
+    }
+  </script>
+  {{end}}
+  </div>
+
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js"
+    crossorigin="anonymous"></script>
+  <script type="importmap">
           {
             "imports": {
               "@popperjs/core": "https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/esm/popper.min.js",
@@ -124,11 +207,12 @@
             }
           }
           </script>
-          <script type="module">
-            import * as bootstrap from 'bootstrap'
+  <script type="module">
+    import * as bootstrap from 'bootstrap'
 
-            new bootstrap.Popover(document.getElementById('popoverButton'))
-          </script>
+    new bootstrap.Popover(document.getElementById('popoverButton'))
+  </script>
 
-  </body>
+</body>
+
 </html>

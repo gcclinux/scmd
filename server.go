@@ -13,21 +13,25 @@ import (
 )
 
 type BuildStruct struct {
-	PageTitle  string
-	Pattern    string
-	Id         int
-	Key        string
-	Data       string
-	CmdTitle   string
-	DescTitle  string
-	Version    string
-	Return     string
-	Status     string
-	CmdFunc    string
-	AllData    []string
-	Code       []string
-	Insert     bool
-	AIResponse string
+	PageTitle       string
+	Pattern         string
+	Id              int
+	Key             string
+	Data            string
+	CmdTitle        string
+	DescTitle       string
+	Version         string
+	Return          string
+	Status          string
+	CmdFunc         string
+	AllData         []string
+	Code            []string
+	Insert          bool
+	AIResponse      string
+	Pages           []string
+	PageQuery       string
+	SaveStatus      string
+	AIProviderLabel string
 }
 
 //go:embed templates
@@ -40,6 +44,11 @@ func routes() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer CloseDB()
+
+	// Validate API access key from .env against the database
+	InitOllama()
+	InitGemini()
+	ValidateAPIAccess()
 
 	// create a WaitGroup
 	wg := new(sync.WaitGroup)
@@ -227,6 +236,7 @@ func routes() {
 	}
 	http.HandleFunc("/game", GamePage)
 	http.HandleFunc("/help", HelpPage)
+	http.HandleFunc("/answer-feedback", AnswerFeedback)
 
 	if browser {
 		if SSL {
@@ -418,17 +428,17 @@ func AddPage(w http.ResponseWriter, r *http.Request) {
 		exists, err := CheckCommandExists(command)
 		if err != nil {
 			log.Printf("Error checking command existence: %v", err)
-			data.Status = fmt.Sprintf("(false) Error checking database!")
+			data.Status = "(false) Error checking database!"
 		} else if exists {
 			save = false
-			data.Status = fmt.Sprintf("%v", "(false) Duplicate command!")
+			data.Status = "(false) Duplicate command!"
 		}
 
 		if save {
 			success, err := AddCommand(command, description)
 			if err != nil {
 				log.Printf("Error adding command: %v", err)
-				data.Status = fmt.Sprintf("(false) Error saving command!")
+				data.Status = "(false) Error saving command!"
 			} else {
 				status = success
 				data.Status = fmt.Sprintf("%t", status)
@@ -465,9 +475,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Version = Release
-	sc := make([]string, 0)
-	scode := make([]string, 0)
-
+	data.AIProviderLabel = getAIProviderLabel()
 	if r.Method == "GET" {
 		tmpl.Execute(w, data)
 	} else {
@@ -480,7 +488,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 			WriteLogToFile(webLog, "SEARCH: "+pattern)
 
 			// Use SmartSearch instead of basic SearchCommands
-			results, aiResponse, err := SmartSearch(pattern, true)
+			results, aiResponse, aiTokens, err := SmartSearch(pattern, true)
 			if err != nil {
 				log.Printf("Error searching commands: %v", err)
 				data.Pattern = "Error searching database"
@@ -488,7 +496,17 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			data.AIResponse = aiResponse
+			// Using Pages for pagination instead of Code/AllData
+			var pages []string
+
+			if aiResponse != "" {
+				tokenStr := "Usage Not Tracked"
+				if aiTokens > 0 {
+					tokenStr = strconv.Itoa(aiTokens)
+				}
+				aiPage := fmt.Sprintf("## AI-Generated Response\n\n**TOKEN:** %s\n\n%s", tokenStr, aiResponse)
+				pages = append(pages, aiPage)
+			}
 
 			if len(results) == 0 && aiResponse == "" {
 				data.Pattern = "No matches found"
@@ -496,28 +514,35 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 
 			for _, record := range results {
 				code := isCode(record.Key)
+				var cmdFormatted string
+
 				if code {
 					funccmd := record.Key
 					if !strings.HasSuffix(funccmd, "{{end}}") {
 						funccmd = replaceLast(funccmd, "}", "\n}")
 					}
 					funccmd = strings.ReplaceAll(funccmd, "\n\t\n\t", "\n\n\t")
-					scode = append(scode, "//ID: "+strconv.Itoa(record.Id)+" - "+record.Data)
-					scode = append(scode, funccmd)
+					cmdFormatted = fmt.Sprintf("```go\n%s\n```", funccmd)
 				} else {
-					sc = append(sc, "----------------------------------------------------------------------")
-					sc = append(sc, "# ID: ")
-					sc = append(sc, strconv.Itoa(record.Id))
-					sc = append(sc, "# Description: ")
-					sc = append(sc, fmt.Sprintf("\"%s\"", string(record.Data)))
-					sc = append(sc, "# Command : ")
-					sc = append(sc, string(record.Key))
-					sc = append(sc, "")
+					cmd := record.Key
+					if strings.Contains(cmd, "```") || strings.Contains(cmd, "\n") {
+						if strings.Contains(cmd, "```") {
+							cmdFormatted = cmd
+						} else {
+							cmdFormatted = fmt.Sprintf("```\n%s\n```", cmd)
+						}
+					} else {
+						cmdFormatted = fmt.Sprintf("```\n%s\n```", cmd)
+					}
 				}
+
+				pageContent := fmt.Sprintf("## ID: %d Description\n%s\n\n## Command\n\n%s", record.Id, record.Data, cmdFormatted)
+				pages = append(pages, pageContent)
 			}
 
-			data.AllData = sc
-			data.Code = scode
+			data.Pages = pages
+			data.PageQuery = pattern
+			data.SaveStatus = ""
 			tmpl.Execute(w, data)
 		}
 	}
@@ -564,4 +589,106 @@ func addCacheControl(next http.Handler) http.Handler {
 		w.Header().Set("Expires", "0")               // Proxies.
 		next.ServeHTTP(w, r)
 	})
+}
+
+// getAIProviderLabel returns a display label for the active AI provider and model
+// e.g. "gemini/gemini-2.0-flash-exp" or "ollama/qwen2.5-coder:1.5b"
+func getAIProviderLabel() string {
+	preferredAgent := strings.ToLower(os.Getenv("AGENT"))
+
+	// Check preferred agent first
+	if preferredAgent == "ollama" && IsOllamaAvailable() {
+		model := os.Getenv("MODEL")
+		if model == "" {
+			model = "unknown"
+		}
+		return "ollama/" + model
+	} else if preferredAgent == "gemini" && IsGeminiAvailable() {
+		model := os.Getenv("GEMINIMODEL")
+		if model == "" {
+			model = "gemini-2.0-flash-exp"
+		}
+		return "gemini/" + model
+	}
+
+	// Fallback logic
+	if IsOllamaAvailable() {
+		model := os.Getenv("MODEL")
+		if model == "" {
+			model = "unknown"
+		}
+		return "ollama/" + model
+	}
+	if IsGeminiAvailable() {
+		model := os.Getenv("GEMINIMODEL")
+		if model == "" {
+			model = "gemini-2.0-flash-exp"
+		}
+		return "gemini/" + model
+	}
+	return ""
+}
+
+// AnswerFeedback handles Good Answer / Bad Answer actions on AI responses
+func AnswerFeedback(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	r.ParseForm()
+	action := r.FormValue("action")
+	query := r.FormValue("query")
+	aiResponse := r.FormValue("airesponse")
+
+	tmpl := template.Must(template.ParseFS(tplFolder, "templates/home.html"))
+	data := BuildStruct{
+		PageTitle: "(SCMD)",
+		Version:   Release,
+	}
+	if os.Args[len(os.Args)-1] == "-block" {
+		data.Insert = false
+	} else {
+		data.Insert = true
+	}
+
+	switch action {
+	case "save":
+		// Good Answer – save to database
+		// If content is a DB result page (already in DB), just acknowledge it
+		if strings.HasPrefix(strings.TrimSpace(aiResponse), "## ID:") {
+			data.SaveStatus = "already"
+		} else if err := saveAIResponse(query, aiResponse); err != nil {
+			log.Printf("Error saving AI response: %v", err)
+			data.SaveStatus = "error"
+		} else {
+			data.SaveStatus = "saved"
+		}
+		// Rebuild pages with the status and keep the current AI result visible
+		tokenStr := "Usage Not Tracked"
+		aiPage := fmt.Sprintf("## AI-Generated Response\n\n**TOKEN:** %s\n\n%s", tokenStr, aiResponse)
+		data.Pages = []string{aiPage}
+		data.PageQuery = query
+		tmpl.Execute(w, data)
+
+	case "retry":
+		// Bad Answer – force fresh AI search (skip the high-quality DB shortcut)
+		results, newResponse, aiTokens, err := SmartSearch(query, true)
+		_ = results
+		if err != nil || newResponse == "" {
+			data.Pattern = "Could not find a better answer"
+			tmpl.Execute(w, data)
+			return
+		}
+		tokenStr := "Usage Not Tracked"
+		if aiTokens > 0 {
+			tokenStr = strconv.Itoa(aiTokens)
+		}
+		aiPage := fmt.Sprintf("## AI-Generated Response\n\n**TOKEN:** %s\n\n%s", tokenStr, newResponse)
+		data.Pages = []string{aiPage}
+		data.PageQuery = query
+		tmpl.Execute(w, data)
+
+	default:
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
 }

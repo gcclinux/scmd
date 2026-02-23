@@ -156,6 +156,7 @@ func GetGeminiEmbedding(text string) ([]float64, error) {
 
 	return embedding, nil
 }
+
 // GeminiChatRequest represents a chat request to Gemini
 type GeminiChatRequest struct {
 	Contents []GeminiContent `json:"contents"`
@@ -181,12 +182,21 @@ type GeminiChatResponse struct {
 			} `json:"parts"`
 		} `json:"content"`
 	} `json:"candidates"`
+	UsageMetadata struct {
+		PromptTokenCount     int `json:"promptTokenCount"`
+		CandidatesTokenCount int `json:"candidatesTokenCount"`
+		TotalTokenCount      int `json:"totalTokenCount"`
+	} `json:"usageMetadata"`
 }
 
 // AskGemini sends a question to Gemini and gets a response
-func AskGemini(question string, context []CommandRecord) (string, error) {
+// Returns (responseText, totalTokens, error)
+func AskGemini(question string, context []CommandRecord) (string, int, error) {
+	if !requireAIAccess() {
+		return "", 0, fmt.Errorf("AI access denied: invalid or missing API_ACCESS key")
+	}
 	if !IsGeminiAvailable() {
-		return "", fmt.Errorf("Gemini API is not available")
+		return "", 0, fmt.Errorf("Gemini API is not available")
 	}
 
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
@@ -229,7 +239,7 @@ You have access to a database of commands. When answering questions:
 
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
-		return "", fmt.Errorf("error marshaling request: %v", err)
+		return "", 0, fmt.Errorf("error marshaling request: %v", err)
 	}
 
 	client := &http.Client{
@@ -238,23 +248,23 @@ You have access to a database of commands. When answering questions:
 
 	resp, err := client.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return "", fmt.Errorf("error calling Gemini API: %v", err)
+		return "", 0, fmt.Errorf("error calling Gemini API: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("Gemini API returned status %d: %s", resp.StatusCode, string(body))
+		return "", 0, fmt.Errorf("Gemini API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var response GeminiChatResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return "", fmt.Errorf("error decoding response: %v", err)
+		return "", 0, fmt.Errorf("error decoding response: %v", err)
 	}
 
 	if len(response.Candidates) == 0 || len(response.Candidates[0].Content.Parts) == 0 {
-		return "", fmt.Errorf("empty response from Gemini API")
+		return "", 0, fmt.Errorf("empty response from Gemini API")
 	}
 
-	return response.Candidates[0].Content.Parts[0].Text, nil
+	return response.Candidates[0].Content.Parts[0].Text, response.UsageMetadata.TotalTokenCount, nil
 }

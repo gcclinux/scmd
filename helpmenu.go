@@ -85,6 +85,12 @@ func helpHere(name string) {
 	fmt.Printf(NoticeColor, "*** Show embedding statistics for the database\n\r")
 	fmt.Println("Usage: \t", name, "--embedding-stats")
 	fmt.Println()
+	fmt.Printf(NoticeColor, "*** Create a new database and tables (reads DB_NAME / TB_NAME / ACCESS_TB from .env)\n\r")
+	fmt.Println("Usage: \t", name, "--create-db")
+	fmt.Println()
+	fmt.Printf(NoticeColor, "*** Generate a 32-char API key for an email and store it in the access table\n\r")
+	fmt.Println("Usage: \t", name, "--create-api [email]")
+	fmt.Println()
 }
 
 func wrongSyntax() {

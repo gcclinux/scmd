@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-DIR=$(dirname "$0")
+DIR=build/$(dirname "$0")
 echo ""
 
 case $1 in

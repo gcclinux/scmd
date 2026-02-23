@@ -21,27 +21,25 @@ type CommandRecord struct {
 
 var db *sql.DB
 
-// LoadEnv loads the .env file from the executable's directory
+// LoadEnv loads the .env file
 func LoadEnv() {
-	// Load .env file from executable's directory
+	// 1. Try to load from current working directory first
+	cwd, err := os.Getwd()
+	if err == nil {
+		envPath := filepath.Join(cwd, ".env")
+		if loadErr := godotenv.Load(envPath); loadErr == nil {
+			return // Successfully loaded from CWD
+		}
+	}
+
+	// 2. Try to load from executable's directory
 	execPath, err := os.Executable()
 	if err != nil {
-		log.Println("Warning: could not determine executable path, trying current directory")
-		execPath = "."
+		return
 	}
 	execDir := filepath.Dir(execPath)
 	envPath := filepath.Join(execDir, ".env")
-
-	if loadErr := godotenv.Load(envPath); loadErr != nil {
-		// Only log if we haven't already loaded it / isn't already set?
-		// Actually, standard behavior is to just warn if file missing but standard file exists
-		// But here we're explicit.
-		// Let's just log as provided in original code, but maybe check if we're redundant?
-		// No, simplest is best.
-		// log.Printf("Warning: .env file not found at %s, using environment variables\n", envPath)
-	} else {
-		// log.Printf("Loaded .env from: %s\n", envPath)
-	}
+	godotenv.Load(envPath) // Ignore errors if not found here either
 }
 
 // InitDB initializes the PostgreSQL database connection

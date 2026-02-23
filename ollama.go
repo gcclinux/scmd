@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -44,10 +45,12 @@ type OllamaMessage struct {
 
 // OllamaChatResponse represents the response from Ollama chat
 type OllamaChatResponse struct {
-	Model     string        `json:"model"`
-	CreatedAt string        `json:"created_at"`
-	Message   OllamaMessage `json:"message"`
-	Done      bool          `json:"done"`
+	Model           string        `json:"model"`
+	CreatedAt       string        `json:"created_at"`
+	Message         OllamaMessage `json:"message"`
+	Done            bool          `json:"done"`
+	PromptEvalCount int           `json:"prompt_eval_count"`
+	EvalCount       int           `json:"eval_count"`
 }
 
 var (
@@ -246,7 +249,11 @@ func SearchWithOllama(query string, limit int) ([]CommandRecord, error) {
 }
 
 // AskOllama sends a question to Ollama and gets a response
-func AskOllama(question string, context []CommandRecord) (string, error) {
+// Returns (responseText, totalTokens, error)
+func AskOllama(question string, context []CommandRecord) (string, int, error) {
+	if !requireAIAccess() {
+		return "", 0, fmt.Errorf("AI access denied: invalid or missing API_ACCESS key")
+	}
 	url := fmt.Sprintf("http://%s:%s/api/chat", ollamaConfig.Host, ollamaConfig.Port)
 
 	// Build context from command records
@@ -283,7 +290,7 @@ You have access to a database of commands. When answering questions:
 
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
-		return "", fmt.Errorf("error marshaling request: %v", err)
+		return "", 0, fmt.Errorf("error marshaling request: %v", err)
 	}
 
 	client := &http.Client{
@@ -292,56 +299,70 @@ You have access to a database of commands. When answering questions:
 
 	resp, err := client.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return "", fmt.Errorf("error calling Ollama: %v", err)
+		return "", 0, fmt.Errorf("error calling Ollama: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("Ollama returned status %d: %s", resp.StatusCode, string(body))
+		return "", 0, fmt.Errorf("Ollama returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var response OllamaChatResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return "", fmt.Errorf("error decoding response: %v", err)
+		return "", 0, fmt.Errorf("error decoding response: %v", err)
 	}
 
-	return response.Message.Content, nil
+	totalTokens := response.PromptEvalCount + response.EvalCount
+	return response.Message.Content, totalTokens, nil
 }
 
 // AskAI sends a question to the best available AI provider
-func AskAI(question string, context []CommandRecord) (string, error) {
+// Returns (responseText, totalTokens, error)
+func AskAI(question string, context []CommandRecord) (string, int, error) {
 	var errs []error
+	preferredAgent := strings.ToLower(os.Getenv("AGENT"))
 
-	// Try Ollama first
+	// Check preferred agent first
+	if preferredAgent == "ollama" && IsOllamaAvailable() {
+		return AskOllama(question, context)
+	} else if preferredAgent == "gemini" && IsGeminiAvailable() {
+		return AskGemini(question, context)
+	}
+
+	// If a preferred agent was explicitly set but failed or wasn't available, do NOT fallback
+	if preferredAgent != "" {
+		return "", 0, fmt.Errorf("preferred AI provider '%s' is not available or failed", preferredAgent)
+	}
+
+	// Fallback logic when no preferred agent is set
 	if IsOllamaAvailable() {
-		response, err := AskOllama(question, context)
+		response, tokens, err := AskOllama(question, context)
 		if err == nil {
-			return response, nil
+			return response, tokens, nil
 		}
 		errs = append(errs, fmt.Errorf("Ollama failed: %v", err))
 	}
 
-	// Fallback to Gemini
 	if IsGeminiAvailable() {
-		response, err := AskGemini(question, context)
+		response, tokens, err := AskGemini(question, context)
 		if err == nil {
-			return response, nil
+			return response, tokens, nil
 		}
 		errs = append(errs, fmt.Errorf("Gemini failed: %v", err))
 	}
 
 	if len(errs) > 0 {
-		return "", fmt.Errorf("all AI providers failed: %v", errs)
+		return "", 0, fmt.Errorf("all AI providers failed: %v", errs)
 	}
-	return "", fmt.Errorf("no AI provider available")
+	return "", 0, fmt.Errorf("no AI provider available")
 }
 
 // SmartSearch performs an intelligent search following the priority:
 // 1. PostgreSQL plain text (keyword) search (using cleaned query)
 // 2. Ollama vector search + chat
 // 3. Gemini vector search + chat
-func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, error) {
+func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, int, error) {
 	// Clean the query to remove "how do i", "show me", etc.
 	// This makes database keyword search much more accurate.
 	cleanedQuery := extractKeywords(query)
@@ -351,11 +372,12 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 
 	var results []CommandRecord
 	var aiResponse string
+	var aiTokens int
 
 	// --- 1st PRIORITY: Cleaned Keyword Search ---
 	jsonData, err := SearchCommands(cleanedQuery, "json")
 	if err != nil {
-		return nil, "", err
+		return nil, "", 0, err
 	}
 	var keywordResults []CommandRecord
 	json.Unmarshal(jsonData, &keywordResults)
@@ -364,15 +386,17 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 	// If we have very high quality matches, return them immediately
 	if HasGoodMatches(scoredKeywords, 60) {
 		fmt.Println("✓ Found high-quality matches in database")
-		bestScored := GetBestMatches(scoredKeywords, 10)
+		// Only include results that themselves meet the 60% threshold
+		// This prevents loosely-related results from slipping through
+		qualifiedScored := FilterByMinScore(scoredKeywords, 60)
+		bestScored := GetBestMatches(qualifiedScored, 10)
 		for _, s := range bestScored {
 			results = append(results, s.Record)
 		}
-		// ALWAYS get AI explanation for natural formatting
-		if IsOllamaAvailable() || IsGeminiAvailable() {
-			aiResponse, _ = AskAI(query, results)
-		}
-		return results, aiResponse, nil
+
+		// DO NOT use AI here to save power when high-quality matches are found
+		aiResponse = ""
+		return results, aiResponse, 0, nil
 	}
 
 	if !useEmbeddings {
@@ -383,17 +407,21 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 				results = append(results, s.Record)
 			}
 		}
-		return results, "", nil
+		return results, "", 0, nil
 	}
 
-	// --- 2nd PRIORITY: Ollama Vector Search ---
-	if IsOllamaAvailable() {
+	preferredAgent := strings.ToLower(os.Getenv("AGENT"))
+
+	// Helper function for Ollama search logic
+	tryOllama := func() bool {
+		if !IsOllamaAvailable() {
+			return false
+		}
 		fmt.Println("⚠ Trying Ollama (Vector Search & Chat)...")
 		emb, err := GetEmbedding(query)
 		if err == nil {
 			vResults, err := SearchVectorInDB(emb, 10)
 			if err == nil && len(vResults) > 0 {
-				// Score vector results to filter unrelated garbage
 				scoredVector := ScoreCommands(vResults, cleanedQuery)
 				var filteredVector []CommandRecord
 				for _, s := range scoredVector {
@@ -401,18 +429,20 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 						filteredVector = append(filteredVector, s.Record)
 					}
 				}
-
 				if len(filteredVector) > 0 {
 					results = filteredVector
-					aiResponse, _ = AskOllama(query, results)
-					if aiResponse != "" {
-						return results, aiResponse, nil
+					res, tok, err := AskOllama(query, results)
+					if err == nil && res != "" {
+						aiResponse = res
+						aiTokens = tok
+						return true
+					} else if err != nil {
+						fmt.Printf("⚠ Ollama API error: %v\n", err)
 					}
 				}
 			}
 		}
 
-		// If vector matched nothing, try AI chat with top keyword results anyway
 		if aiResponse == "" && len(scoredKeywords) > 0 {
 			var contextResults []CommandRecord
 			for _, s := range GetBestMatches(scoredKeywords, 5) {
@@ -420,15 +450,24 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 					contextResults = append(contextResults, s.Record)
 				}
 			}
-			aiResponse, _ = AskOllama(query, contextResults)
-			if aiResponse != "" {
-				return contextResults, aiResponse, nil
+			res, tok, err := AskOllama(query, contextResults)
+			if err == nil && res != "" {
+				results = contextResults
+				aiResponse = res
+				aiTokens = tok
+				return true
+			} else if err != nil {
+				fmt.Printf("⚠ Ollama API error: %v\n", err)
 			}
 		}
+		return false
 	}
 
-	// --- 3rd PRIORITY: Gemini Vector Search ---
-	if IsGeminiAvailable() {
+	// Helper function for Gemini search logic
+	tryGemini := func() bool {
+		if !IsGeminiAvailable() {
+			return false
+		}
 		fmt.Println("⚠ Trying Gemini (Vector Search & Chat)...")
 		emb, err := GetGeminiEmbedding(query)
 		if err == nil {
@@ -441,18 +480,20 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 						filteredVector = append(filteredVector, s.Record)
 					}
 				}
-
 				if len(filteredVector) > 0 {
 					results = filteredVector
-					aiResponse, _ = AskGemini(query, results)
-					if aiResponse != "" {
-						return results, aiResponse, nil
+					res, tok, err := AskGemini(query, results)
+					if err == nil && res != "" {
+						aiResponse = res
+						aiTokens = tok
+						return true
+					} else if err != nil {
+						fmt.Printf("⚠ Gemini API error: %v\n", err)
 					}
 				}
 			}
 		}
 
-		// Fallback to Gemini chat with keyword context
 		if aiResponse == "" && len(scoredKeywords) > 0 {
 			var contextResults []CommandRecord
 			for _, s := range GetBestMatches(scoredKeywords, 5) {
@@ -460,16 +501,52 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 					contextResults = append(contextResults, s.Record)
 				}
 			}
-			aiResponse, _ = AskGemini(query, contextResults)
-			if aiResponse != "" {
-				return contextResults, aiResponse, nil
+			res, tok, err := AskGemini(query, contextResults)
+			if err == nil && res != "" {
+				results = contextResults
+				aiResponse = res
+				aiTokens = tok
+				return true
+			} else if err != nil {
+				fmt.Printf("⚠ Gemini API error: %v\n", err)
 			}
+		}
+		return false
+	}
+
+	// --- 2nd PRIORITY: Preferred Agent ---
+	success := false
+	if preferredAgent == "ollama" {
+		success = tryOllama()
+	} else if preferredAgent == "gemini" {
+		success = tryGemini()
+	}
+
+	if success {
+		return results, aiResponse, aiTokens, nil
+	}
+
+	// --- 3rd PRIORITY: Fallback Agent ---
+	// Only fallback if no explicit preferredAgent was set
+	if preferredAgent == "" {
+		if tryOllama() {
+			return results, aiResponse, aiTokens, nil
+		}
+		if tryGemini() {
+			return results, aiResponse, aiTokens, nil
 		}
 	}
 
 	// --- 4th PRIORITY: Last Resort AI chat with no context ---
 	if aiResponse == "" {
-		aiResponse, _ = AskAI(query, nil)
+		resp, tok, err := AskAI(query, nil)
+		if err != nil {
+			fmt.Printf("⚠ AskAI Error: %v\n", err)
+			aiResponse = fmt.Sprintf("⚠️ **AI Provider Error**\n\n```text\n%v\n```\n\nPlease check your configuration, model name, and API keys.", err)
+		} else {
+			aiResponse = resp
+			aiTokens = tok
+		}
 	}
 
 	// FINAL CLEANUP: Make sure we only return results that actually have some keyword relevance
@@ -481,5 +558,5 @@ func SmartSearch(query string, useEmbeddings bool) ([]CommandRecord, string, err
 		}
 	}
 
-	return finalResults, aiResponse, nil
+	return finalResults, aiResponse, aiTokens, nil
 }

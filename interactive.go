@@ -24,6 +24,9 @@ func StartInteractiveMode() {
 	InitGemini()
 	InitOllama()
 
+	// Validate API access key from .env against the database
+	ValidateAPIAccess()
+
 	reader := bufio.NewReader(os.Stdin)
 
 	printWelcome()
@@ -345,7 +348,7 @@ func extractKeywords(input string) string {
 
 func performInteractiveSearch(pattern string) string {
 	// Use smart search with Ollama if available
-	results, aiResponse, err := SmartSearch(pattern, true)
+	results, aiResponse, _, err := SmartSearch(pattern, true)
 	if err != nil {
 		fmt.Printf("Error searching: %v\n", err)
 		return ""
@@ -894,21 +897,49 @@ func saveAIResponse(query, response string) error {
 	var embeddingErr error
 	hasEmbedding := false
 
-	// Try Ollama first
-	if IsOllamaAvailable() {
+	preferredAgent := strings.ToLower(os.Getenv("AGENT"))
+
+	// Helper for Ollama embedding
+	tryOllamaEmb := func() bool {
+		if !IsOllamaAvailable() {
+			return false
+		}
 		text := command + " " + description
 		embedding, embeddingErr = GetEmbedding(text)
 		if embeddingErr == nil {
 			hasEmbedding = true
+			return true
 		}
+		return false
 	}
 
-	// Fallback to Gemini if Ollama failed or unavailable
-	if !hasEmbedding && IsGeminiAvailable() {
+	// Helper for Gemini embedding
+	tryGeminiEmb := func() bool {
+		if !IsGeminiAvailable() {
+			return false
+		}
 		text := command + " " + description
 		embedding, embeddingErr = GetGeminiEmbedding(text)
 		if embeddingErr == nil {
 			hasEmbedding = true
+			return true
+		}
+		return false
+	}
+
+	// Try preferred agent first
+	if preferredAgent == "ollama" {
+		tryOllamaEmb()
+	} else if preferredAgent == "gemini" {
+		tryGeminiEmb()
+	}
+
+	// Fallback
+	// Only fallback if no explicit preferredAgent was set
+	if !hasEmbedding && preferredAgent == "" {
+		tryOllamaEmb()
+		if !hasEmbedding {
+			tryGeminiEmb()
 		}
 	}
 
@@ -978,29 +1009,60 @@ func regenerateAIResponse(query string) string {
 
 	// Call AI directly to get a fresh response
 	var aiResponse string
+	preferredAgent := strings.ToLower(os.Getenv("AGENT"))
 
-	if IsOllamaAvailable() {
+	tryOllama := func() bool {
+		if !IsOllamaAvailable() {
+			return false
+		}
 		fmt.Println("⚠ Regenerating with Ollama...")
-		aiResponse, err = AskOllama(query, contextResults)
+		aiResponse, _, err = AskOllama(query, contextResults)
 		if err == nil && aiResponse != "" {
 			fmt.Println("🤖 AI Assistant:")
 			fmt.Println("══════════════════════════════════════════════════════════════")
 			fmt.Println(aiResponse)
 			fmt.Println("══════════════════════════════════════════════════════════════")
 			fmt.Println()
+			return true
+		}
+		return false
+	}
+
+	tryGemini := func() bool {
+		if !IsGeminiAvailable() {
+			return false
+		}
+		fmt.Println("⚠ Regenerating with Gemini...")
+		aiResponse, _, err = AskGemini(query, contextResults)
+		if err == nil && aiResponse != "" {
+			fmt.Println("🤖 AI Assistant:")
+			fmt.Println("══════════════════════════════════════════════════════════════")
+			fmt.Println(aiResponse)
+			fmt.Println("══════════════════════════════════════════════════════════════")
+			fmt.Println()
+			return true
+		}
+		return false
+	}
+
+	// Try preferred agent
+	if preferredAgent == "ollama" {
+		if tryOllama() {
+			return aiResponse
+		}
+	} else if preferredAgent == "gemini" {
+		if tryGemini() {
 			return aiResponse
 		}
 	}
 
-	if IsGeminiAvailable() {
-		fmt.Println("⚠ Regenerating with Gemini...")
-		aiResponse, err = AskGemini(query, contextResults)
-		if err == nil && aiResponse != "" {
-			fmt.Println("🤖 AI Assistant:")
-			fmt.Println("══════════════════════════════════════════════════════════════")
-			fmt.Println(aiResponse)
-			fmt.Println("══════════════════════════════════════════════════════════════")
-			fmt.Println()
+	// Fallback
+	// Only fallback if no explicit preferredAgent was set
+	if preferredAgent == "" {
+		if tryOllama() {
+			return aiResponse
+		}
+		if tryGemini() {
 			return aiResponse
 		}
 	}
