@@ -50,6 +50,9 @@ func routes() {
 	InitGemini()
 	ValidateAPIAccess()
 
+	// Start session cleanup routine
+	StartSessionCleanup()
+
 	// create a WaitGroup
 	wg := new(sync.WaitGroup)
 	wg.Add(2) // create one go routine
@@ -230,13 +233,18 @@ func routes() {
 	fs := http.FS(tplFolder)
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(fs)))
 
-	http.HandleFunc("/", HomePage)
+	// Public routes
+	http.HandleFunc("/login", LoginPage)
+	http.HandleFunc("/logout", LogoutPage)
+
+	// Protected routes
+	http.HandleFunc("/", RequireAuth(HomePage))
 	if os.Args[count-1] != "-block" {
-		http.HandleFunc("/add", AddPage)
+		http.HandleFunc("/add", RequireAuth(AddPage))
 	}
-	http.HandleFunc("/game", GamePage)
-	http.HandleFunc("/help", HelpPage)
-	http.HandleFunc("/answer-feedback", AnswerFeedback)
+	http.HandleFunc("/game", RequireAuth(GamePage))
+	http.HandleFunc("/help", RequireAuth(HelpPage))
+	http.HandleFunc("/answer-feedback", RequireAuth(AnswerFeedback))
 
 	if browser {
 		if SSL {
@@ -342,6 +350,10 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --help")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Start Interactive CLI Mode")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --cli")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
 			sc = append(sc, "INFO: Opens the web UI with default Port: \"3333\"")
 			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --web")
 			sc = append(sc, "")
@@ -358,28 +370,48 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --web -port [port] -block")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
-			sc = append(sc, "INFO: Linux start UI without launching browser as a background service")
-			sc = append(sc, "Command: screen -dmS SCMD scmd-Linux-aarch64 --web -port 3333 -services")
+			sc = append(sc, "INFO: Starts SCMD without launching Web UI")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --web -port [port] -service")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
-			sc = append(sc, "INFO: Linux start UI without launching browser as a background service & \"DISABLE\" add commands")
-			sc = append(sc, "Command: screen -dmS SCMD scmd-Linux-aarch64 --web -port 3333 -services -block")
+			sc = append(sc, "INFO: Starts SCMD without launching Web UI & \"DISABLE\" add commands")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --web -port [port] -service -block")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
-			sc = append(sc, "INFO: Windows start UI without launching browser as a background service")
-			sc = append(sc, "Command: START SCMD /B scmd-win-x86_64.exe --web -port 3333 -services")
+			sc = append(sc, "INFO: Opens SSL Web UI with default Port: \"3333\"")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --ssl [certificate.pem] [privkey.pem]")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Starts SCMD without launching Web UI default Port: \"3333\"")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --ssl -service [certificate.pem] [privkey.pem]")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Opens SSL Web UI with default Port: \"3333\" & \"DISABLE\" add commands")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --ssl [certificate.pem] [privkey.pem] -block")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Opens SSL web UI with alternative Port:")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --ssl -port [port] [certificate.pem] [privkey.pem]")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Opens SSL web UI with alternative Port: & \"DISABLE\" add commands")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --ssl -port [port] [certificate.pem] [privkey.pem] -block")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Starts SCMD SSL without launching Web UI")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --ssl -port [port] -service [certificate.pem] [privkey.pem]")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Starts SCMD SSL without launching Web UI & \"DISABLE\" add commands")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --ssl -port [port] -service [certificate.pem] [privkey.pem] -block")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
 			sc = append(sc, "INFO: Show local and available scmd version")
 			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --version")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
-			sc = append(sc, "INFO: Copy for the commands database and save it in the current directory")
+			sc = append(sc, "INFO: Create a copy for the commands database and save it in the current directory (default: scmd_export.json)")
 			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --copydb [filename]")
-			sc = append(sc, "")
-			sc = append(sc, "----------------------------------------------------------------------")
-			sc = append(sc, "INFO: Download latest tardigrade.db WRN: (override locally DB)")
-			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --download")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
 			sc = append(sc, "INFO: Download and upgrade the latest version of the scmd application binary")
@@ -387,11 +419,31 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
 			sc = append(sc, "INFO: Search command based on comma separated pattern(s)")
-			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --search \"pattern(s)\"")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --search [pattern(s)]")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
 			sc = append(sc, "INFO: Save new command with description in the local database")
-			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --save \"command\" \"description\"")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --save [command] [description]")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Import a markdown document")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --import [filepath]")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Generate embeddings for all commands (enables vector search)")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --generate-embeddings")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Show embedding statistics for the database")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --embedding-stats")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Create a new database and tables (reads DB_NAME / TB_NAME / ACCESS_TB from .env)")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --create-db")
+			sc = append(sc, "")
+			sc = append(sc, "----------------------------------------------------------------------")
+			sc = append(sc, "INFO: Generate a 32-char API key for an email and store it in the access table")
+			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --create-api [email]")
 			sc = append(sc, "")
 		}
 
@@ -691,4 +743,91 @@ func AnswerFeedback(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+// LoginPage handles user authentication
+func LoginPage(w http.ResponseWriter, r *http.Request) {
+	// If already logged in, redirect to home
+	if cookie, err := r.Cookie("session_id"); err == nil {
+		if _, exists := sessionStore.GetSession(cookie.Value); exists {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	tmpl := template.Must(template.ParseFS(tplFolder, "templates/login.html"))
+
+	data := BuildStruct{
+		PageTitle: "Login",
+		Version:   Release,
+	}
+
+	if r.Method == "GET" {
+		tmpl.Execute(w, data)
+	} else {
+		r.ParseForm()
+		email := r.FormValue("email")
+		apiKey := r.FormValue("api_key")
+
+		// Authenticate user
+		authenticated, err := AuthenticateUser(email, apiKey)
+		if err != nil {
+			log.Printf("Authentication error: %v", err)
+			data.Status = "error"
+			tmpl.Execute(w, data)
+			return
+		}
+
+		if !authenticated {
+			log.Printf("Failed login attempt for email: %s", email)
+			data.Status = "failed"
+			tmpl.Execute(w, data)
+			return
+		}
+
+		// Create session
+		sessionID, err := sessionStore.CreateSession(email)
+		if err != nil {
+			log.Printf("Session creation error: %v", err)
+			data.Status = "error"
+			tmpl.Execute(w, data)
+			return
+		}
+
+		// Set session cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:     "session_id",
+			Value:    sessionID,
+			Path:     "/",
+			MaxAge:   86400, // 24 hours
+			HttpOnly: true,
+			Secure:   false, // Set to true if using HTTPS
+			SameSite: http.SameSiteLaxMode,
+		})
+
+		log.Printf("Successful login for email: %s", email)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+// LogoutPage handles user logout
+func LogoutPage(w http.ResponseWriter, r *http.Request) {
+	// Get session cookie
+	cookie, err := r.Cookie("session_id")
+	if err == nil {
+		// Delete session from store
+		sessionStore.DeleteSession(cookie.Value)
+	}
+
+	// Clear session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
