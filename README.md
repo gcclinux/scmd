@@ -18,11 +18,7 @@ Create a `.env` file in the project root with your PostgreSQL connection details
 Start an interactive session with natural language support:
 
 ```bash
-scmd.exe --interactive
-# or
-scmd.exe -i
-# or
-scmd.exe --cli
+scmd-windows-amd64.exe --cli
 ```
 
 **Features:**
@@ -32,7 +28,9 @@ scmd.exe --cli
 - User-friendly prompts and formatted output
 
 ### Example of the extended functions menu
-![SCMD v2.0.0 Interactive CLI](images/smcd-2.0.0-show.png)
+![CLI v2.0.0 Interactive CLI](images/smcd-2.0.0-show.png)
+---
+![WEB v2.0.1 Interactive CLI](images/smcd-2.0.1-web.png)
 
 See [INTERACTIVE_MODE.md](INTERACTIVE_MODE.md) for detailed documentation.
 
@@ -40,42 +38,40 @@ See [INTERACTIVE_MODE.md](INTERACTIVE_MODE.md) for detailed documentation.
 
 **Search for commands:**
 ```bash
-scmd.exe --search "postgresql replication"
-scmd.exe --search "docker,kubernetes"
+scmd-windows-amd64.exe --search "postgresql replication"
+scmd-windows-amd64.exe --search "docker,kubernetes"
 ```
 
 **Add new commands:**
 ```bash
-scmd.exe --save "docker ps -a" "List all containers"
+scmd-windows-amd64.exe --save "docker ps -a" "List all containers"
 ```
 
 ### 3. Web Interface
 
 **Start web server:**
 ```bash
-scmd.exe --web                    # Default port 3333
-scmd.exe --web -port 8080         # Custom port
-scmd.exe --web -block             # Read-only mode
-scmd.exe --web -service           # Background mode (no browser)
+scmd-windows-amd64.exe --web                    # Default port 3333
+scmd-windows-amd64.exe --web -port 8080         # Custom port
+scmd-windows-amd64.exe --web -block             # Read-only mode
+scmd-windows-amd64.exe --web -service           # Background mode (no browser)
 ```
 
-## Release History
+## Installation
 
-Release: 1.0.0 - (18-02-2023) Initial SCMD CLI & Web UI<BR>
-Release: 1.0.1 - (19-02-2023) Recompiled with updated tardigrade-mod v0.2.0<BR>
-Release: 1.0.2 - (26-02-2023) Minor cosmetic changes in the search UI<BR>
-Release: 1.1.0 - (05-03-2023) Added binary upgrade option in the menu!<BR>
-Release: 1.2.0 - (12-03-2023) Added option to specific what port to open the Web UI<BR>
-Release: 1.3.0 - (19-03-2023) Added option to save or display functions also<BR>
-Release: 1.3.1 - (26-03-2023) Check if command already exist + cosmetics<BR>
-Release: 1.3.2 - (01-04-2023) Created the Help page and added search login.<BR>
-Release: 1.3.3 - (05-04-2023) Minor cosmetics on help page (before annual leave).<BR>
-Release: 1.3.5 - (29-08-2023) Added TLS capabilities for HTTPS.<BR>
-Release: 1.3.6 - (09-09-2023) Added -block "DISABLES" add commands page.<BR>
-Release: 1.3.7 - (16-12-2023) Started a command game page.<BR>
-Release: 1.3.8 - (20-03-2024) Pauzed game but added favicon.<BR>
-Release: 2.0.0 - (2026) **Migrated to PostgreSQL database**<BR>
-Release: 2.0.1 - (14-04-2026) **Several features added to interractive cli**<br>
+### Download Pre-built Binaries
+
+Download the latest release for your platform from the [GitHub Releases](https://github.com/gcclinux/scmd/releases) page:
+
+- **Windows (AMD64):** `scmd-windows-amd64.exe`
+- **Linux (AMD64):** `scmd-linux-amd64`
+- **Linux (ARM64):** `scmd-linux-aarch64`
+- **macOS (Intel):** `scmd-darwin-amd64`
+- **macOS (Apple Silicon):** `scmd-darwin-arm64`
+
+All binaries are ready to use - no compilation required!
+
+### Build from Source
 
 > Display this help menu
 ```
@@ -154,21 +150,47 @@ Usage: 	 scmd-Linux-x86_64(exe) --search "patterns"
 Usage: 	 scmd-Linux-x86_64(exe) --save "command" "description"
 ```
 
-Build and compile scmd from source code will require
->go get github.com/lib/pq
->go get github.com/joho/godotenv
+### Build from Source
 
+Build and compile scmd from source code will require:
+- Go 1.23 or higher
+- Git
+- PostgreSQL database
 
-\* Download and Install - https://go.dev/dl/ <BR>
-\* Download and Install - https://git-scm.com/downloads
-\* Setup PostgreSQL database and import data from tardigrade.db
-
+Dependencies:
+```bash
+go get github.com/lib/pq
+go get github.com/joho/godotenv
 ```
-$ git clone https://github.com/gcclinux/scmd.git
-$ cd scmd/
-$ cp .env.example .env
-$ # Edit .env with your PostgreSQL credentials
-$ go mod tidy
-$ go build -o scmd-$(uname)-$(uname -m) .
-$ scmd-$(uname)-$(uname -m) --help
+
+Build steps:
+Build steps:
+
+```bash
+git clone https://github.com/gcclinux/scmd.git
+cd scmd/
+cp .env.example .env
+# Edit .env with your PostgreSQL credentials
+go mod tidy
+go build -o scmd-$(uname)-$(uname -m) .
+scmd-$(uname)-$(uname -m) --help
 ```
+
+Or use the build script:
+
+**Windows:**
+```powershell
+.\build.ps1 all          # Build for all platforms
+.\build.ps1 windows      # Build for Windows only
+.\build.ps1 linux        # Build for Linux only
+.\build.ps1 darwin       # Build for macOS only
+```
+
+**Linux/macOS:**
+```bash
+./compile.sh             # Build for current platform
+```
+
+## Release History
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release history.
