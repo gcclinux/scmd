@@ -14,9 +14,10 @@ import (
 
 // OllamaConfig holds Ollama configuration
 type OllamaConfig struct {
-	Host  string
-	Model string
-	Port  string
+	Host           string
+	Model          string
+	EmbeddingModel string
+	Port           string
 }
 
 // OllamaEmbeddingRequest represents the request to Ollama for embeddings
@@ -62,9 +63,10 @@ var (
 // InitOllama initializes Ollama configuration and checks availability
 func InitOllama() {
 	ollamaConfig = OllamaConfig{
-		Host:  os.Getenv("OLLAMA"),
-		Model: os.Getenv("MODEL"),
-		Port:  "11434", // Default Ollama port
+		Host:           os.Getenv("OLLAMA"),
+		Model:          os.Getenv("MODEL"),
+		EmbeddingModel: os.Getenv("EMBEDDING_MODEL"),
+		Port:           "11434", // Default Ollama port
 	}
 
 	if ollamaConfig.Host == "" {
@@ -73,6 +75,10 @@ func InitOllama() {
 
 	if ollamaConfig.Model == "" {
 		ollamaConfig.Model = "llama2"
+	}
+
+	if ollamaConfig.EmbeddingModel == "" {
+		ollamaConfig.EmbeddingModel = ollamaConfig.Model // fallback to query model
 	}
 
 	// Check if Ollama is available
@@ -84,8 +90,8 @@ func InitOllama() {
 		if embeddingDim == "" {
 			embeddingDim = "384"
 		}
-		fmt.Printf("✓ Ollama available at %s:%s (model: %s, embedding_dim: %s)\n",
-			ollamaConfig.Host, ollamaConfig.Port, ollamaConfig.Model, embeddingDim)
+		fmt.Printf("✓ Ollama available at %s:%s (model: %s, embedding: %s, embedding_dim: %s)\n",
+			ollamaConfig.Host, ollamaConfig.Port, ollamaConfig.Model, ollamaConfig.EmbeddingModel, embeddingDim)
 	}
 }
 
@@ -119,7 +125,7 @@ func GetEmbedding(text string) ([]float64, error) {
 	url := fmt.Sprintf("http://%s:%s/api/embeddings", ollamaConfig.Host, ollamaConfig.Port)
 
 	reqBody := OllamaEmbeddingRequest{
-		Model:  ollamaConfig.Model,
+		Model:  ollamaConfig.EmbeddingModel,
 		Prompt: text,
 	}
 

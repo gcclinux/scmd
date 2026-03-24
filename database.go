@@ -21,25 +21,37 @@ type CommandRecord struct {
 
 var db *sql.DB
 
-// LoadEnv loads the .env file
+// LoadEnv loads the .env file from the executable's directory or a parent
 func LoadEnv() {
-	// 1. Try to load from current working directory first
-	cwd, err := os.Getwd()
+	// 1. Try executable's directory first (resolving symlinks)
+	execPath, err := os.Executable()
 	if err == nil {
-		envPath := filepath.Join(cwd, ".env")
-		if loadErr := godotenv.Load(envPath); loadErr == nil {
-			return // Successfully loaded from CWD
+		execPath, _ = filepath.EvalSymlinks(execPath)
+		execDir := filepath.Dir(execPath)
+
+		// Try the exe directory itself, then walk up to parent directories (max 3 levels)
+		dir := execDir
+		for i := 0; i < 4; i++ {
+			envPath := filepath.Join(dir, ".env")
+			if _, statErr := os.Stat(envPath); statErr == nil {
+				if loadErr := godotenv.Load(envPath); loadErr == nil {
+					return
+				}
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				break
+			}
+			dir = parent
 		}
 	}
 
-	// 2. Try to load from executable's directory
-	execPath, err := os.Executable()
-	if err != nil {
-		return
+	// 2. Fallback: try current working directory
+	cwd, err := os.Getwd()
+	if err == nil {
+		envPath := filepath.Join(cwd, ".env")
+		godotenv.Load(envPath)
 	}
-	execDir := filepath.Dir(execPath)
-	envPath := filepath.Join(execDir, ".env")
-	godotenv.Load(envPath) // Ignore errors if not found here either
 }
 
 // InitDB initializes the PostgreSQL database connection

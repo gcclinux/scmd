@@ -147,21 +147,16 @@ func printWelcome() {
 func printInteractiveHelp() {
 	fmt.Println()
 	fmt.Println("Available Slash Commands:")
-	fmt.Println("──────────────────────────────────────────────────────────────")
-	fmt.Println("  /help or /?           - Show this help message")
-	fmt.Println("  /search <pattern>     - Search for commands matching pattern")
-	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | as separator)")
-	fmt.Println("  /delete <id>          - Delete a command by ID")
-	fmt.Println("  /show <id>            - Show the command and description by ID")
-	fmt.Println("  /list                 - List recent commands")
-	fmt.Println("  /count                - Show total number of commands")
-	fmt.Println("  /run <command>        - Execute a system command")
-	fmt.Println("  /ai                   - Show AI/Ollama status")
-	fmt.Println("  /embeddings           - Check embedding statistics")
-	fmt.Println("  /import <path>        - Import a markdown document")
-	fmt.Println("  /generate             - Generate embeddings for all commands")
-	fmt.Println("  /clear or /cls        - Clear the screen")
-	fmt.Println("  /exit, /quit, or /q   - Exit interactive mode")
+	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+	fmt.Println("  /help or /?           - Show this help message              │  /ai                   - Show AI/Ollama status")
+	fmt.Println("  /help next            - Show next page of help              │  /config				- Step by step setup ai parameters")
+	fmt.Println("  /search <pattern>     - Search for commands matching pattern│  /embeddings           - Check embedding statistics")
+	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | separator) │  /import <path>        - Import a markdown document")
+	fmt.Println("  /delete <id>          - Delete a command by ID              │  /generate             - Generate embeddings for all commands")
+	fmt.Println("  /show <id>            - Show command and description by ID  │  /clear or /cls        - Clear the screen")
+	fmt.Println("  /list                 - List recent commands                │  /count                - Show total number of commands")
+	fmt.Println("  /run <command>        - Execute a system command            │  /exit, /quit, or /q   - Exit interactive mode")
+	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println()
 	fmt.Println("AI Response Feedback:")
 	fmt.Println("──────────────────────────────────────────────────────────────")
@@ -174,6 +169,10 @@ func printInteractiveHelp() {
 	fmt.Println("  help or ?             - Show this help message")
 	fmt.Println("  clear or cls          - Clear the screen")
 	fmt.Println("  exit, quit, or q      - Exit interactive mode")
+	fmt.Println()
+}
+
+func printInteractiveHelpNext() {
 	fmt.Println()
 	if IsGeminiAvailable() || IsOllamaAvailable() {
 		aiProvider := "Gemini"
@@ -247,7 +246,11 @@ func handleSlashCommand(input string) {
 
 	switch command {
 	case "/help", "/?":
-		printInteractiveHelp()
+		if args == "next" {
+			printInteractiveHelpNext()
+		} else {
+			printInteractiveHelp()
+		}
 
 	case "/exit", "/quit", "/q":
 		fmt.Println("Goodbye!")
@@ -605,6 +608,7 @@ func handleAIStatus(args string) {
 		fmt.Println("🤖 Ollama is available and active")
 		fmt.Printf("  Host: %s\n", os.Getenv("OLLAMA"))
 		fmt.Printf("  Model: %s\n", os.Getenv("MODEL"))
+		fmt.Printf("  Embedding Model: %s\n", ollamaConfig.EmbeddingModel)
 		fmt.Println()
 	}
 
