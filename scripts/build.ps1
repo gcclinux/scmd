@@ -32,7 +32,7 @@ function Ensure-BuildDir {
 function Build-Current {
     Write-Host "Building $BINARY_NAME for current platform..." -ForegroundColor Cyan
     Ensure-BuildDir
-    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME.exe" .
+    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME.exe" ./cmd/scmd/
     if ($LASTEXITCODE -eq 0) {
         Write-Host "Build complete: $BUILD_DIR/$BINARY_NAME.exe" -ForegroundColor Green
     }
@@ -47,7 +47,7 @@ function Build-Windows {
     Ensure-BuildDir
     $env:GOOS = "windows"
     $env:GOARCH = "amd64"
-    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-windows-amd64.exe" .
+    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-windows-amd64.exe" ./cmd/scmd/
     Write-Host "Build complete: $BUILD_DIR/$BINARY_NAME-windows-amd64.exe" -ForegroundColor Green
 }
 
@@ -56,9 +56,9 @@ function Build-Linux {
     Ensure-BuildDir
     $env:GOOS = "linux"
     $env:GOARCH = "amd64"
-    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-amd64" .
+    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-amd64" ./cmd/scmd/
     $env:GOARCH = "arm64"
-    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-aarch64" .
+    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-aarch64" ./cmd/scmd/
     Write-Host "Build complete: $BUILD_DIR/$BINARY_NAME-linux-amd64 and $BUILD_DIR/$BINARY_NAME-linux-aarch64" -ForegroundColor Green
 }
 
@@ -67,9 +67,9 @@ function Build-Darwin {
     Ensure-BuildDir
     $env:GOOS = "darwin"
     $env:GOARCH = "amd64"
-    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-amd64" .
+    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-amd64" ./cmd/scmd/
     $env:GOARCH = "arm64"
-    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-arm64" .
+    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-arm64" ./cmd/scmd/
     Write-Host "Build complete: $BUILD_DIR/$BINARY_NAME-darwin-amd64 and $BUILD_DIR/$BINARY_NAME-darwin-arm64" -ForegroundColor Green
 }
 

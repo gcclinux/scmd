@@ -32,30 +32,30 @@ ensure_build_dir() {
 build_current() {
     echo -e "${CYAN}Building $BINARY_NAME for current platform...${NC}"
     ensure_build_dir
-    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME" .
+    go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME" ./cmd/scmd/
     echo -e "${GREEN}Build complete: $BUILD_DIR/$BINARY_NAME${NC}"
 }
 
 build_windows() {
     echo -e "${CYAN}Building $BINARY_NAME for Windows...${NC}"
     ensure_build_dir
-    GOOS=windows GOARCH=amd64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-windows-amd64.exe" .
+    GOOS=windows GOARCH=amd64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-windows-amd64.exe" ./cmd/scmd/
     echo -e "${GREEN}Build complete: $BUILD_DIR/$BINARY_NAME-windows-amd64.exe${NC}"
 }
 
 build_linux() {
     echo -e "${CYAN}Building $BINARY_NAME for Linux...${NC}"
     ensure_build_dir
-    GOOS=linux GOARCH=amd64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-amd64" .
-    GOOS=linux GOARCH=arm64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-aarch64" .
+    GOOS=linux GOARCH=amd64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-amd64" ./cmd/scmd/
+    GOOS=linux GOARCH=arm64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-linux-aarch64" ./cmd/scmd/
     echo -e "${GREEN}Build complete: $BUILD_DIR/$BINARY_NAME-linux-amd64 and $BUILD_DIR/$BINARY_NAME-linux-aarch64${NC}"
 }
 
 build_darwin() {
     echo -e "${CYAN}Building $BINARY_NAME for macOS...${NC}"
     ensure_build_dir
-    GOOS=darwin GOARCH=amd64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-amd64" .
-    GOOS=darwin GOARCH=arm64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-arm64" .
+    GOOS=darwin GOARCH=amd64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-amd64" ./cmd/scmd/
+    GOOS=darwin GOARCH=arm64 go build -ldflags="$LDFLAGS" -o "$BUILD_DIR/$BINARY_NAME-darwin-arm64" ./cmd/scmd/
     echo -e "${GREEN}Build complete: $BUILD_DIR/$BINARY_NAME-darwin-amd64 and $BUILD_DIR/$BINARY_NAME-darwin-arm64${NC}"
 }
 
