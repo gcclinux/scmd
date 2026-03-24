@@ -96,6 +96,18 @@ func PrintHelp(name string) {
 	fmt.Printf(NoticeColor, "*** Create a new database and tables (reads db_name / tb_name from ~/.scmd/config.json)\n\r")
 	fmt.Println("Usage: \t", name, "--create-db")
 	fmt.Println()
+	fmt.Printf(NoticeColor, "*** Interactive PostgreSQL database setup (prompts for connection details, saves config, creates DB)\n\r")
+	fmt.Println("Usage: \t", name, "--create-db-postgresql")
+	fmt.Println()
+	fmt.Printf(NoticeColor, "*** Interactive SQLite database setup (lightweight, no server required, saves to ~/.scmd/)\n\r")
+	fmt.Println("Usage: \t", name, "--create-db-sqlite")
+	fmt.Println()
+	fmt.Printf(NoticeColor, "*** Interactive Ollama AI server setup (prompts for host, model, embedding config)\n\r")
+	fmt.Println("Usage: \t", name, "--server-ollama")
+	fmt.Println()
+	fmt.Printf(NoticeColor, "*** Interactive Gemini AI server setup (prompts for API key, model, embedding config)\n\r")
+	fmt.Println("Usage: \t", name, "--server-gemini")
+	fmt.Println()
 }
 
 // PrintWrongSyntax shows usage error.

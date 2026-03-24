@@ -2,14 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.0.1] - 2026-04-14
+## [2.0.5] - 2026-03-24
+
+### Added
+- Standalone interactive setup commands for first-time application configuration
+- `--create-db-postgresql` — interactive PostgreSQL database setup (prompts for host, port, user, password, db/table name)
+- `--create-db-sqlite` — interactive SQLite database setup (lightweight, no server required, stored in ~/.scmd/)
+- `--server-ollama` — interactive Ollama AI server setup (prompts for host, chat model, embedding model, dimension)
+- `--server-gemini` — interactive Gemini AI server setup (prompts for API key, chat model, embedding model, dimension)
+- SQLite database support as an alternative to PostgreSQL (pure Go driver, no CGo)
+- SQLite-compatible query layer with cosine similarity vector search in Go
+- `SaveConfig` and `CurrentConfig` helpers for reading/writing ~/.scmd/config.json
+- `db_type` field in config.json to select between `postgresql` and `sqlite`
+
+## [2.0.1] - 2026-02-23
 
 ### Added
 - Several features added to interactive CLI
 - Enhanced natural language query support
 - Improved slash commands functionality
 
-## [2.0.0] - 2026
+## [2.0.0] - 2026-02-19
 
 ### Changed
 - **BREAKING:** Migrated from SQLite (tardigrade.db) to PostgreSQL database

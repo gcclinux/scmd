@@ -13,6 +13,9 @@ import (
 
 // SearchCommands searches for commands matching the pattern.
 func SearchCommands(pattern string, format string) ([]byte, error) {
+	if !IsPostgreSQL() {
+		return searchCommandsSQLite(pattern)
+	}
 	tableName := config.TableName()
 
 	var query string
@@ -109,6 +112,9 @@ func SearchCommands(pattern string, format string) ([]byte, error) {
 // AddCommand adds a new command to the database.
 // embeddingFn is an optional callback to generate embeddings.
 func AddCommand(command, description string, embeddingFn func(string) ([]float64, error)) (bool, error) {
+	if !IsPostgreSQL() {
+		return addCommandSQLite(command, description, embeddingFn)
+	}
 	tableName := config.TableName()
 
 	var embedding []float64
@@ -155,6 +161,9 @@ func AddCommand(command, description string, embeddingFn func(string) ([]float64
 
 // CheckCommandExists checks if a command already exists in the database.
 func CheckCommandExists(command string) (bool, error) {
+	if !IsPostgreSQL() {
+		return checkCommandExistsSQLite(command)
+	}
 	tableName := config.TableName()
 
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE key = $1", tableName)
@@ -169,6 +178,9 @@ func CheckCommandExists(command string) (bool, error) {
 
 // DeleteCommand deletes a command from the database by ID.
 func DeleteCommand(id int) (bool, error) {
+	if !IsPostgreSQL() {
+		return deleteCommandSQLite(id)
+	}
 	tableName := config.TableName()
 
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", tableName)
@@ -187,6 +199,9 @@ func DeleteCommand(id int) (bool, error) {
 
 // GetCommandByID retrieves a single command record by its ID.
 func GetCommandByID(id int) (*CommandRecord, error) {
+	if !IsPostgreSQL() {
+		return getCommandByIDSQLite(id)
+	}
 	tableName := config.TableName()
 
 	query := fmt.Sprintf("SELECT id, key, data FROM %s WHERE id = $1", tableName)
@@ -204,6 +219,9 @@ func GetCommandByID(id int) (*CommandRecord, error) {
 
 // GetCommandsWithoutEmbeddings returns all commands that have no embedding.
 func GetCommandsWithoutEmbeddings() ([]CommandRecord, error) {
+	if !IsPostgreSQL() {
+		return getCommandsWithoutEmbeddingsSQLite()
+	}
 	tableName := config.TableName()
 	query := fmt.Sprintf("SELECT id, key, data FROM %s WHERE embedding IS NULL", tableName)
 	rows, err := db.Query(query)
@@ -225,6 +243,9 @@ func GetCommandsWithoutEmbeddings() ([]CommandRecord, error) {
 
 // UpdateEmbedding updates the embedding for a command by ID.
 func UpdateEmbedding(id int, embedding []float64) error {
+	if !IsPostgreSQL() {
+		return updateEmbeddingSQLite(id, embedding)
+	}
 	tableName := config.TableName()
 	embeddingStr := FormatEmbedding(embedding)
 	query := fmt.Sprintf("UPDATE %s SET embedding = $1::vector WHERE id = $2", tableName)
@@ -234,6 +255,9 @@ func UpdateEmbedding(id int, embedding []float64) error {
 
 // GetEmbeddingStats returns total commands and count with embeddings.
 func GetEmbeddingStats() (total int, withEmbeddings int, err error) {
+	if !IsPostgreSQL() {
+		return getEmbeddingStatsSQLite()
+	}
 	tableName := config.TableName()
 
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", tableName)
@@ -251,6 +275,9 @@ func GetEmbeddingStats() (total int, withEmbeddings int, err error) {
 
 // SearchByVector performs a vector similarity search using pgvector.
 func SearchByVector(embedding []float64, limit int) ([]CommandRecord, error) {
+	if !IsPostgreSQL() {
+		return searchByVectorSQLite(embedding, limit)
+	}
 	tableName := config.TableName()
 	embeddingStr := FormatEmbedding(embedding)
 
@@ -280,6 +307,9 @@ func SearchByVector(embedding []float64, limit int) ([]CommandRecord, error) {
 
 // AuthenticateUser validates email and API key against the database.
 func AuthenticateUser(email, apiKey string) (bool, error) {
+	if !IsPostgreSQL() {
+		return authenticateUserSQLite(email, apiKey)
+	}
 	email = strings.TrimSpace(email)
 	apiKey = strings.TrimSpace(apiKey)
 

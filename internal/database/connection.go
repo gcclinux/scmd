@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
+	_ "modernc.org/sqlite"
 
 	"github.com/gcclinux/scmd/internal/config"
 )
@@ -18,9 +20,24 @@ func DB() *sql.DB {
 	return db
 }
 
-// InitDB initializes the PostgreSQL database connection.
+// IsPostgreSQL returns true if the configured database type is PostgreSQL.
+func IsPostgreSQL() bool {
+	return strings.ToLower(os.Getenv("DB_TYPE")) != "sqlite"
+}
+
+// InitDB initializes the database connection based on the configured db_type.
 func InitDB() error {
 	config.LoadConfig()
+
+	dbType := strings.ToLower(os.Getenv("DB_TYPE"))
+	if dbType == "sqlite" {
+		return InitSQLiteDB()
+	}
+	return initPostgresDB()
+}
+
+// initPostgresDB initializes the PostgreSQL database connection.
+func initPostgresDB() error {
 	var err error
 
 	host := os.Getenv("DB_HOST")

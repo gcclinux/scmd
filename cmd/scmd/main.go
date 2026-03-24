@@ -13,6 +13,7 @@ import (
 	"github.com/gcclinux/scmd/internal/markdown"
 	"github.com/gcclinux/scmd/internal/search"
 	"github.com/gcclinux/scmd/internal/server"
+	"github.com/gcclinux/scmd/internal/setup"
 	"github.com/gcclinux/scmd/internal/updater"
 	"github.com/gcclinux/scmd/internal/util"
 )
@@ -46,6 +47,14 @@ func main() {
 			updater.RunUpgrade()
 		} else if arg1 == "--create-db" {
 			database.SetupDatabase()
+		} else if arg1 == "--create-db-postgresql" {
+			setup.SetupPostgreSQL()
+		} else if arg1 == "--create-db-sqlite" {
+			setup.SetupSQLite()
+		} else if arg1 == "--server-ollama" {
+			setup.SetupOllama()
+		} else if arg1 == "--server-gemini" {
+			setup.SetupGemini()
 		} else if arg1 == "--web" {
 			server.Routes()
 		} else if arg1 == "--ssl" {
