@@ -192,9 +192,6 @@ type GeminiChatResponse struct {
 // AskGemini sends a question to Gemini and gets a response
 // Returns (responseText, totalTokens, error)
 func AskGemini(question string, context []CommandRecord) (string, int, error) {
-	if !requireAIAccess() {
-		return "", 0, fmt.Errorf("AI access denied: invalid or missing API_ACCESS key")
-	}
 	if !IsGeminiAvailable() {
 		return "", 0, fmt.Errorf("Gemini API is not available")
 	}

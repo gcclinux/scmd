@@ -257,9 +257,6 @@ func SearchWithOllama(query string, limit int) ([]CommandRecord, error) {
 // AskOllama sends a question to Ollama and gets a response
 // Returns (responseText, totalTokens, error)
 func AskOllama(question string, context []CommandRecord) (string, int, error) {
-	if !requireAIAccess() {
-		return "", 0, fmt.Errorf("AI access denied: invalid or missing API_ACCESS key")
-	}
 	url := fmt.Sprintf("http://%s:%s/api/chat", ollamaConfig.Host, ollamaConfig.Port)
 
 	// Build context from command records

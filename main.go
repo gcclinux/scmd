@@ -34,8 +34,6 @@ func main() {
 		} else if arg1 == "--create-db" {
 			// Create database and tables (DB_NAME / TB_NAME from .env)
 			SetupDatabase()
-		} else if arg1 == "--create-api" {
-			fmt.Println("Usage: scmd --create-api \"user@example.com\"")
 		} else if arg1 == "--web" {
 			routes()
 		} else if arg1 == "--ssl" {
@@ -77,9 +75,6 @@ func main() {
 	} else if count == 3 {
 		if (os.Args[1]) == "--search" {
 			search(os.Args[2])
-		} else if os.Args[1] == "--create-api" {
-			// Generate + store API key for the given email
-			CreateAPIKey(os.Args[2])
 		} else if os.Args[1] == "--import" {
 			// Initialize providers
 			InitGemini()

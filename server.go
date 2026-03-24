@@ -48,10 +48,6 @@ func routes() {
 	// Validate API access key from .env against the database
 	InitOllama()
 	InitGemini()
-	ValidateAPIAccess()
-
-	// Start session cleanup routine
-	StartSessionCleanup()
 
 	// create a WaitGroup
 	wg := new(sync.WaitGroup)
@@ -234,17 +230,13 @@ func routes() {
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(fs)))
 
 	// Public routes
-	http.HandleFunc("/login", LoginPage)
-	http.HandleFunc("/logout", LogoutPage)
-
-	// Protected routes
-	http.HandleFunc("/", RequireAuth(HomePage))
+	http.HandleFunc("/", HomePage)
 	if os.Args[count-1] != "-block" {
-		http.HandleFunc("/add", RequireAuth(AddPage))
+		http.HandleFunc("/add", AddPage)
 	}
-	http.HandleFunc("/game", RequireAuth(GamePage))
-	http.HandleFunc("/help", RequireAuth(HelpPage))
-	http.HandleFunc("/answer-feedback", RequireAuth(AnswerFeedback))
+	http.HandleFunc("/game", GamePage)
+	http.HandleFunc("/help", HelpPage)
+	http.HandleFunc("/answer-feedback", AnswerFeedback)
 
 	if browser {
 		if SSL {
@@ -438,7 +430,7 @@ func HelpPage(w http.ResponseWriter, r *http.Request) {
 			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --embedding-stats")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")
-			sc = append(sc, "INFO: Create a new database and tables (reads DB_NAME / TB_NAME / ACCESS_TB from .env)")
+			sc = append(sc, "INFO: Create a new database and tables (reads DB_NAME / TB_NAME from .env)")
 			sc = append(sc, "Command: scmd-Linux-x86_64(exe) --create-db")
 			sc = append(sc, "")
 			sc = append(sc, "----------------------------------------------------------------------")

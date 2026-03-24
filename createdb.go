@@ -28,10 +28,6 @@ func SetupDatabase() {
 	if dataTbl == "" {
 		dataTbl = "data"
 	}
-	accessTbl := os.Getenv("ACCESS_TB")
-	if accessTbl == "" {
-		accessTbl = "access"
-	}
 
 	// -----------------------------------------------------------------------
 	// Step 1 – Create the database (connect via postgres maintenance DB)
@@ -102,21 +98,6 @@ func SetupDatabase() {
 	fmt.Printf("  Table '%s' created.\n", dataTbl)
 
 	// -----------------------------------------------------------------------
-	// Step 5 – Create the access table
-	// -----------------------------------------------------------------------
-	fmt.Printf("\n=== Step 4: Create table '%s' ===\n", accessTbl)
-	if _, err = conn.Exec(fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			id         SERIAL      PRIMARY KEY,
-			email      VARCHAR(50) NOT NULL UNIQUE,
-			api_key    VARCHAR(50) NOT NULL,
-			created_at TIMESTAMP   DEFAULT CURRENT_TIMESTAMP
-		)`, accessTbl)); err != nil {
-		log.Fatalf("Failed to create '%s' table: %v", accessTbl, err)
-	}
-	fmt.Printf("  Table '%s' created.\n", accessTbl)
-
-	// -----------------------------------------------------------------------
 	// Done
 	// -----------------------------------------------------------------------
 	fmt.Println()
@@ -126,7 +107,6 @@ func SetupDatabase() {
 	fmt.Println()
 	fmt.Printf("  DB_NAME=%s\n", dstDB)
 	fmt.Printf("  TB_NAME=%s\n", dataTbl)
-	fmt.Printf("  ACCESS_TB=%s\n", accessTbl)
 	fmt.Println()
 	fmt.Println("  Run --generate-embeddings after adding data.")
 	fmt.Println("======================================================")

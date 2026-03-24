@@ -24,8 +24,7 @@ func StartInteractiveMode() {
 	InitGemini()
 	InitOllama()
 
-	// Validate API access key from .env against the database
-	ValidateAPIAccess()
+
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -148,14 +147,14 @@ func printInteractiveHelp() {
 	fmt.Println()
 	fmt.Println("Available Slash Commands:")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
-	fmt.Println("  /help or /?           - Show this help message              │  /ai                   - Show AI/Ollama status")
-	fmt.Println("  /help next            - Show next page of help              │  /config				- Step by step setup ai parameters")
-	fmt.Println("  /search <pattern>     - Search for commands matching pattern│  /embeddings           - Check embedding statistics")
-	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | separator) │  /import <path>        - Import a markdown document")
-	fmt.Println("  /delete <id>          - Delete a command by ID              │  /generate             - Generate embeddings for all commands")
-	fmt.Println("  /show <id>            - Show command and description by ID  │  /clear or /cls        - Clear the screen")
-	fmt.Println("  /list                 - List recent commands                │  /count                - Show total number of commands")
-	fmt.Println("  /run <command>        - Execute a system command            │  /exit, /quit, or /q   - Exit interactive mode")
+	fmt.Println("  /help or /?           - Show this help message                │  /ai                   - Show AI/Ollama status")
+	fmt.Println("  /help next            - Show next page of help                │  /config	         - Step by step setup ai parameters")
+	fmt.Println("  /search <pattern>     - Search for commands matching pattern  │  /embeddings           - Check embedding statistics")
+	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | separator)   │  /import <path>        - Import a markdown document")
+	fmt.Println("  /delete <id>          - Delete a command by ID                │  /generate             - Generate embeddings for all commands")
+	fmt.Println("  /show <id>            - Show command and description by ID    │  /clear or /cls        - Clear the screen")
+	fmt.Println("  /list                 - List recent commands                  │  /count                - Show total number of commands")
+	fmt.Println("  /run <command>        - Execute a system command              │  /exit, /quit, or /q   - Exit interactive mode")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println()
 	fmt.Println("AI Response Feedback:")
