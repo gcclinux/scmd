@@ -23,7 +23,7 @@ jobs:
           go-version: '1.23.x'
           
       - name: Build all platforms
-        run: .\build.ps1 all
+        run: .\scripts\build.ps1 all
         shell: pwsh
         
       - name: List build artifacts

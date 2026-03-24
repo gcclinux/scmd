@@ -4,7 +4,7 @@ param(
 )
 
 $BINARY_NAME = "scmd"
-$VERSION = "2.0.1"
+$VERSION = "2.0.5"
 $BUILD_DIR = "build"
 
 # Get build number from git
