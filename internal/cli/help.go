@@ -13,7 +13,7 @@ func printInteractiveHelp() {
 	fmt.Println("Available Slash Commands:")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println("  /help or /?           - Show this help message                │  /ai                   - Show AI/Ollama status")
-	fmt.Println("  /help next            - Show next page of help                │  /config	         - Step by step setup ai parameters")
+	fmt.Println("  /help next            - Show next page of help                │  /config	         - Show current config.json settings")
 	fmt.Println("  /search <pattern>     - Search for commands matching pattern  │  /embeddings           - Check embedding statistics")
 	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | separator)   │  /import <path>        - Import a markdown document")
 	fmt.Println("  /delete <id>          - Delete a command by ID                │  /generate             - Generate embeddings for all commands")

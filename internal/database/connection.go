@@ -20,7 +20,7 @@ func DB() *sql.DB {
 
 // InitDB initializes the PostgreSQL database connection.
 func InitDB() error {
-	config.LoadEnv()
+	config.LoadConfig()
 	var err error
 
 	host := os.Getenv("DB_HOST")

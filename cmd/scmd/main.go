@@ -21,7 +21,7 @@ import (
 var tplFolder embed.FS
 
 func main() {
-	config.LoadEnv()
+	config.LoadConfig()
 	msg, _, _ := updater.VersionRemote()
 	count := len(os.Args)
 

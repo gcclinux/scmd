@@ -12,7 +12,7 @@ import (
 
 // SetupDatabase creates the scmd database and its tables from scratch.
 func SetupDatabase() {
-	config.LoadEnv()
+	config.LoadConfig()
 
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
@@ -92,10 +92,10 @@ func SetupDatabase() {
 	fmt.Println()
 	fmt.Println("======================================================")
 	fmt.Println("  Database setup complete!")
-	fmt.Println("  Verify your .env matches:")
+	fmt.Println("  Verify your ~/.scmd/config.json matches:")
 	fmt.Println()
-	fmt.Printf("  DB_NAME=%s\n", dstDB)
-	fmt.Printf("  TB_NAME=%s\n", dataTbl)
+	fmt.Printf("  db_name: %s\n", dstDB)
+	fmt.Printf("  tb_name: %s\n", dataTbl)
 	fmt.Println()
 	fmt.Println("  Run --generate-embeddings after adding data.")
 	fmt.Println("======================================================")

@@ -13,6 +13,7 @@ import (
 	"github.com/gcclinux/scmd/internal/ai"
 	"github.com/gcclinux/scmd/internal/ai/gemini"
 	"github.com/gcclinux/scmd/internal/ai/ollama"
+	"github.com/gcclinux/scmd/internal/config"
 	"github.com/gcclinux/scmd/internal/database"
 	"github.com/gcclinux/scmd/internal/markdown"
 	"github.com/gcclinux/scmd/internal/util"
@@ -63,6 +64,8 @@ func handleSlashCommand(input string) {
 		handleCountCommand()
 	case "/ai":
 		handleAIStatus()
+	case "/config":
+		handleConfigShow()
 	case "/embeddings":
 		handleEmbeddingsCheck()
 	case "/generate":
@@ -247,12 +250,74 @@ func handleAIStatus() {
 	if !gemini.IsAvailable() && !ollama.IsAvailable() {
 		fmt.Println()
 		fmt.Println("⚠ No AI providers available")
-		fmt.Println("To enable AI features, set GEMINIAPI in .env or run Ollama locally.")
+		fmt.Println("To enable AI features, set gemini_api in ~/.scmd/config.json or run Ollama locally.")
 		fmt.Println()
 		return
 	}
 
 	fmt.Println("AI-enhanced search is automatically used when available.")
+	fmt.Println()
+}
+func handleConfigShow() {
+	cfgPath := config.ConfigFilePath()
+	data, err := os.ReadFile(cfgPath)
+	if err != nil {
+		fmt.Println()
+		fmt.Printf("⚠ Could not read config file: %s\n", cfgPath)
+		fmt.Printf("  Error: %v\n", err)
+		fmt.Println()
+		fmt.Println("To create one, copy the example:")
+		fmt.Println("  mkdir -p ~/.scmd")
+		fmt.Println("  cp config.json.example ~/.scmd/config.json")
+		fmt.Println()
+		return
+	}
+
+	var cfg config.ConfigData
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		fmt.Println()
+		fmt.Printf("⚠ Could not parse config file: %v\n", err)
+		fmt.Println()
+		return
+	}
+
+	mask := func(s string) string {
+		if s == "" {
+			return "(not set)"
+		}
+		if len(s) <= 6 {
+			return "****"
+		}
+		return s[:3] + "****" + s[len(s)-3:]
+	}
+
+	fmt.Println()
+	fmt.Printf("📄 Config: %s\n", cfgPath)
+	fmt.Println("══════════════════════════════════════════════════════════════")
+	fmt.Println()
+	fmt.Println("  AI Settings:")
+	fmt.Printf("    agent:                  %s\n", cfg.Agent)
+	fmt.Println()
+	fmt.Println("  Gemini:")
+	fmt.Printf("    gemini_api:             %s\n", mask(cfg.GeminiAPI))
+	fmt.Printf("    gemini_model:           %s\n", cfg.GeminiModel)
+	fmt.Printf("    gemini_embedding_model: %s\n", cfg.GeminiEmbeddingModel)
+	fmt.Println()
+	fmt.Println("  Ollama:")
+	fmt.Printf("    ollama:                 %s\n", cfg.Ollama)
+	fmt.Printf("    model:                  %s\n", cfg.Model)
+	fmt.Printf("    embedding_model:        %s\n", cfg.EmbeddingModel)
+	fmt.Printf("    embedding_dim:          %s\n", cfg.EmbeddingDim)
+	fmt.Println()
+	fmt.Println("  Database:")
+	fmt.Printf("    db_host:                %s\n", cfg.DBHost)
+	fmt.Printf("    db_port:                %s\n", cfg.DBPort)
+	fmt.Printf("    db_user:                %s\n", cfg.DBUser)
+	fmt.Printf("    db_pass:                %s\n", mask(cfg.DBPass))
+	fmt.Printf("    db_name:                %s\n", cfg.DBName)
+	fmt.Printf("    tb_name:                %s\n", cfg.TBName)
+	fmt.Println()
+	fmt.Println("══════════════════════════════════════════════════════════════")
 	fmt.Println()
 }
 

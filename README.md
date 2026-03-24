@@ -7,9 +7,9 @@ Simple search command App that gives the possibility to find commands or store c
 
 ## Configuration
 
-Create a `.env` file in the project root with your PostgreSQL connection details:
+Create a `config.json` file at `$HOME/.scmd/config.json` with your settings:
 
-[.env Example](.env.example ".env Example")
+[config.json Example](config.json.example "config.json Example")
 
 ## Usage Modes
 
@@ -160,17 +160,16 @@ Build and compile scmd from source code will require:
 Dependencies:
 ```bash
 go get github.com/lib/pq
-go get github.com/joho/godotenv
 ```
 
-Build steps:
 Build steps:
 
 ```bash
 git clone https://github.com/gcclinux/scmd.git
 cd scmd/
-cp .env.example .env
-# Edit .env with your PostgreSQL credentials
+mkdir -p ~/.scmd
+cp config.json.example ~/.scmd/config.json
+# Edit ~/.scmd/config.json with your PostgreSQL credentials and AI settings
 go mod tidy
 go build -o scmd-$(uname)-$(uname -m) .
 scmd-$(uname)-$(uname -m) --help

@@ -36,7 +36,7 @@ WORKDIR /app
 # Add Maintainer Info
 LABEL maintainer="Ricardo Wagemaker"
 LABEL app.name="SCMD"
-LABEL app.version="2.0.2"
+LABEL app.version="2.0.5"
 LABEL app.description="Simple Command Line or Code Search"
 LABEL app.license="MIT"
 LABEL app.repository="https://github.com/gcclinux/scmd"

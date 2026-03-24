@@ -93,7 +93,7 @@ func PrintHelp(name string) {
 	fmt.Printf(NoticeColor, "*** Show embedding statistics for the database\n\r")
 	fmt.Println("Usage: \t", name, "--embedding-stats")
 	fmt.Println()
-	fmt.Printf(NoticeColor, "*** Create a new database and tables (reads DB_NAME / TB_NAME from .env)\n\r")
+	fmt.Printf(NoticeColor, "*** Create a new database and tables (reads db_name / tb_name from ~/.scmd/config.json)\n\r")
 	fmt.Println("Usage: \t", name, "--create-db")
 	fmt.Println()
 }
