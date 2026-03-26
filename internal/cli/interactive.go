@@ -34,12 +34,27 @@ func StartInteractiveMode() {
 
 	for {
 		fmt.Print("scmd> ")
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Error reading input:", err)
-			continue
+
+		// Multi-line input: accumulate lines until the user submits
+		// by pressing Enter on an empty line (blank line = submit).
+		// This lets users paste or type multi-line queries freely.
+		var lines []string
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				fmt.Println("Error reading input:", err)
+				break
+			}
+			trimmed := strings.TrimSpace(line)
+			if trimmed == "" {
+				// Empty line: submit whatever we have accumulated
+				break
+			}
+			lines = append(lines, trimmed)
+			fmt.Print("  ... ")
 		}
 
+		input := strings.Join(lines, " ")
 		input = strings.TrimSpace(input)
 		if input == "" {
 			continue
@@ -141,6 +156,8 @@ func printWelcome() {
 	fmt.Println("  Space-separated = AND: postgresql replication slave")
 	fmt.Println("  Comma-separated = OR:  docker,kubernetes,postgresql")
 	fmt.Println("  Natural language:      show me postgresql replication examples")
+	fmt.Println()
+	fmt.Println("Input: Type or paste your query, then press Enter on an empty line to submit.")
 	fmt.Println()
 }
 
