@@ -51,6 +51,10 @@ func main() {
 			setup.SetupPostgreSQL()
 		} else if arg1 == "--create-db-sqlite" {
 			setup.SetupSQLite()
+		} else if arg1 == "--connect-db-sqlite" {
+			setup.ConnectSQLite()
+		} else if arg1 == "--connect-db-postgresql" {
+			setup.ConnectPostgreSQL()
 		} else if arg1 == "--server-ollama" {
 			setup.SetupOllama()
 		} else if arg1 == "--server-gemini" {
