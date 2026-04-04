@@ -2,7 +2,7 @@
 
 > An AI-powered command search and management tool with CLI, Interactive, and Web interfaces.
 
-**Version:** 2.0.5 | **Language:** Go 1.23 | **License:** MIT
+**Version:** 2.0.6 | **Language:** Go 1.23 | **License:** MIT
 **Author:** Ricardo Wagemaker | **Repo:** github.com/gcclinux/scmd
 
 ---
@@ -211,7 +211,7 @@ Environment variables override config file values.
 
 ```
 ┌─────────────────────────────────────────────────┐
-│                    SCMD v2.0.5                  │
+│                    SCMD v2.0.6                  │
 ├─────────────┬──────────────┬────────────────────┤
 │ Interactive  │ Traditional  │     Web UI         │
 │    CLI       │    CLI       │  (HTTP/HTTPS)      │

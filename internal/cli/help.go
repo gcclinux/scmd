@@ -3,9 +3,6 @@ package cli
 import (
 	"fmt"
 	"strings"
-
-	"github.com/gcclinux/scmd/internal/ai/gemini"
-	"github.com/gcclinux/scmd/internal/ai/ollama"
 )
 
 func printInteractiveHelp() {
@@ -13,13 +10,18 @@ func printInteractiveHelp() {
 	fmt.Println("Available Slash Commands:")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println("  /help or /?           - Show this help message                │  /ai                   - Show AI/Ollama status")
-	fmt.Println("  /help next            - Show next page of help                │  /config	         - Show current config.json settings")
-	fmt.Println("  /search <pattern>     - Search for commands matching pattern  │  /embeddings           - Check embedding statistics")
-	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | separator)   │  /import <path>        - Import a markdown document")
-	fmt.Println("  /delete <id>          - Delete a command by ID                │  /generate             - Generate embeddings for all commands")
-	fmt.Println("  /show <id>            - Show command and description by ID    │  /clear or /cls        - Clear the screen")
-	fmt.Println("  /list                 - List recent commands                  │  /count                - Show total number of commands")
+	fmt.Println("  /search <pattern>     - Search for commands matching pattern  │  /config               - Show current config.json settings")
+	fmt.Println("  /add <cmd> | <desc>   - Add a new command (use | separator)   │  /embeddings           - Check embedding statistics")
+	fmt.Println("  /delete <id>          - Delete a command by ID                │  /import <path>        - Import a markdown document")
+	fmt.Println("  /show <id>            - Show command and description by ID    │  /generate             - Generate embeddings for all commands")
+	fmt.Println("  /list                 - List recent commands                  │  /clear or /cls        - Clear the screen")
 	fmt.Println("  /run <command>        - Execute a system command              │  /exit, /quit, or /q   - Exit interactive mode")
+	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+	fmt.Println("AI Personas (Focused Context):")
+	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+	fmt.Println("  /ubuntu <query>       - Ubuntu expert persona                 │  /powershell <query>   - PowerShell guru persona")
+	fmt.Println("  /debian <query>       - Debian expert persona                 │  /archlinux <query>    - Arch Linux master persona")
+	fmt.Println("  /fedora <query>       - Fedora expert persona                 │  /windows <query>      - Windows admin persona")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println()
 	fmt.Println("AI Response Feedback:")
@@ -27,45 +29,6 @@ func printInteractiveHelp() {
 	fmt.Println("  After an AI response, you can rate it:")
 	fmt.Println("  [1] - Good answer (saves to database for future searches)")
 	fmt.Println("  [2] - Bad answer (discards without saving)")
-	fmt.Println()
-	fmt.Println("Quick Shortcuts (without slash):")
-	fmt.Println("──────────────────────────────────────────────────────────────")
-	fmt.Println("  help or ?             - Show this help message")
-	fmt.Println("  clear or cls          - Clear the screen")
-	fmt.Println("  exit, quit, or q      - Exit interactive mode")
-	fmt.Println()
-}
-
-func printInteractiveHelpNext() {
-	fmt.Println()
-	if gemini.IsAvailable() || ollama.IsAvailable() {
-		aiProvider := "Gemini"
-		if !gemini.IsAvailable() && ollama.IsAvailable() {
-			aiProvider = "Ollama"
-		}
-		fmt.Printf("🤖 AI Features (%s Active):\n", aiProvider)
-		fmt.Println("──────────────────────────────────────────────────────────────")
-		fmt.Println("  - Vector similarity search for better relevance")
-		fmt.Println("  - AI-generated explanations and context")
-		fmt.Println("  - Natural language understanding")
-		fmt.Println("  - Automatic fallback to traditional search")
-		fmt.Println()
-	}
-	fmt.Println("Natural Language Queries:")
-	fmt.Println("──────────────────────────────────────────────────────────────")
-	fmt.Println("  Just type your question naturally:")
-	fmt.Println("  - show me docker commands")
-	fmt.Println("  - how to check postgresql replication")
-	fmt.Println("  - provide kubernetes examples")
-	fmt.Println("  - find git commands")
-	fmt.Println()
-	fmt.Println("Search Logic:")
-	fmt.Println("──────────────────────────────────────────────────────────────")
-	fmt.Println("  Space-separated = AND (all words must match):")
-	fmt.Println("    postgresql replication slave")
-	fmt.Println()
-	fmt.Println("  Comma-separated = OR (any pattern can match):")
-	fmt.Println("    docker,kubernetes,postgresql")
 	fmt.Println()
 }
 

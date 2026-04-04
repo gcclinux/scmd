@@ -137,9 +137,7 @@ func SaveCmd(cmd, details string) {
 		}
 	}
 	details = strings.TrimSpace(details)
-	if strings.HasSuffix(details, "```") {
-		details = strings.TrimSuffix(details, "```")
-	}
+	details = strings.TrimSuffix(details, "```")
 	details = strings.TrimSpace(details)
 
 	// Import needed packages

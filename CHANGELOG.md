@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.6] - 2026-04-04
+
+### Added
+- Six new specialized AI personas for focused system administration and command help:
+  - `/ubuntu` — Focused on Ubuntu Linux specific commands, patches, and fixes.
+  - `/debian` — Focused on Debian and derived distributions.
+  - `/fedora` — Focused on Fedora ecosystem and DNF administration.
+  - `/windows` — Focused on standard Windows management and CMD tools.
+  - `/powershell` — Focused on PowerShell cmdlets, scripting, and automation.
+  - `/archlinux` — Focused on Arch Linux, Pacman, and rolling release maintenance.
+- Interactive feedback for persona-based queries (saves AI answers to database).
+
+### Changed
+- Rebalanced the interactive help menu layout for better readability.
+- Consolidated slash commands to prioritize utility and core features.
+
+### Removed
+- `/help next` — Simplified help menu navigation.
+- `/count` — Integrated database state visibility into standard list commands.
+
 ## [2.0.5] - 2026-03-24
 
 ### Added

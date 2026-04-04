@@ -163,8 +163,7 @@ func printWelcome() {
 
 func processInteractiveCommand(input string) string {
 	if strings.HasPrefix(input, "/") {
-		handleSlashCommand(input)
-		return ""
+		return handleSlashCommand(input)
 	}
 
 	keywords := extractKeywords(input)

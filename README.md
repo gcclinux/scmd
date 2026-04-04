@@ -2,7 +2,7 @@
 
 > An AI-powered command search and management tool with CLI, Interactive, and Web interfaces.
 
-**Version:** 2.0.5 | **Language:** Go 1.23 | **License:** MIT
+**Version:** 2.0.6 | **Language:** Go 1.23 | **License:** MIT
 **Author:** Ricardo Wagemaker | **Repo:** [github.com/gcclinux/scmd](https://github.com/gcclinux/scmd)
 
 ---
@@ -18,7 +18,7 @@ For a full feature breakdown and infographic-ready reference, see [docs/SCMD_INF
 ## Screenshots
 
 ### Interactive CLI — Slash Commands & AI Responses
-![Interactive CLI showing available commands and AI-powered search](images/smcd-2.0.5-show.png)
+![Interactive CLI showing available commands and AI-powered search](images/smcd-2.0.6-show.png)
 
 ### Web UI — Browser-Based Search Interface
 ![Web UI with real-time search, syntax highlighting, and AI explanations](images/smcd-2.0.1-web.png)
@@ -48,7 +48,8 @@ scmd --cli
 ```
 
 - Natural language queries: `"show me postgresql replication examples"`
-- 13 slash commands: `/search`, `/add`, `/list`, `/count`, `/delete`, `/show`, `/help`, `/import`, `/run`, `/ai`, `/config`, `/embeddings`, `/generate`
+- 14 slash commands: `/search`, `/add`, `/list`, `/delete`, `/show`, `/help`, `/import`, `/run`, `/ai`, `/config`, `/embeddings`, `/generate`, `/clear`, `/exit`
+- 6 specialized persona commands: `/ubuntu`, `/debian`, `/fedora`, `/windows`, `/powershell`, `/archlinux`
 - AI-powered explanations with context-aware responses
 - Feedback loop — save or retry AI answers
 - Markdown rendering in terminal
@@ -303,7 +304,7 @@ See [AUTHENTICATION.md](docs/AUTHENTICATION.md) for setup instructions.
 
 ```
 ┌─────────────────────────────────────────────────┐
-│                    SCMD v2.0.5                  │
+│                    SCMD v2.0.6                  │
 ├─────────────┬──────────────┬────────────────────┤
 │ Interactive  │ Traditional  │     Web UI         │
 │    CLI       │    CLI       │  (HTTP/HTTPS)      │

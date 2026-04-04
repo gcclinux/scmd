@@ -19,7 +19,7 @@ import (
 	"github.com/gcclinux/scmd/internal/util"
 )
 
-func handleSlashCommand(input string) {
+func handleSlashCommand(input string) string {
 	parts := strings.SplitN(input, " ", 2)
 	command := parts[0]
 	args := ""
@@ -29,11 +29,7 @@ func handleSlashCommand(input string) {
 
 	switch command {
 	case "/help", "/?":
-		if args == "next" {
-			printInteractiveHelpNext()
-		} else {
-			printInteractiveHelp()
-		}
+		printInteractiveHelp()
 	case "/exit", "/quit", "/q":
 		fmt.Println("Goodbye!")
 		os.Exit(0)
@@ -42,26 +38,24 @@ func handleSlashCommand(input string) {
 	case "/search":
 		if args == "" {
 			fmt.Println("Usage: /search <pattern>")
-			return
+			return ""
 		}
-		performInteractiveSearch(args)
+		return performInteractiveSearch(args)
 	case "/add":
 		if args == "" {
 			fmt.Println("Usage: /add <command> | <description>")
 			fmt.Println("Example: /add docker ps -a | List all containers")
-			return
+			return ""
 		}
 		handleAddCommand(args)
 	case "/delete":
 		if args == "" {
 			fmt.Println("Usage: /delete <id>")
-			return
+			return ""
 		}
 		handleDeleteCommand(args)
 	case "/list":
 		handleListCommand()
-	case "/count":
-		handleCountCommand()
 	case "/ai":
 		handleAIStatus()
 	case "/config":
@@ -73,25 +67,57 @@ func handleSlashCommand(input string) {
 	case "/show":
 		if args == "" {
 			fmt.Println("Usage: /show <id>")
-			return
+			return ""
 		}
 		handleShowCommand(args)
 	case "/import":
 		if args == "" {
 			fmt.Println("Usage: /import <path>")
-			return
+			return ""
 		}
 		handleImportCommand(args)
 	case "/run":
 		if args == "" {
 			fmt.Println("Usage: /run <command>")
-			return
+			return ""
 		}
 		handleRunCommand(args)
+	case "/ubuntu", "/debian", "/fedora", "/windows", "/powershell", "/archlinux":
+		if args == "" {
+			fmt.Printf("Usage: %s <question>\n", command)
+			return ""
+		}
+		return handlePersonaCommand(command[1:], args)
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		fmt.Println("Type '/help' for available commands")
 	}
+	return ""
+}
+
+func handlePersonaCommand(persona, query string) string {
+	fmt.Printf("🤖 Processing with %s persona...\n", persona)
+	
+	// We'll perform a search to get context for the persona
+	results, _, _, err := ai.SmartSearch(query, true)
+	if err != nil {
+		fmt.Printf("Error searching: %v\n", err)
+	}
+
+	aiResp, _, err := ai.AskAIPersona(persona, query, results)
+	if err != nil {
+		fmt.Printf("Error from AI: %v\n", err)
+		return ""
+	}
+
+	fmt.Println()
+	fmt.Printf("🤖 AI %s Persona:\n", strings.Title(persona))
+	fmt.Println("══════════════════════════════════════════════════════════════")
+	fmt.Println(aiResp)
+	fmt.Println("══════════════════════════════════════════════════════════════")
+	fmt.Println()
+
+	return aiResp
 }
 
 func handleAddCommand(args string) {
@@ -206,23 +232,6 @@ func handleListCommand() {
 	fmt.Println()
 }
 
-func handleCountCommand() {
-	received, err := database.SearchCommands("", "json")
-	if err != nil {
-		fmt.Printf("Error counting commands: %v\n", err)
-		return
-	}
-
-	var results []database.CommandRecord
-	if err := json.Unmarshal(received, &results); err != nil {
-		fmt.Printf("Error parsing results: %v\n", err)
-		return
-	}
-
-	fmt.Println()
-	fmt.Printf("Total commands in database: %d\n", len(results))
-	fmt.Println()
-}
 
 func clearScreen() {
 	fmt.Print("\033[H\033[2J")
