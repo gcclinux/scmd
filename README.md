@@ -83,6 +83,25 @@ scmd --ssl cert.pem key.pem                  # HTTPS with custom certificates
 - AI-generated explanations inline
 - Syntax highlighting for code blocks
 - Session-based authentication (email + API key, 24h sessions)
+- SSL/TLS support for secure access
+
+### 4. MCP Server (`--mcp`)
+
+```bash
+scmd --mcp
+```
+
+The **Model Context Protocol (MCP)** interface allows local AI assistants (like Claude Desktop, Cursor, or VS Code extensions) to directly interact with your `scmd` database.
+
+- **Human -> Database**: Use `--cli` or `--web` for manual search.
+- **AI Agent -> Database**: Use `--mcp` to let your AI assistant search your "brain" for you.
+
+**Exposed Tools:**
+- `search_commands`: AI-powered semantic search across your commands.
+- `add_command`: Let the AI save useful commands it generates for you.
+- `get_stats`: Monitor your database and embedding health.
+
+See [MCP-walkthrough.md](docs/MCP-walkthrough.md) for setup and registration details.
 
 ---
 
@@ -272,6 +291,7 @@ docker-compose up -d
 | `--web -block` | Read-only mode |
 | `--web -service` | Background / headless mode |
 | `--ssl [cert] [key]` | HTTPS mode |
+| `--mcp` | Start MCP server (stdio) |
 
 ---
 
@@ -305,10 +325,10 @@ See [AUTHENTICATION.md](docs/AUTHENTICATION.md) for setup instructions.
 ```
 ┌─────────────────────────────────────────────────┐
 │                    SCMD v2.0.6                  │
-├─────────────┬──────────────┬────────────────────┤
-│ Interactive  │ Traditional  │     Web UI         │
-│    CLI       │    CLI       │  (HTTP/HTTPS)      │
-├─────────────┴──────────────┴────────────────────┤
+├─────────────┬──────────────┬──────────────┬────────────────────┤
+│ Interactive  │ Traditional  │  MCP Server  │     Web UI         │
+│    CLI       │    CLI       │   (stdio)    │  (HTTP/HTTPS)      │
+├─────────────┴──────────────┴──────────────┴────────────────────┤
 │              Core Engine                         │
 │  ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
 │  │ Search   │ │ Scoring  │ │ Keyword Extract  │ │

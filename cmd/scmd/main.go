@@ -11,6 +11,7 @@ import (
 	"github.com/gcclinux/scmd/internal/config"
 	"github.com/gcclinux/scmd/internal/database"
 	"github.com/gcclinux/scmd/internal/markdown"
+	"github.com/gcclinux/scmd/internal/mcp"
 	"github.com/gcclinux/scmd/internal/search"
 	"github.com/gcclinux/scmd/internal/server"
 	"github.com/gcclinux/scmd/internal/setup"
@@ -63,6 +64,11 @@ func main() {
 			server.Routes()
 		} else if arg1 == "--ssl" {
 			server.Routes()
+		} else if arg1 == "--mcp" {
+			if err := mcp.StartServer(); err != nil {
+				fmt.Printf("MCP server error: %v\n", err)
+				os.Exit(1)
+			}
 		} else if arg1 == "--interactive" || arg1 == "-i" || arg1 == "--cli" {
 			cli.StartInteractiveMode()
 		} else if arg1 == "--generate-embeddings" {

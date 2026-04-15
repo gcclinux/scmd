@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.7] - 2026-04-15
+
+### Added
+- **Model Context Protocol (MCP)** server integration (`--mcp`).
+- Purpose-built interface for **AI Agents** to interact with the SCMD knowledge base.
+- Exposes tools to AI assistants: `search_commands`, `add_command`, and `get_stats`.
+- Support for official **Go MCP SDK** over stdio transport.
+- Comprehensive [MCP-walkthrough.md](docs/MCP-walkthrough.md) for assistant setup (Claude Desktop, Cursor, etc.).
+
+### Changed
+- Upgraded project to **Go 1.25.0** to support enhanced MCP protocol capabilities.
+
 ## [2.0.6] - 2026-04-04
 
 ### Added
