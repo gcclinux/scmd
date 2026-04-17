@@ -2,9 +2,12 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"strings"
 
 	"github.com/gcclinux/scmd/internal/ai"
 	"github.com/gcclinux/scmd/internal/cli"
@@ -12,6 +15,7 @@ import (
 	"github.com/gcclinux/scmd/internal/database"
 	"github.com/gcclinux/scmd/internal/markdown"
 	"github.com/gcclinux/scmd/internal/mcp"
+	"github.com/gcclinux/scmd/internal/mcpclient"
 	"github.com/gcclinux/scmd/internal/search"
 	"github.com/gcclinux/scmd/internal/server"
 	"github.com/gcclinux/scmd/internal/setup"
@@ -19,11 +23,123 @@ import (
 	"github.com/gcclinux/scmd/internal/util"
 )
 
+func init() {
+	// Wire MCP bridge functions to break the import cycle between
+	// the database and mcpclient packages.
+	database.MCPInitFunc = func(configPath string) (any, error) {
+		return mcpclient.Init(configPath)
+	}
+
+	database.MCPCloseFunc = func(client any) {
+		if c, ok := client.(*mcpclient.Client); ok {
+			c.Close()
+		}
+	}
+
+	database.MCPListDataFn = func(namespace string, limit, offset int) ([]byte, error) {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return nil, fmt.Errorf("MCP client not initialized")
+		}
+		records, err := c.ListData(namespace, limit, offset)
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(records)
+	}
+
+	database.MCPStoreDataFn = func(key, content string, embedding []float64, metadata map[string]string) error {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return fmt.Errorf("MCP client not initialized")
+		}
+		return c.StoreData(key, content, embedding, metadata)
+	}
+
+	database.MCPGetDataFn = func(uuid string) ([]byte, error) {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return nil, fmt.Errorf("MCP client not initialized")
+		}
+		record, err := c.GetData(uuid)
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(record)
+	}
+
+	database.MCPUpdateDataFn = func(uuid string, embedding []float64) error {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return fmt.Errorf("MCP client not initialized")
+		}
+		return c.UpdateData(uuid, embedding)
+	}
+
+	database.MCPDeleteDataFn = func(uuid string) (bool, error) {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return false, fmt.Errorf("MCP client not initialized")
+		}
+		return c.DeleteData(uuid)
+	}
+
+	database.MCPQuerySimilarFn = func(embedding []float64, namespace string, limit int) ([]byte, error) {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return nil, fmt.Errorf("MCP client not initialized")
+		}
+		records, err := c.QuerySimilar(embedding, namespace, limit)
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(records)
+	}
+
+	database.MCPIDMapToUUIDFn = func(id int) (string, error) {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return "", fmt.Errorf("MCP client not initialized")
+		}
+		return c.IDMap.ToUUID(id)
+	}
+
+	database.MCPIDMapAssignFn = func(uuids []string) []int {
+		c, ok := database.MCPClient().(*mcpclient.Client)
+		if !ok {
+			return nil
+		}
+		return c.IDMap.Assign(uuids)
+	}
+
+	database.MCPCheckCommandExistsFn = func(recordsJSON []byte, command string) (bool, error) {
+		var records []mcpclient.MCPRecord
+		if len(recordsJSON) > 0 {
+			if err := json.Unmarshal(recordsJSON, &records); err != nil {
+				return false, fmt.Errorf("error parsing MCP records: %v", err)
+			}
+		}
+		return mcpclient.CheckCommandExists(records, command), nil
+	}
+}
+
 //go:embed templates
 var tplFolder embed.FS
 
 func main() {
 	config.LoadConfig()
+
+	// Log which storage backend is active
+	dbType := os.Getenv("DB_TYPE")
+	switch strings.ToLower(dbType) {
+	case "mcp":
+		log.Println("Storage backend: MCP")
+	case "sqlite":
+		log.Println("Storage backend: SQLite")
+	default:
+		log.Println("Storage backend: PostgreSQL")
+	}
+
 	msg, _, _ := updater.VersionRemote()
 	count := len(os.Args)
 

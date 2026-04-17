@@ -124,10 +124,10 @@ See [MCP-walkthrough.md](docs/MCP-walkthrough.md) for setup and registration det
 ```
 User Query
   → Keyword Extraction (NLP stop-word removal)
-    → PostgreSQL ILIKE Search
+    → Database Search (keyword matching)
       → Score & Rank Results (word-match %)
         → Score ≥ 60%? → Return ranked results
-        → Score < 60%? → Vector Similarity Search (pgvector / cosine)
+        → Score < 60%? → Vector Similarity Search (cosine)
           → Still low? → Pure AI Chat Response
 ```
 
@@ -137,7 +137,7 @@ User Query
 - Configurable dimensions (384, 768, etc.)
 - Batch generation with progress tracking
 - Stats dashboard (`--embedding-stats`)
-- Supports pgvector (PostgreSQL) and in-memory cosine similarity (SQLite)
+- Supports pgvector (via MCP server) and in-memory cosine similarity (SQLite)
 
 See [EMBEDDING_DIMENSIONS.md](docs/EMBEDDING_DIMENSIONS.md) and [SEARCH_GUIDE.md](docs/SEARCH_GUIDE.md) for details.
 
@@ -145,16 +145,84 @@ See [EMBEDDING_DIMENSIONS.md](docs/EMBEDDING_DIMENSIONS.md) and [SEARCH_GUIDE.md
 
 ## Database Support
 
-| Feature | PostgreSQL | SQLite |
-|---------|-----------|--------|
-| Type | Client-server | File-based |
-| Vector Search | pgvector extension | Go cosine similarity |
-| Multi-user | Yes | Single-user |
-| Setup | `--create-db-postgresql` | `--create-db-sqlite` |
-| Location | Remote/local server | `~/.scmd/scmd.db` |
-| Scalability | Enterprise | Lightweight |
+SCMD supports two storage backends: **SQLite** for local/lightweight use and **MCP** for delegating storage to an external PostgreSQL-backed MCP server.
 
-See [POSTGRESQL_MIGRATION.md](docs/POSTGRESQL_MIGRATION.md) for migration details from older SQLite versions.
+| Feature | SQLite | MCP (via MCP Server) |
+|---------|--------|----------------------|
+| Type | File-based | Network (SSE) |
+| Vector Search | Go cosine similarity | pgvector on MCP server |
+| Multi-user | Single-user | Multi-user via server |
+| Setup | `--create-db-sqlite` | Configure `mcp_server.json` |
+| Location | `~/.scmd/scmd.db` | Remote MCP server |
+| Scalability | Lightweight | Enterprise (PostgreSQL) |
+| PostgreSQL Access | — | Via [go-mcp-postgres-server](https://github.com/gcclinux/go-mcp-postgres-server.git) |
+
+> **Note:** Direct PostgreSQL connections are no longer offered. To use PostgreSQL as your data store, run the [go-mcp-postgres-server](https://github.com/gcclinux/go-mcp-postgres-server.git) and set `db_type` to `"mcp"` in your config.
+
+---
+
+## MCP Client Mode
+
+When `db_type` is set to `"mcp"`, SCMD acts as an MCP client and delegates all data operations (store, query, list, update, delete) to an external MCP server. Embeddings are still generated locally by SCMD (via Gemini or Ollama) and transmitted to the MCP server for storage and similarity search.
+
+### How It Works
+
+```
+SCMD (MCP Client)  ──SSE──>  MCP Server  ──>  PostgreSQL + pgvector
+     │                            │
+     ├─ store_data                ├─ Stores commands & embeddings
+     ├─ query_similar             ├─ Vector similarity search
+     ├─ list_data                 ├─ List/paginate records
+     ├─ get_data                  ├─ Retrieve by ID
+     ├─ update_data               ├─ Update embeddings
+     └─ delete_data               └─ Remove records
+```
+
+### Setting Up MCP Client Mode
+
+1. **Download and run the MCP server:**
+
+   ```bash
+   git clone https://github.com/gcclinux/go-mcp-postgres-server.git
+   cd go-mcp-postgres-server
+   # Follow the server's README for setup and configuration
+   ```
+
+2. **Create `~/.scmd/mcp_server.json`:**
+
+   ```json
+   {
+     "mcpServers": {
+       "my-mcp-server": {
+         "url": "http://localhost:3001/sse"
+       }
+     }
+   }
+   ```
+
+3. **Set `db_type` to `"mcp"` in `~/.scmd/config.json`:**
+
+   ```json
+   {
+     "agent": "ollama",
+     "db_type": "mcp",
+     "tb_name": "data",
+     "mcp_server": "",
+     "gemini_api": "your_gemini_api_key_here",
+     "ollama": "localhost",
+     "model": "ministral-3:3b",
+     "embedding_model": "qwen2.5-coder:1.5b",
+     "embedding_dim": "384"
+   }
+   ```
+
+   When `mcp_server` is empty, SCMD defaults to `~/.scmd/mcp_server.json`.
+
+4. **Use SCMD as normal** — all commands work the same way. The MCP backend is transparent to the CLI, web, and interactive interfaces.
+
+### ID Mapping
+
+The MCP server uses UUIDs internally, but SCMD continues to display integer IDs in the CLI for convenience. A session-scoped mapping translates between the two. When you list or search commands, integer IDs are assigned. Use those IDs for `show`, `delete`, and other operations within the same session.
 
 ---
 
@@ -167,16 +235,32 @@ mkdir -p ~/.scmd
 cp config.json.example ~/.scmd/config.json
 ```
 
+### SQLite Configuration (default)
+
 ```json
 {
   "agent": "ollama",
-  "db_type": "postgresql",
-  "db_host": "localhost",
-  "db_port": "5432",
-  "db_user": "your_username",
-  "db_pass": "your_password",
-  "db_name": "your_database",
-  "tb_name": "scmd",
+  "db_type": "sqlite",
+  "tb_name": "data",
+  "gemini_api": "your_gemini_api_key_here",
+  "gemini_model": "gemini-2.5-flash-lite",
+  "gemini_embedding_model": "gemini-embedding-001",
+  "ollama": "localhost",
+  "model": "ministral-3:3b",
+  "embedding_model": "qwen2.5-coder:1.5b",
+  "embedding_dim": "384",
+  "mcp_server": ""
+}
+```
+
+### MCP Configuration (PostgreSQL via MCP server)
+
+```json
+{
+  "agent": "ollama",
+  "db_type": "mcp",
+  "tb_name": "data",
+  "mcp_server": "",
   "gemini_api": "your_gemini_api_key_here",
   "gemini_model": "gemini-2.5-flash-lite",
   "gemini_embedding_model": "gemini-embedding-001",
@@ -186,6 +270,8 @@ cp config.json.example ~/.scmd/config.json
   "embedding_dim": "384"
 }
 ```
+
+When `db_type` is `"mcp"`, the `db_host`, `db_port`, `db_user`, `db_pass`, and `db_name` fields are ignored. The `tb_name` field is used as the MCP namespace. The `mcp_server` field points to the MCP server configuration file (defaults to `~/.scmd/mcp_server.json` if empty).
 
 Environment variables override config file values. See [config.json.example](config.json.example) for the full template.
 
@@ -209,7 +295,7 @@ All binaries are ready to use — no compilation required.
 
 ### Build from Source
 
-Requires Go 1.23+, Git, and a PostgreSQL or SQLite database.
+Requires Go 1.23+ and Git.
 
 ```bash
 git clone https://github.com/gcclinux/scmd.git
@@ -272,7 +358,6 @@ docker-compose up -d
 | Command | Description |
 |---------|-------------|
 | `--create-db` | Interactive database setup |
-| `--create-db-postgresql` | PostgreSQL setup wizard |
 | `--create-db-sqlite` | SQLite setup wizard |
 
 ### AI & Embeddings
@@ -323,30 +408,31 @@ See [AUTHENTICATION.md](docs/AUTHENTICATION.md) for setup instructions.
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│                    SCMD v2.0.6                  │
-├─────────────┬──────────────┬──────────────┬────────────────────┤
-│ Interactive  │ Traditional  │  MCP Server  │     Web UI         │
-│    CLI       │    CLI       │   (stdio)    │  (HTTP/HTTPS)      │
-├─────────────┴──────────────┴──────────────┴────────────────────┤
-│              Core Engine                         │
-│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
-│  │ Search   │ │ Scoring  │ │ Keyword Extract  │ │
-│  │ Engine   │ │ System   │ │ (NLP)            │ │
-│  └──────────┘ └──────────┘ └──────────────────┘ │
-├──────────────────────────────────────────────────┤
-│              AI Layer                            │
-│  ┌──────────────────┐ ┌───────────────────────┐ │
-│  │ Ollama (Local)   │ │ Gemini (Cloud)        │ │
-│  │ Chat + Embedding │ │ Chat + Embedding      │ │
-│  └──────────────────┘ └───────────────────────┘ │
-├──────────────────────────────────────────────────┤
-│              Data Layer                          │
-│  ┌──────────────────┐ ┌───────────────────────┐ │
-│  │ PostgreSQL       │ │ SQLite                │ │
-│  │ + pgvector       │ │ + cosine similarity   │ │
-│  └──────────────────┘ └───────────────────────┘ │
-└──────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                        SCMD v2.0.6                           │
+├─────────────┬──────────────┬──────────────┬──────────────────┤
+│ Interactive  │ Traditional  │  MCP Server  │     Web UI       │
+│    CLI       │    CLI       │   (stdio)    │  (HTTP/HTTPS)    │
+├─────────────┴──────────────┴──────────────┴──────────────────┤
+│                       Core Engine                            │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐             │
+│  │ Search   │ │ Scoring  │ │ Keyword Extract  │             │
+│  │ Engine   │ │ System   │ │ (NLP)            │             │
+│  └──────────┘ └──────────┘ └──────────────────┘             │
+├──────────────────────────────────────────────────────────────┤
+│                        AI Layer                              │
+│  ┌──────────────────┐ ┌───────────────────────┐             │
+│  │ Ollama (Local)   │ │ Gemini (Cloud)        │             │
+│  │ Chat + Embedding │ │ Chat + Embedding      │             │
+│  └──────────────────┘ └───────────────────────┘             │
+├──────────────────────────────────────────────────────────────┤
+│                       Data Layer                             │
+│  ┌──────────────────┐ ┌───────────────────────────────────┐ │
+│  │ SQLite           │ │ MCP Client                        │ │
+│  │ + cosine         │ │ → External MCP Server (SSE)       │ │
+│  │   similarity     │ │ → PostgreSQL + pgvector            │ │
+│  └──────────────────┘ └───────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -363,7 +449,6 @@ See [AUTHENTICATION.md](docs/AUTHENTICATION.md) for setup instructions.
 | [GEMINI_INTEGRATION.md](docs/GEMINI_INTEGRATION.md) | Google Gemini setup |
 | [OLLAMA_INTEGRATION.md](docs/OLLAMA_INTEGRATION.md) | Ollama setup |
 | [AUTHENTICATION.md](docs/AUTHENTICATION.md) | Web authentication system |
-| [POSTGRESQL_MIGRATION.md](docs/POSTGRESQL_MIGRATION.md) | Database migration guide |
 | [QUICKSTART.md](docs/QUICKSTART.md) | Getting started |
 | [WHATS_NEW.md](docs/WHATS_NEW.md) | What's new in v2.0 |
 | [SCMD_INFOGRAPHIC.md](docs/SCMD_INFOGRAPHIC.md) | Full capabilities overview |

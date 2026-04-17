@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // ConfigData holds all configuration fields from config.json.
@@ -24,6 +25,7 @@ type ConfigData struct {
 	Model                string `json:"model"`
 	EmbeddingModel       string `json:"embedding_model"`
 	EmbeddingDim         string `json:"embedding_dim"`
+	MCPServer            string `json:"mcp_server"`
 }
 
 // configPath returns the path to $HOME/.scmd/config.json.
@@ -70,6 +72,20 @@ func LoadConfig() {
 	setIfNotEmpty("MODEL", cfg.Model)
 	setIfNotEmpty("EMBEDDING_MODEL", cfg.EmbeddingModel)
 	setIfNotEmpty("EMBEDDING_DIM", cfg.EmbeddingDim)
+	setIfNotEmpty("MCP_SERVER", cfg.MCPServer)
+
+	// When db_type is "mcp", resolve the MCP server config path to an absolute path.
+	// This overrides the raw value set above with the fully resolved path.
+	if strings.EqualFold(cfg.DBType, "mcp") {
+		mcpPath := os.Getenv("MCP_SERVER")
+		if mcpPath == "" {
+			mcpPath = filepath.Join(ConfigDir(), "mcp_server.json")
+		}
+		if !filepath.IsAbs(mcpPath) {
+			mcpPath = filepath.Join(ConfigDir(), mcpPath)
+		}
+		os.Setenv("MCP_SERVER", mcpPath)
+	}
 }
 
 // setIfNotEmpty sets an environment variable only if the value is non-empty

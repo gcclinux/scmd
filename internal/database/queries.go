@@ -13,6 +13,9 @@ import (
 
 // SearchCommands searches for commands matching the pattern.
 func SearchCommands(pattern string, format string) ([]byte, error) {
+	if IsMCP() {
+		return searchCommandsMCP(pattern)
+	}
 	if !IsPostgreSQL() {
 		return searchCommandsSQLite(pattern)
 	}
@@ -112,6 +115,9 @@ func SearchCommands(pattern string, format string) ([]byte, error) {
 // AddCommand adds a new command to the database.
 // embeddingFn is an optional callback to generate embeddings.
 func AddCommand(command, description string, embeddingFn func(string) ([]float64, error)) (bool, error) {
+	if IsMCP() {
+		return addCommandMCP(command, description, embeddingFn)
+	}
 	if !IsPostgreSQL() {
 		return addCommandSQLite(command, description, embeddingFn)
 	}
@@ -161,6 +167,9 @@ func AddCommand(command, description string, embeddingFn func(string) ([]float64
 
 // CheckCommandExists checks if a command already exists in the database.
 func CheckCommandExists(command string) (bool, error) {
+	if IsMCP() {
+		return checkCommandExistsMCP(command)
+	}
 	if !IsPostgreSQL() {
 		return checkCommandExistsSQLite(command)
 	}
@@ -178,6 +187,9 @@ func CheckCommandExists(command string) (bool, error) {
 
 // DeleteCommand deletes a command from the database by ID.
 func DeleteCommand(id int) (bool, error) {
+	if IsMCP() {
+		return deleteCommandMCP(id)
+	}
 	if !IsPostgreSQL() {
 		return deleteCommandSQLite(id)
 	}
@@ -199,6 +211,9 @@ func DeleteCommand(id int) (bool, error) {
 
 // GetCommandByID retrieves a single command record by its ID.
 func GetCommandByID(id int) (*CommandRecord, error) {
+	if IsMCP() {
+		return getCommandByIDMCP(id)
+	}
 	if !IsPostgreSQL() {
 		return getCommandByIDSQLite(id)
 	}
@@ -219,6 +234,9 @@ func GetCommandByID(id int) (*CommandRecord, error) {
 
 // GetCommandsWithoutEmbeddings returns all commands that have no embedding.
 func GetCommandsWithoutEmbeddings() ([]CommandRecord, error) {
+	if IsMCP() {
+		return getCommandsWithoutEmbeddingsMCP()
+	}
 	if !IsPostgreSQL() {
 		return getCommandsWithoutEmbeddingsSQLite()
 	}
@@ -243,6 +261,9 @@ func GetCommandsWithoutEmbeddings() ([]CommandRecord, error) {
 
 // UpdateEmbedding updates the embedding for a command by ID.
 func UpdateEmbedding(id int, embedding []float64) error {
+	if IsMCP() {
+		return updateEmbeddingMCP(id, embedding)
+	}
 	if !IsPostgreSQL() {
 		return updateEmbeddingSQLite(id, embedding)
 	}
@@ -255,6 +276,9 @@ func UpdateEmbedding(id int, embedding []float64) error {
 
 // GetEmbeddingStats returns total commands and count with embeddings.
 func GetEmbeddingStats() (total int, withEmbeddings int, err error) {
+	if IsMCP() {
+		return getEmbeddingStatsMCP()
+	}
 	if !IsPostgreSQL() {
 		return getEmbeddingStatsSQLite()
 	}
@@ -275,6 +299,9 @@ func GetEmbeddingStats() (total int, withEmbeddings int, err error) {
 
 // SearchByVector performs a vector similarity search using pgvector.
 func SearchByVector(embedding []float64, limit int) ([]CommandRecord, error) {
+	if IsMCP() {
+		return searchByVectorMCP(embedding, limit)
+	}
 	if !IsPostgreSQL() {
 		return searchByVectorSQLite(embedding, limit)
 	}
@@ -307,6 +334,9 @@ func SearchByVector(embedding []float64, limit int) ([]CommandRecord, error) {
 
 // AuthenticateUser validates email and API key against the database.
 func AuthenticateUser(email, apiKey string) (bool, error) {
+	if IsMCP() {
+		return false, fmt.Errorf("authentication not supported with MCP backend")
+	}
 	if !IsPostgreSQL() {
 		return authenticateUserSQLite(email, apiKey)
 	}

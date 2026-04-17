@@ -6,6 +6,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/modelcontextprotocol/go-sdk v1.5.0
 	modernc.org/sqlite v1.34.5
+	pgregory.net/rapid v1.2.0
 )
 
 require (

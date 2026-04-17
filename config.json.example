@@ -1,11 +1,6 @@
 {
   "agent": "ollama",
-  "db_type": "postgresql",
-  "db_host": "localhost",
-  "db_port": "5432",
-  "db_user": "your_username",
-  "db_pass": "your_password",
-  "db_name": "your_database",
+  "db_type": "sqlite",
   "tb_name": "data",
   "gemini_api": "your_gemini_api_key_here",
   "gemini_model": "gemini-2.5-flash-lite",
@@ -13,5 +8,6 @@
   "ollama": "localhost",
   "model": "ministral-3:3b",
   "embedding_model": "qwen2.5-coder:1.5b",
-  "embedding_dim": "384"
+  "embedding_dim": "384",
+  "mcp_server": ""
 }
