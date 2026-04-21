@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -18,6 +19,10 @@ import (
 	"github.com/gcclinux/scmd/internal/markdown"
 	"github.com/gcclinux/scmd/internal/util"
 )
+
+// showOriginalQuery holds the original query extracted from a /show record's
+// description, so the feedback loop can use it for regeneration.
+var showOriginalQuery string
 
 func handleSlashCommand(input string) string {
 	parts := strings.SplitN(input, " ", 2)
@@ -69,7 +74,9 @@ func handleSlashCommand(input string) string {
 			fmt.Println("Usage: /show <id>")
 			return ""
 		}
-		handleShowCommand(args)
+		content, origQuery := handleShowCommand(args)
+		showOriginalQuery = origQuery
+		return content
 	case "/import":
 		if args == "" {
 			fmt.Println("Usage: /import <path>")
@@ -97,7 +104,7 @@ func handleSlashCommand(input string) string {
 
 func handlePersonaCommand(persona, query string) string {
 	fmt.Printf("🤖 Processing with %s persona...\n", persona)
-	
+
 	// We'll perform a search to get context for the persona
 	results, _, _, err := ai.SmartSearch(query, true)
 	if err != nil {
@@ -231,7 +238,6 @@ func handleListCommand() {
 	}
 	fmt.Println()
 }
-
 
 func clearScreen() {
 	fmt.Print("\033[H\033[2J")
@@ -368,18 +374,25 @@ func handleImportCommand(args string) {
 	fmt.Println()
 }
 
-func handleShowCommand(args string) {
+func handleShowCommand(args string) (string, string) {
 	idStr := strings.TrimSpace(args)
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		fmt.Println("Error: Invalid ID. Please provide a number.")
-		return
+		return "", ""
 	}
 
 	record, err := database.GetCommandByID(id)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		return
+		return "", ""
+	}
+
+	// Extract the original query from the description if it was AI-generated.
+	originalQuery := ""
+	const prefix = "AI-generated response for: "
+	if strings.HasPrefix(record.Data, prefix) {
+		originalQuery = strings.TrimPrefix(record.Data, prefix)
 	}
 
 	fmt.Println()
@@ -395,9 +408,11 @@ func handleShowCommand(args string) {
 
 	fmt.Println("──────────────────────────────────────────────────────────────")
 
+	var content string
 	if markdown.IsMarkdownContent(record.Key) {
 		fmt.Println("Content:")
 		fmt.Print(markdown.Render(record.Key))
+		content = record.Key
 	} else {
 		fmt.Println("Command:")
 		if util.IsCode(record.Key) {
@@ -407,13 +422,18 @@ func handleShowCommand(args string) {
 			}
 			cmd = strings.ReplaceAll(cmd, "\n\t\n\t", "\n\t\t")
 			fmt.Println(cmd)
+			content = cmd
 		} else {
 			fmt.Println(record.Key)
+			content = record.Key
 		}
 	}
 
 	fmt.Println("══════════════════════════════════════════════════════════════")
 	fmt.Println()
+
+	// Return the content and the original query for regeneration.
+	return content, originalQuery
 }
 
 func handleRunCommand(args string) {
@@ -456,7 +476,14 @@ func handleRunCommand(args string) {
 		}
 	}
 
-	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+	// Run through the user's shell so that shell built-ins, aliases,
+	// and the full PATH/environment are available.
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("powershell", "-Command", args)
+	} else {
+		cmd = exec.Command("sh", "-c", args)
+	}
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

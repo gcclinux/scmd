@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gcclinux/scmd/internal/ai"
@@ -31,6 +32,8 @@ func StartInteractiveMode() {
 
 	var lastAIResponse string
 	var lastQuery string
+	var lastCodeBlocks []string
+	var lastFromShow bool
 
 	for {
 		fmt.Print("scmd> ")
@@ -61,8 +64,8 @@ func StartInteractiveMode() {
 		}
 
 		// Feedback on last AI response
-		if lastAIResponse != "" && (input == "1" || input == "2") {
-			if input == "1" {
+		if lastAIResponse != "" && isFeedbackInput(input, len(lastCodeBlocks)) {
+			if input == "s" && !lastFromShow {
 				if _, err := database.AddCommand(lastAIResponse,
 					fmt.Sprintf("AI-generated response for: %s", lastQuery),
 					ai.GetBestEmbedding); err != nil {
@@ -73,19 +76,61 @@ func StartInteractiveMode() {
 				}
 				lastAIResponse = ""
 				lastQuery = ""
-			} else if input == "2" {
+				lastCodeBlocks = nil
+				lastFromShow = false
+			} else if input == "n" {
 				fmt.Println("Regenerating response...")
 				fmt.Println()
 				aiResp := regenerateAIResponse(lastQuery)
 				if aiResp != "" {
 					lastAIResponse = aiResp
-					fmt.Println("Good Answer [1], Bad Answer [2]")
+					lastCodeBlocks = ExtractCodeBlocks(aiResp)
+					lastFromShow = false
+					fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), false))
 				} else {
 					fmt.Println("Failed to regenerate response.")
 					fmt.Println()
 					lastAIResponse = ""
 					lastQuery = ""
+					lastCodeBlocks = nil
+					lastFromShow = false
 				}
+			} else if strings.HasPrefix(input, "x") {
+				arg := strings.TrimSpace(strings.TrimPrefix(input, "x"))
+				if arg == "" {
+					// bare "x"
+					switch len(lastCodeBlocks) {
+					case 0:
+						// no code blocks — re-display prompt
+						fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
+					case 1:
+						handleRunCommand(lastCodeBlocks[0])
+						fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
+					default:
+						fmt.Printf("Multiple code blocks found. Type 1 to %d to execute, or x <number>.\n", len(lastCodeBlocks))
+						fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
+					}
+				} else {
+					n, usageMsg := parseExecuteArg(arg)
+					if usageMsg != "" {
+						fmt.Println(usageMsg)
+						fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
+					} else if errMsg := validateExecuteIndex(n, len(lastCodeBlocks)); errMsg != "" {
+						fmt.Println(errMsg)
+						fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
+					} else {
+						handleRunCommand(lastCodeBlocks[n-1])
+						fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
+					}
+				}
+			} else if n, err := strconv.Atoi(input); err == nil && len(lastCodeBlocks) > 0 {
+				// Bare numeric input — direct block execution shortcut
+				if errMsg := validateExecuteIndex(n, len(lastCodeBlocks)); errMsg != "" {
+					fmt.Println(errMsg)
+				} else {
+					handleRunCommand(lastCodeBlocks[n-1])
+				}
+				fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
 			}
 			continue
 		}
@@ -108,21 +153,40 @@ func StartInteractiveMode() {
 		aiResp := processInteractiveCommand(input)
 		if aiResp != "" {
 			lastAIResponse = aiResp
-			lastQuery = input
-			fmt.Println("Good Answer [1], Bad Answer [2]")
+			lastFromShow = strings.HasPrefix(input, "/show")
+			if lastFromShow && showOriginalQuery != "" {
+				lastQuery = showOriginalQuery
+				showOriginalQuery = ""
+			} else {
+				lastQuery = input
+			}
+			lastCodeBlocks = ExtractCodeBlocks(aiResp)
+			fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
 		} else {
 			lastAIResponse = ""
 			lastQuery = ""
+			lastCodeBlocks = nil
+			lastFromShow = false
 		}
 	}
 }
 
 func printWelcome() {
 	fmt.Println()
-	fmt.Println("╔════════════════════════════════════════════════════════════════╗")
-	fmt.Println("║           SCMD Interactive CLI - PostgreSQL Edition            ║")
-	fmt.Println("║                      Version", updater.Release, "                            ║")
-	fmt.Println("╚════════════════════════════════════════════════════════════════╝")
+	green := "\033[32m"
+	reset := "\033[0m"
+
+	fmt.Println("  ╔════════════════════════════════════════════════════════════╗")
+	fmt.Println("  ║                                                            ║")
+	fmt.Printf("  ║            %s███████╗ ██████╗███╗   ███╗██████╗%s              ║\n", green, reset)
+	fmt.Printf("  ║            %s██╔════╝██╔════╝████╗ ████║██╔══██╗%s             ║\n", green, reset)
+	fmt.Printf("  ║            %s███████╗██║     ██╔████╔██║██║  ██║%s             ║\n", green, reset)
+	fmt.Printf("  ║            %s╚════██║██║     ██║╚██╔╝██║██║  ██║%s             ║\n", green, reset)
+	fmt.Printf("  ║            %s███████║╚██████╗██║ ╚═╝ ██║██████╔╝%s             ║\n", green, reset)
+	fmt.Printf("  ║             %s╚══════╝ ╚═════╝╚═╝     ╚═╝╚═════╝%s             ║\n", green, reset)
+	fmt.Println("  ║                                                            ║")
+	fmt.Printf("  ║             ⚡ Interactive CLI  ·  v%-20s  ║\n", updater.Release+" ⚡")
+	fmt.Println("  ╚════════════════════════════════════════════════════════════╝")
 	fmt.Println()
 
 	preferred := strings.ToLower(os.Getenv("AGENT"))
@@ -351,4 +415,62 @@ func regenerateAIResponse(query string) string {
 	}
 
 	return ""
+}
+
+// buildFeedbackPrompt returns the feedback prompt string based on the
+// number of extracted code blocks. When savedResponse is true (e.g. from
+// /show), the save option is omitted since the response is already stored.
+func buildFeedbackPrompt(codeBlockCount int, savedResponse bool) string {
+	var prompt string
+	if savedResponse {
+		prompt = "[n] - New answer (regenerates)"
+	} else {
+		prompt = "[s] - Good answer (saves to db)  |  [n] - New answer (discards)"
+	}
+	if codeBlockCount == 1 {
+		prompt += "  |  [x] Execute"
+	} else if codeBlockCount > 1 {
+		prompt += "  |  Execute:"
+		for i := 1; i <= codeBlockCount; i++ {
+			prompt += fmt.Sprintf(" [%d]", i)
+		}
+	}
+	return prompt
+}
+
+// isFeedbackInput returns true if the input is a valid feedback command:
+// "s", "n", any input starting with "x", or a bare number when code blocks
+// are available (codeBlockCount > 0).
+func isFeedbackInput(input string, codeBlockCount int) bool {
+	if input == "s" || input == "n" {
+		return true
+	}
+	if strings.HasPrefix(input, "x") {
+		return true
+	}
+	if codeBlockCount > 0 {
+		if _, err := strconv.Atoi(input); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// validateExecuteIndex returns an error message if index is out of range
+// (< 1 or > total), or an empty string if valid.
+func validateExecuteIndex(index int, total int) string {
+	if index < 1 || index > total {
+		return fmt.Sprintf("Error: block number must be between 1 and %d", total)
+	}
+	return ""
+}
+
+// parseExecuteArg parses the argument after "x". Returns (index, "") if
+// valid number, or (0, "Usage: x or x <number>") if non-numeric.
+func parseExecuteArg(arg string) (int, string) {
+	n, err := strconv.Atoi(arg)
+	if err != nil {
+		return 0, "Usage: x or x <number>"
+	}
+	return n, ""
 }
