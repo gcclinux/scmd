@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2026-04-22
+
+### Added
+- **Execute correct answer in scmd-cli** — users can select numbered code blocks `[1]`, `[2]`, `[3]` from AI responses and execute them directly.
+- **MCP server initial version** — scmd moved from direct PostgreSQL queries to MCP server architecture.
+- **AI Persona search focus** — implemented persona-aware search that tailors results based on the active AI persona context.
+
 ## [2.0.7] - 2026-04-15
 
 ### Added

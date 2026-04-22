@@ -21,8 +21,22 @@ const (
 
 // PrintHelp displays the comprehensive CLI help menu.
 func PrintHelp(name string) {
+	green := "\033[32m"
+	cyan := "\033[36m"
+	reset := "\033[0m"
+
 	fmt.Println()
-	fmt.Println("Version:", updater.Release)
+	fmt.Println("  ╔════════════════════════════════════════════════════════════╗")
+	fmt.Println("  ║                                                            ║")
+	fmt.Printf("  ║            %s███████╗ ██████╗███╗   ███╗██████╗%s              ║\n", green, reset)
+	fmt.Printf("  ║            %s██╔════╝██╔════╝████╗ ████║██╔══██╗%s             ║\n", green, reset)
+	fmt.Printf("  ║            %s███████╗██║     ██╔████╔██║██║  ██║%s             ║\n", green, reset)
+	fmt.Printf("  ║            %s╚════██║██║     ██║╚██╔╝██║██║  ██║%s             ║\n", green, reset)
+	fmt.Printf("  ║            %s███████║╚██████╗██║ ╚═╝ ██║██████╔╝%s             ║\n", green, reset)
+	fmt.Printf("  ║             %s╚══════╝ ╚═════╝╚═╝     ╚═╝╚═════╝%s             ║\n", green, reset)
+	fmt.Println("  ║                                                            ║")
+	fmt.Printf("  ║          %s⚡ AI-Powered Command Search · v%-15s%s  ║\n", cyan, updater.Release+" ⚡", reset)
+	fmt.Println("  ╚════════════════════════════════════════════════════════════╝")
 	fmt.Println()
 	fmt.Printf(NoticeColor, "*** Display this help menu\n\r")
 	fmt.Println("Usage: \t", name, "--help")

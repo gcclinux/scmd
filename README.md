@@ -17,23 +17,14 @@ For a full feature breakdown and infographic-ready reference, see [docs/SCMD_INF
 
 ## Screenshots
 
-### Interactive CLI — Slash Commands & AI Responses
-![Interactive CLI showing available commands and AI-powered search](images/smcd-2.0.6-show.png)
+### v2.1.0 representation when scmd start with flags --cli
+![v2.1.0 representation when scmd with flags --cli](images\v208-cli-start.png)
 
-### Web UI — Browser-Based Search Interface
-![Web UI with real-time search, syntax highlighting, and AI explanations](images/smcd-2.0.1-web.png)
+### v2.1.0 representation when scmd --cli interactive menu /help
+![v2.1.0 representation when scmd --cli interactive menu /help](images\v208-cli-help.png)
 
-### Easy Setup — Interactive Configuration Wizard
-![Interactive setup wizard for database and AI provider configuration](images/easy-setup.png)
-
-### Minimal Configuration — config.json
-![Minimal config.json example showing database and AI settings](images/minimum-config.png)
-
-### Available Commands — Full CLI Reference
-![Full list of available CLI commands and flags](images/available-cmd.png)
-
-### Embedding-Powered Semantic Search
-![Vector embedding query showing AI-enhanced semantic search results](images/embedding-query.png)
+### v2.1.0 representation when scmd --cli execute required command
+![v2.1.0 representation when scmd --cli execute required command](images\v208-cli-exe.png)
 
 ---
 

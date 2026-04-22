@@ -47,7 +47,7 @@ a:hover{color:var(--green)}
 <section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:6rem 1.5rem 4rem;position:relative;overflow:hidden">
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,255,136,.06) 0%,transparent 60%);pointer-events:none"></div>
   <div style="max-width:800px;text-align:center;position:relative;z-index:1">
-    <div style="font-family:var(--font-mono);color:var(--muted);font-size:.875rem;margin-bottom:1rem">v2.0.6 · Go · MIT License</div>
+    <div style="font-family:var(--font-mono);color:var(--muted);font-size:.875rem;margin-bottom:1rem">v2.1.0 · Go · AGPL-3.0 License</div>
     <h1 style="font-size:clamp(2.5rem,6vw,4rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem">
       <span style="color:var(--green)">Search</span> commands.<br>
       <span style="color:var(--cyan)">Ask</span> AI.<br>
@@ -402,7 +402,7 @@ a:hover{color:var(--green)}
     </div>
 
     <!-- Step 3 -->
-    <div>
+    <div style="margin-bottom:2rem">
       <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
         <span style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">3</span>
         <h3 style="font-size:1rem">Search</h3>
@@ -412,6 +412,73 @@ a:hover{color:var(--green)}
         <div><span style="color:var(--cyan)">$</span> scmd --search "docker,kubernetes" <span style="color:var(--muted)"># quick search</span></div>
         <div><span style="color:var(--cyan)">$</span> scmd --web <span style="color:var(--muted)"># web UI</span></div>
       </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div>
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+        <span style="background:var(--orange);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">4</span>
+        <h3 style="font-size:1rem">Interactive</h3>
+      </div>
+
+      <!-- Workflow steps -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;position:relative">
+          <div style="background:var(--green);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">1</div>
+          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Search Command</div>
+          <div style="color:var(--muted);font-size:.75rem">Type a natural language query or use keywords to find commands</div>
+          <div style="color:var(--green);font-size:1.2rem;position:absolute;right:-.35rem;top:50%;transform:translateY(-50%);display:none">→</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
+          <div style="background:var(--cyan);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">2</div>
+          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">AI Identifies</div>
+          <div style="color:var(--muted);font-size:.75rem">AI persona analyzes results and provides recommendations</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
+          <div style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">3</div>
+          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Select Code Block</div>
+          <div style="color:var(--muted);font-size:.75rem">Pick from numbered options <span style="color:var(--orange);font-family:var(--font-mono)">[1] [2] [3]</span> to execute</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
+          <div style="background:var(--orange);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">4</div>
+          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Execute &amp; Output</div>
+          <div style="color:var(--muted);font-size:.75rem">Loads user profile and displays the command output</div>
+        </div>
+      </div>
+
+      <!-- Flow arrows (visible on wider screens) -->
+      <div style="display:flex;justify-content:center;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+        <span style="font-size:.7rem;color:var(--green);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">search</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span style="font-size:.7rem;color:var(--cyan);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">AI match</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span style="font-size:.7rem;color:var(--purple);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">select [1,2,3]</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span style="font-size:.7rem;color:var(--orange);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">output</span>
+      </div>
+
+      <!-- Screenshot gallery -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="background:var(--bg3);padding:.5rem .75rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border)">
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span>
+            <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--muted);margin-left:.4rem">scmd --cli (execute)</span>
+          </div>
+          <img src="../images/v208-cli-exe.png" alt="SCMD interactive CLI executing a command with AI-powered code block selection" style="width:100%;display:block" loading="lazy">
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="background:var(--bg3);padding:.5rem .75rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border)">
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span>
+            <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--muted);margin-left:.4rem">scmd --help</span>
+          </div>
+          <img src="../images/v208-cli-help.png" alt="SCMD CLI help menu showing available commands and options" style="width:100%;display:block" loading="lazy">
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:.8rem;margin-top:.75rem;text-align:center">Search → AI identifies the best match → select a code block to run → see the output with your profile loaded.</p>
     </div>
 
     <!-- Platform table -->
@@ -448,7 +515,7 @@ a:hover{color:var(--green)}
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;font-family:var(--font-mono);font-size:.8rem;line-height:1.7;overflow-x:auto;text-align:center">
 <pre style="display:inline-block;text-align:left;color:var(--text)">
 <span style="color:var(--border)">┌─────────────────────────────────────────────────┐</span>
-<span style="color:var(--border)">│</span>                 <span style="color:var(--green);font-weight:700">SCMD v2.0.6</span>                   <span style="color:var(--border)">│</span>
+<span style="color:var(--border)">│</span>                 <span style="color:var(--green);font-weight:700">SCMD v2.1.0</span>                   <span style="color:var(--border)">│</span>
 <span style="color:var(--border)">├─────────────┬──────────────┬────────────────────┤</span>
 <span style="color:var(--border)">│</span> <span style="color:var(--green)">Interactive</span>  <span style="color:var(--border)">│</span> <span style="color:var(--cyan)">Traditional</span>  <span style="color:var(--border)">│</span>     <span style="color:var(--purple)">Web UI</span>         <span style="color:var(--border)">│</span>
 <span style="color:var(--border)">│</span> <span style="color:var(--green)">CLI</span>          <span style="color:var(--border)">│</span> <span style="color:var(--cyan)">CLI</span>          <span style="color:var(--border)">│</span>  <span style="color:var(--purple)">(HTTP/HTTPS)</span>      <span style="color:var(--border)">│</span>
@@ -487,7 +554,7 @@ a:hover{color:var(--green)}
       <a href="https://github.com/gcclinux/scmd/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
     </div>
     <p style="color:var(--muted);font-size:.8rem">
-      Built with Go by <a href="https://github.com/gcclinux" target="_blank" rel="noopener">Ricardo Wagemaker</a> · SCMD v2.0.6
+      Built with Go by <a href="https://github.com/gcclinux" target="_blank" rel="noopener">Ricardo Wagemaker</a> · SCMD v2.1.0
     </p>
   </div>
 </footer>
@@ -498,6 +565,7 @@ a:hover{color:var(--green)}
   nav div:last-child{gap:.75rem;font-size:.8rem}
   section{padding:3rem 1rem !important}
   div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
+  div[style*="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))"]{grid-template-columns:1fr 1fr !important}
 }
 a[style*="background:var(--green)"]:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,255,136,.25)}
 a[style*="background:var(--bg3)"]:hover{border-color:var(--muted)}
