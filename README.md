@@ -349,12 +349,6 @@ docker-compose up -d
 | `--import <path>` | Import markdown file |
 | `--copydb [filename]` | Export database to JSON |
 
-### Database Setup
-| Command | Description |
-|---------|-------------|
-| `--create-db` | Interactive database setup |
-| `--create-db-sqlite` | SQLite setup wizard |
-
 ### AI & Embeddings
 | Command | Description |
 |---------|-------------|
@@ -458,4 +452,4 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release history.
 
 ## License
 
-[MIT](LICENSE)
+[AGPL-3.0](LICENSE)
