@@ -18,3 +18,4 @@
 .kiro/
 build/
 *.exe
+.vscode/

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.1] - 2026-04-25
+
+### Changed
+- **CLI upgrade: GitHub release URL format** — updated from fixed path to dynamically generated URL including semantic version tag (e.g., `/releases/download/v2.1.2/`)
+- **Updated** `internal/updater` to construct download URLs with the correct version tag
+- **Cleanup** — removed old download functionality (`internal/download`)
+- **Cleanup** — removed old menu entries and manuak process now automated via cli
+- **Code Block in green** — AI answers with code blocks are now displayed in green 
+
+
 ## [2.1.0] - 2026-04-22
 
 ### Added

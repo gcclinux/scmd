@@ -77,12 +77,7 @@ func handleSlashCommand(input string) string {
 		content, origQuery := handleShowCommand(args)
 		showOriginalQuery = origQuery
 		return content
-	case "/import":
-		if args == "" {
-			fmt.Println("Usage: /import <path>")
-			return ""
-		}
-		handleImportCommand(args)
+
 	case "/run":
 		if args == "" {
 			fmt.Println("Usage: /run <command>")
@@ -120,7 +115,10 @@ func handlePersonaCommand(persona, query string) string {
 	fmt.Println()
 	fmt.Printf("🤖 AI %s Persona:\n", strings.Title(persona))
 	fmt.Println("══════════════════════════════════════════════════════════════")
-	fmt.Println(aiResp)
+	fmt.Print(markdown.Render(aiResp))
+	if !strings.HasSuffix(aiResp, "\n") {
+		fmt.Println()
+	}
 	fmt.Println("══════════════════════════════════════════════════════════════")
 	fmt.Println()
 
@@ -324,13 +322,6 @@ func handleConfigShow() {
 	fmt.Printf("    embedding_model:        %s\n", cfg.EmbeddingModel)
 	fmt.Printf("    embedding_dim:          %s\n", cfg.EmbeddingDim)
 	fmt.Println()
-	fmt.Println("  Database:")
-	fmt.Printf("    db_host:                %s\n", cfg.DBHost)
-	fmt.Printf("    db_port:                %s\n", cfg.DBPort)
-	fmt.Printf("    db_user:                %s\n", cfg.DBUser)
-	fmt.Printf("    db_pass:                %s\n", mask(cfg.DBPass))
-	fmt.Printf("    db_name:                %s\n", cfg.DBName)
-	fmt.Printf("    tb_name:                %s\n", cfg.TBName)
 	fmt.Println()
 	fmt.Println("══════════════════════════════════════════════════════════════")
 	fmt.Println()
@@ -361,18 +352,7 @@ func handleGenerateEmbeddings() {
 	}
 }
 
-func handleImportCommand(args string) {
-	title, err := markdown.ImportMarkdown(args, ai.GetBestEmbedding)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
-	}
 
-	fmt.Println()
-	fmt.Println("✓ Document imported successfully!")
-	fmt.Printf("  Title: %s\n", title)
-	fmt.Println()
-}
 
 func handleShowCommand(args string) (string, string) {
 	idStr := strings.TrimSpace(args)

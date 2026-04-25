@@ -12,12 +12,6 @@ import (
 type ConfigData struct {
 	Agent                string `json:"agent"`
 	DBType               string `json:"db_type"`
-	DBHost               string `json:"db_host"`
-	DBPort               string `json:"db_port"`
-	DBUser               string `json:"db_user"`
-	DBPass               string `json:"db_pass"`
-	DBName               string `json:"db_name"`
-	TBName               string `json:"tb_name"`
 	GeminiAPI            string `json:"gemini_api"`
 	GeminiModel          string `json:"gemini_model"`
 	GeminiEmbeddingModel string `json:"gemini_embedding_model"`
@@ -40,6 +34,10 @@ func configPath() string {
 // LoadConfig reads $HOME/.scmd/config.json and sets environment variables
 // so the rest of the application can continue using os.Getenv as before.
 func LoadConfig() {
+	// Static SQLite configuration
+	setIfNotEmpty("DB_NAME", "scmd")
+	setIfNotEmpty("TB_NAME", "data")
+
 	path := configPath()
 	if path == "" {
 		return
@@ -59,12 +57,6 @@ func LoadConfig() {
 
 	setIfNotEmpty("AGENT", cfg.Agent)
 	setIfNotEmpty("DB_TYPE", cfg.DBType)
-	setIfNotEmpty("DB_HOST", cfg.DBHost)
-	setIfNotEmpty("DB_PORT", cfg.DBPort)
-	setIfNotEmpty("DB_USER", cfg.DBUser)
-	setIfNotEmpty("DB_PASS", cfg.DBPass)
-	setIfNotEmpty("DB_NAME", cfg.DBName)
-	setIfNotEmpty("TB_NAME", cfg.TBName)
 	setIfNotEmpty("GEMINIAPI", cfg.GeminiAPI)
 	setIfNotEmpty("GEMINIMODEL", cfg.GeminiModel)
 	setIfNotEmpty("GEMINI_EMBEDDING_MODEL", cfg.GeminiEmbeddingModel)
@@ -104,9 +96,14 @@ func GetEnv(key, fallback string) string {
 	return fallback
 }
 
-// TableName returns the configured table name from TB_NAME or the default.
+// TableName returns the configured table name.
 func TableName() string {
-	return GetEnv("TB_NAME", "scmd")
+	return "data"
+}
+
+// DBName returns the configured database name.
+func DBName() string {
+	return "scmd"
 }
 
 // ConfigFilePath returns the expected config file location for display purposes.

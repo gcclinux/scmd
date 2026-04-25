@@ -22,8 +22,7 @@ func setupTestConfig(t *testing.T, cfg ConfigData) (configDir string, cleanup fu
 	}
 
 	// Clear relevant env vars before each test.
-	envVars := []string{"DB_TYPE", "MCP_SERVER", "AGENT", "DB_HOST", "DB_PORT",
-		"DB_USER", "DB_PASS", "DB_NAME", "TB_NAME", "GEMINIAPI", "GEMINIMODEL",
+	envVars := []string{"DB_TYPE", "MCP_SERVER", "AGENT", "GEMINIAPI", "GEMINIMODEL",
 		"GEMINI_EMBEDDING_MODEL", "OLLAMA", "MODEL", "EMBEDDING_MODEL", "EMBEDDING_DIM"}
 	for _, v := range envVars {
 		os.Unsetenv(v)
@@ -50,12 +49,6 @@ func loadConfigFromDir(dir string) {
 
 	setIfNotEmpty("AGENT", cfg.Agent)
 	setIfNotEmpty("DB_TYPE", cfg.DBType)
-	setIfNotEmpty("DB_HOST", cfg.DBHost)
-	setIfNotEmpty("DB_PORT", cfg.DBPort)
-	setIfNotEmpty("DB_USER", cfg.DBUser)
-	setIfNotEmpty("DB_PASS", cfg.DBPass)
-	setIfNotEmpty("DB_NAME", cfg.DBName)
-	setIfNotEmpty("TB_NAME", cfg.TBName)
 	setIfNotEmpty("GEMINIAPI", cfg.GeminiAPI)
 	setIfNotEmpty("GEMINIMODEL", cfg.GeminiModel)
 	setIfNotEmpty("GEMINI_EMBEDDING_MODEL", cfg.GeminiEmbeddingModel)
@@ -172,7 +165,7 @@ func TestLoadConfig_NonMCPMode_RawValueSet(t *testing.T) {
 
 func TestLoadConfig_NonMCPMode_EmptyMCPServer(t *testing.T) {
 	dir, cleanup := setupTestConfig(t, ConfigData{
-		DBType: "postgresql",
+		DBType: "sqlite",
 	})
 	defer cleanup()
 

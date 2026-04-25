@@ -16,6 +16,7 @@ import (
 	"github.com/gcclinux/scmd/internal/markdown"
 	"github.com/gcclinux/scmd/internal/search"
 	"github.com/gcclinux/scmd/internal/updater"
+	"github.com/gcclinux/scmd/internal/util"
 )
 
 // StartInteractiveMode starts the interactive CLI prompt.
@@ -269,7 +270,10 @@ func performInteractiveSearch(pattern string) string {
 	if aiResponse != "" {
 		fmt.Println("🤖 AI Assistant:")
 		fmt.Println("══════════════════════════════════════════════════════════════")
-		fmt.Println(aiResponse)
+		fmt.Print(markdown.Render(aiResponse))
+		if !strings.HasSuffix(aiResponse, "\n") {
+			fmt.Println()
+		}
 		fmt.Println("══════════════════════════════════════════════════════════════")
 		fmt.Println()
 		return aiResponse
@@ -363,13 +367,17 @@ func regenerateAIResponse(query string) string {
 		if !ollama.IsAvailable() {
 			return false
 		}
-		fmt.Println("⚠ Regenerating with Ollama...")
+		util.StartSpinner()
+		defer util.StopSpinner()
 		resp, _, err := ollama.Ask(query, contextResults)
 		if err == nil && resp != "" {
 			aiResponse = resp
 			fmt.Println("🤖 AI Assistant:")
 			fmt.Println("══════════════════════════════════════════════════════════════")
-			fmt.Println(aiResponse)
+			fmt.Print(markdown.Render(aiResponse))
+			if !strings.HasSuffix(aiResponse, "\n") {
+				fmt.Println()
+			}
 			fmt.Println("══════════════════════════════════════════════════════════════")
 			fmt.Println()
 			return true
@@ -381,13 +389,17 @@ func regenerateAIResponse(query string) string {
 		if !gemini.IsAvailable() {
 			return false
 		}
-		fmt.Println("⚠ Regenerating with Gemini...")
+		util.StartSpinner()
+		defer util.StopSpinner()
 		resp, _, err := gemini.Ask(query, contextResults)
 		if err == nil && resp != "" {
 			aiResponse = resp
 			fmt.Println("🤖 AI Assistant:")
 			fmt.Println("══════════════════════════════════════════════════════════════")
-			fmt.Println(aiResponse)
+			fmt.Print(markdown.Render(aiResponse))
+			if !strings.HasSuffix(aiResponse, "\n") {
+				fmt.Println()
+			}
 			fmt.Println("══════════════════════════════════════════════════════════════")
 			fmt.Println()
 			return true

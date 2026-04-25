@@ -83,35 +83,7 @@ func TestIsMCP_FalseWhenEmpty(t *testing.T) {
 	}
 }
 
-// --- IsPostgreSQL tests ---
 
-func TestIsPostgreSQL_FalseWhenMCP(t *testing.T) {
-	setDBType(t, "mcp")
-	if IsPostgreSQL() {
-		t.Error("IsPostgreSQL() = true, want false when DB_TYPE=mcp")
-	}
-}
-
-func TestIsPostgreSQL_FalseWhenSQLite(t *testing.T) {
-	setDBType(t, "sqlite")
-	if IsPostgreSQL() {
-		t.Error("IsPostgreSQL() = true, want false when DB_TYPE=sqlite")
-	}
-}
-
-func TestIsPostgreSQL_TrueWhenPostgreSQL(t *testing.T) {
-	setDBType(t, "postgresql")
-	if !IsPostgreSQL() {
-		t.Error("IsPostgreSQL() = false, want true when DB_TYPE=postgresql")
-	}
-}
-
-func TestIsPostgreSQL_TrueWhenEmpty(t *testing.T) {
-	setDBType(t, "")
-	if !IsPostgreSQL() {
-		t.Error("IsPostgreSQL() = false, want true when DB_TYPE is empty (default)")
-	}
-}
 
 // --- Dispatch tests: verify each public function routes to MCP bridge ---
 

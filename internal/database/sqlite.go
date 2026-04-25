@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/gcclinux/scmd/internal/config"
@@ -13,11 +12,7 @@ import (
 
 // SQLitePath returns the full path to the SQLite database file.
 func SQLitePath() string {
-	dbName := os.Getenv("DB_NAME")
-	if dbName == "" {
-		dbName = "scmd"
-	}
-	return filepath.Join(config.ConfigDir(), dbName+".db")
+	return filepath.Join(config.ConfigDir(), config.DBName()+".db")
 }
 
 // InitSQLiteDB initializes a SQLite database connection.
@@ -49,10 +44,7 @@ func SetupSQLiteDatabase() {
 	config.LoadConfig()
 
 	dbPath := SQLitePath()
-	dataTbl := os.Getenv("TB_NAME")
-	if dataTbl == "" {
-		dataTbl = "data"
-	}
+	dataTbl := config.TableName()
 
 	fmt.Printf("\n=== Step 1: Create SQLite database '%s' ===\n", dbPath)
 

@@ -320,11 +320,9 @@ func cosineSimilarity(a, b []float64) float64 {
 }
 
 func sqliteTableName() string {
-	tbl := config.GetEnv("TB_NAME", "data")
-	return tbl
+	return config.TableName()
 }
 
 func sqliteAccessTable() string {
-	tbl := config.GetEnv("ACCESS_TB", "access")
-	return tbl
+	return "access"
 }

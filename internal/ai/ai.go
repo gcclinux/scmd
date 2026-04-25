@@ -10,6 +10,7 @@ import (
 	"github.com/gcclinux/scmd/internal/ai/ollama"
 	"github.com/gcclinux/scmd/internal/database"
 	"github.com/gcclinux/scmd/internal/search"
+	"github.com/gcclinux/scmd/internal/util"
 )
 
 // InitProviders initializes both AI providers and prints the active provider status.
@@ -69,6 +70,9 @@ func GetBestEmbedding(text string) ([]float64, error) {
 // AskAI sends a question to the best available AI provider.
 // Returns (responseText, totalTokens, error).
 func AskAI(question string, context []database.CommandRecord) (string, int, error) {
+	util.StartSpinner()
+	defer util.StopSpinner()
+
 	var errs []error
 	preferredAgent := strings.ToLower(os.Getenv("AGENT"))
 
@@ -153,7 +157,8 @@ func SmartSearch(query string, useEmbeddings bool) ([]database.CommandRecord, st
 		if !ollama.IsAvailable() {
 			return false
 		}
-		fmt.Println("⚠ Trying Ollama (Vector Search & Chat)...")
+		util.StartSpinner()
+		defer util.StopSpinner()
 		emb, err := ollama.GetEmbedding(query)
 		if err == nil {
 			vResults, err := database.SearchByVector(emb, 10)
@@ -203,7 +208,8 @@ func SmartSearch(query string, useEmbeddings bool) ([]database.CommandRecord, st
 		if !gemini.IsAvailable() {
 			return false
 		}
-		fmt.Println("⚠ Trying Gemini (Vector Search & Chat)...")
+		util.StartSpinner()
+		defer util.StopSpinner()
 		emb, err := gemini.GetEmbedding(query)
 		if err == nil {
 			vResults, err := database.SearchByVector(emb, 10)

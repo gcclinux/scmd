@@ -13,14 +13,12 @@ import (
 	"github.com/gcclinux/scmd/internal/cli"
 	"github.com/gcclinux/scmd/internal/config"
 	"github.com/gcclinux/scmd/internal/database"
-	"github.com/gcclinux/scmd/internal/markdown"
 	"github.com/gcclinux/scmd/internal/mcp"
 	"github.com/gcclinux/scmd/internal/mcpclient"
 	"github.com/gcclinux/scmd/internal/search"
 	"github.com/gcclinux/scmd/internal/server"
 	"github.com/gcclinux/scmd/internal/setup"
 	"github.com/gcclinux/scmd/internal/updater"
-	"github.com/gcclinux/scmd/internal/util"
 )
 
 func init() {
@@ -127,17 +125,24 @@ func init() {
 var tplFolder embed.FS
 
 func main() {
+	// If config doesn't exist, run automatic SQLite setup
+	if _, err := os.Stat(config.ConfigFilePath()); os.IsNotExist(err) {
+		setup.AutoSetupSQLite()
+	}
+
 	config.LoadConfig()
 
 	// Log which storage backend is active
-	dbType := os.Getenv("DB_TYPE")
-	switch strings.ToLower(dbType) {
+	dbType := strings.ToLower(os.Getenv("DB_TYPE"))
+	if dbType == "" {
+		dbType = "sqlite"
+	}
+
+	switch dbType {
 	case "mcp":
 		log.Println("Storage backend: MCP")
-	case "sqlite":
-		log.Println("Storage backend: SQLite")
 	default:
-		log.Println("Storage backend: PostgreSQL")
+		log.Println("Storage backend: SQLite")
 	}
 
 	msg, _, _ := updater.VersionRemote()
@@ -162,16 +167,7 @@ func main() {
 			updater.Download()
 		} else if arg1 == "--upgrade" {
 			updater.RunUpgrade()
-		} else if arg1 == "--create-db" {
-			database.SetupDatabase()
-		} else if arg1 == "--create-db-postgresql" {
-			setup.SetupPostgreSQL()
-		} else if arg1 == "--create-db-sqlite" {
-			setup.SetupSQLite()
-		} else if arg1 == "--connect-db-sqlite" {
-			setup.ConnectSQLite()
-		} else if arg1 == "--connect-db-postgresql" {
-			setup.ConnectPostgreSQL()
+
 		} else if arg1 == "--server-ollama" {
 			setup.SetupOllama()
 		} else if arg1 == "--server-gemini" {
@@ -208,41 +204,14 @@ func main() {
 				fmt.Printf("Error: %v\n", err)
 				os.Exit(1)
 			}
-		} else if arg1 == "--copydb" {
-			if err := database.InitDB(); err != nil {
-				fmt.Printf("Failed to connect to database: %v\n", err)
-				os.Exit(1)
-			}
-			defer database.CloseDB()
-			util.CopyDB("scmd_export.json", database.SearchCommands)
 		} else {
 			cli.PrintWrongSyntax()
 		}
 	} else if count == 3 {
 		if os.Args[1] == "--search" {
 			search.RunCLISearch(os.Args[2])
-		} else if os.Args[1] == "--import" {
-			ai.InitProviders()
-			if err := database.InitDB(); err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to connect to database: %v\n", err)
-				os.Exit(1)
-			}
-			defer database.CloseDB()
-			title, err := markdown.ImportMarkdown(os.Args[2], ai.GetBestEmbedding)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
-			fmt.Printf("✓ Document imported successfully: %s\n", title)
 		} else if os.Args[1] == "--web" && os.Args[2] == "-block" {
 			server.Routes()
-		} else if os.Args[1] == "--copydb" {
-			if err := database.InitDB(); err != nil {
-				fmt.Printf("Failed to connect to database: %v\n", err)
-				os.Exit(1)
-			}
-			defer database.CloseDB()
-			util.CopyDB(os.Args[2], database.SearchCommands)
 		} else if os.Args[1] == "--save" {
 			stat, _ := os.Stdin.Stat()
 			if (stat.Mode() & os.ModeCharDevice) == 0 {

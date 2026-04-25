@@ -10,7 +10,7 @@ import (
 const (
 	ansiBold   = "\033[1m"
 	ansiCyan   = "\033[36m"
-	ansiYellow = "\033[33m"
+	ansiGreen  = "\033[32m"
 	ansiReset  = "\033[0m"
 )
 
@@ -89,16 +89,16 @@ func Render(content string) string {
 			if !inCodeBlock {
 				codeBlockLang = strings.TrimSpace(strings.TrimPrefix(trimmed, "```"))
 				if codeBlockLang != "" {
-					out.WriteString(fmt.Sprintf("%s┌─ %s ─%s\n", ansiYellow, codeBlockLang, ansiReset))
+					out.WriteString(fmt.Sprintf("%s┌─ %s ─%s\n", ansiGreen, codeBlockLang, ansiReset))
 				} else {
-					out.WriteString(fmt.Sprintf("%s┌──────%s\n", ansiYellow, ansiReset))
+					out.WriteString(fmt.Sprintf("%s┌──────%s\n", ansiGreen, ansiReset))
 				}
 				inCodeBlock = true
 			} else {
 				if codeBlockLang != "" {
-					out.WriteString(fmt.Sprintf("%s└─ %s ─%s\n", ansiYellow, codeBlockLang, ansiReset))
+					out.WriteString(fmt.Sprintf("%s└─ %s ─%s\n", ansiGreen, codeBlockLang, ansiReset))
 				} else {
-					out.WriteString(fmt.Sprintf("%s└──────%s\n", ansiYellow, ansiReset))
+					out.WriteString(fmt.Sprintf("%s└──────%s\n", ansiGreen, ansiReset))
 				}
 				inCodeBlock = false
 				codeBlockLang = ""
@@ -107,7 +107,7 @@ func Render(content string) string {
 		}
 
 		if inCodeBlock {
-			out.WriteString(fmt.Sprintf("%s│%s %s\n", ansiYellow, ansiReset, line))
+			out.WriteString(fmt.Sprintf("%s│%s %s\n", ansiGreen, ansiReset, line))
 			continue
 		}
 
@@ -131,7 +131,7 @@ func Render(content string) string {
 	}
 
 	if inCodeBlock {
-		out.WriteString(fmt.Sprintf("%s└──────%s\n", ansiYellow, ansiReset))
+		out.WriteString(fmt.Sprintf("%s└──────%s\n", ansiGreen, ansiReset))
 	}
 
 	return out.String()

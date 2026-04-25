@@ -22,12 +22,23 @@ func RunUpgrade() string {
 	if upgrade {
 		local := fmt.Sprintf("%v%v%v", filepath.Dir(os.Args[0]), string(path), filepath.Base(os.Args[0]))
 		old := fmt.Sprintf("%v%v%v%v%v%v", filepath.Dir(os.Args[0]), string(path), "v", localInt, "-", filepath.Base(os.Args[0]))
-		remote := fmt.Sprintf("%v%v", "https://github.com/gcclinux/scmd/releases/download/latest/", file)
+		// Ensure the version string starts with 'v' for the GitHub release tag
+		versionTag := remoteVersion
+		if !strings.HasPrefix(versionTag, "v") {
+			versionTag = "v" + versionTag
+		}
+		
+		remote := fmt.Sprintf("https://github.com/gcclinux/scmd/releases/download/%v/%v", versionTag, file)
 
 		replaceFile(local, old)
-		DownloadFile(file, remote)
+		
+		fmt.Printf("Downloading new version from %s...\n", remote)
+		err := DownloadFile(local, remote)
+		if err != nil {
+			log.Fatalf("Failed to download new version: %v", err)
+		}
 
-		err := os.Chmod(local, 0750)
+		err = os.Chmod(local, 0750)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -50,15 +61,17 @@ func replaceFile(file string, local string) {
 func getFile() string {
 	fileName := ""
 	if runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
-		fileName = "scmd-win-x86_64.exe"
+		fileName = "scmd-windows-amd64.exe"
 	} else if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
-		fileName = "scmd-Linux-x86_64"
+		fileName = "scmd-linux-amd64"
 	} else if runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
-		fileName = "scmd-Linux-aarch64"
+		fileName = "scmd-linux-aarch64"
+	} else if runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
+		fileName = "scmd-darwin-amd64"
 	} else if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
-		fileName = "scmd-Darwin-arm64"
+		fileName = "scmd-darwin-arm64"
 	} else {
-		log.Println("unknown")
+		log.Println("unknown architecture/os")
 	}
 	return fileName
 }
@@ -67,11 +80,7 @@ func getFile() string {
 func Download() {
 	fmt.Println()
 	fmt.Println("Note: Database download functionality is no longer available.")
-	fmt.Println("This application now uses PostgreSQL instead of tardigrade.db")
-	fmt.Println()
-	fmt.Println("To import data into PostgreSQL, use the CLI tools in the cli/ directory:")
-	fmt.Println("  cd cli/")
-	fmt.Println("  python import_to_postgres.py")
+	fmt.Println("This application uses an automated SQLite database configuration.")
 	fmt.Println()
 }
 
