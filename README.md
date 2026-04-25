@@ -2,7 +2,7 @@
 
 > An AI-powered command search and management tool with CLI, Interactive, and Web interfaces.
 
-**Version:** 2.0.6 | **Language:** Go 1.23 | **License:** MIT
+**Version:** 2.0.6 | **Language:** Go 1.23 | **License:** AGPL-3.0
 **Author:** Ricardo Wagemaker | **Repo:** [github.com/gcclinux/scmd](https://github.com/gcclinux/scmd)
 
 ---
@@ -13,8 +13,15 @@ SCMD is a personal and team command knowledge base. Store, search, and retrieve 
 
 For a full feature breakdown and infographic-ready reference, see [docs/SCMD_INFOGRAPHIC.md](docs/SCMD_INFOGRAPHIC.md).
 
----
 
+---
+## Climate Commitment
+
+![Climate Commitment](images/climate.png)
+
+SCMD is committed to sustainable software development, The primary goal of SCMD-CLI is to change this paradigm. We believe developers shouldn't have to sacrifice our planet to write great code. By building a lightning-fast, dependency-free binary in Go, we deliver all the advanced agentic features you expect from a modern CLI AI Assistant, but with a drastically smaller environmental impact.
+
+---
 ## Screenshots
 
 ### v2.1.2 representation when starting scmd with flags --cli
