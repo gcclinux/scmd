@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.1.1] - 2026-04-25
+## [2.1.2] - 2026-04-25
+
+### Added
+- **New "Stored Commands" Web Interface** — A comprehensive command browser (`/stored`) allowing users to navigate, filter, and view the entire SCMD database.
+  - **Master-Detail Layout** — Sidebar list for quick navigation and a rich detail panel for command inspection.
+  - **Live Client-side Search** — Instant filtering across command keys and descriptions with highlighted matches.
+  - **Rich Markdown Rendering** — Full support for markdown headers, tables, and code blocks within the web UI using `marked.js`.
+  - **Master Pagination** — Efficiently handles large datasets (1000+ entries) with client-side pagination.
+  - **Integration Features** — "Search this" action to quickly re-query commands and "Copy" button for easy terminal usage.
+
+### Changed
+- **Web UI Overhaul** — Complete visual redesign transitioning from Bootstrap to a custom, modern dark-themed glassmorphism system.
+  - **Typography Upgrade** — Switched to Google Fonts (Inter for UI, JetBrains Mono for code).
+  - **Component Library** — Implemented sticky navigation, animated brand indicators, and reusable card-based layouts.
+  - **Responsive Layouts** — Optimized Search, Add, and Help pages for consistent desktop and mobile experiences.
+- **Enhanced Login Experience** — Professional redesigned login card with ambient background lighting and interactive feedback for authentication attempts.
+
+
+## [2.1.1] - 2026-04-23
 
 ### Changed
 - **CLI upgrade: GitHub release URL format** — updated from fixed path to dynamically generated URL including semantic version tag (e.g., `/releases/download/v2.1.2/`)

@@ -1,201 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-    <style>
-        .vertical-menu {
-            width: 50%;
-        }
-  
-        .vertical-menu button {
-            background-color: #eee;
-            color: black;
-            display: block;
-            padding: 2px;
-            text-decoration: none;
-            width: 50%;
-        }
-  
-        .vertical-menu button:hover {
-            background-color: #ccc;
-        }
-  
-        .vertical-menu button.active {
-            background-color: #0d6efd;
-            color: white;
-        }
-    </style>
-    <title>{{.PageTitle}}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SCMD Help — commands, upgrade, and download options">
+  <title>Help — {{.PageTitle}}</title>
+  <link rel="icon" href="scmd_icon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:      #0d0f14;
+      --bg-surface:   #13161e;
+      --bg-card:      rgba(255,255,255,0.04);
+      --bg-card-hov:  rgba(255,255,255,0.07);
+      --border:       rgba(255,255,255,0.08);
+      --border-focus: rgba(99,179,237,0.6);
+      --accent:       #63b3ed;
+      --accent-glow:  rgba(99,179,237,0.25);
+      --accent2:      #9f7aea;
+      --accent3:      #f6ad55;
+      --accent4:      #68d391;
+      --success:      #68d391;
+      --danger:       #fc8181;
+      --text-primary: #e8eaf0;
+      --text-muted:   #6b7280;
+      --text-subtle:  #4b5563;
+      --font-sans:    'Inter', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+      --radius:       12px;
+      --radius-lg:    16px;
+      --shadow:       0 4px 24px rgba(0,0,0,0.4);
+      --transition:   0.2s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-sans); background: var(--bg-base); color: var(--text-primary); min-height: 100vh; line-height: 1.6; }
+
+    /* NAVBAR */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 60px;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.15rem; font-weight: 700; color: var(--text-primary);
+      text-decoration: none; letter-spacing: -0.3px;
+    }
+    .nav-brand .brand-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.8); }
+    }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      padding: 6px 14px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; color: var(--text-muted);
+      text-decoration: none; transition: color var(--transition), background var(--transition);
+    }
+    .nav-link:hover { color: var(--text-primary); background: var(--bg-card-hov); }
+    .nav-link.active { color: var(--accent); background: var(--bg-card-hov); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .version-badge {
+      font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-subtle);
+      background: var(--bg-card); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px;
+    }
+    .btn-logout {
+      padding: 6px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+      color: var(--text-muted); background: transparent; border: 1px solid var(--border);
+      cursor: pointer; text-decoration: none; transition: all var(--transition);
+    }
+    .btn-logout:hover { color: var(--danger); border-color: var(--danger); background: rgba(252,129,129,0.08); }
+
+    /* MAIN */
+    .main { padding: 48px 24px 80px; max-width: 1100px; margin: 0 auto; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 40px; }
+    .page-header h1 {
+      font-size: 1.8rem; font-weight: 700; color: var(--text-primary);
+      letter-spacing: -0.5px; margin-bottom: 8px;
+    }
+    .page-header p { font-size: 0.95rem; color: var(--text-muted); }
+
+    /* SECTION */
+    .section-label {
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-subtle); margin-bottom: 16px;
+    }
+
+    /* CARDS GRID */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .help-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex; flex-direction: column;
+      gap: 12px;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+    .help-card:hover {
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .card-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .card-icon.blue   { background: rgba(99,179,237,0.12);  }
+    .card-icon.purple { background: rgba(159,122,234,0.12); }
+    .card-icon.orange { background: rgba(246,173,85,0.12);  }
+    .card-icon.green  { background: rgba(104,211,145,0.12); }
+
+    .card-title {
+      font-size: 1rem; font-weight: 600; color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .card-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; flex: 1; }
+    .card-desc a { color: var(--accent); text-decoration: none; }
+    .card-desc a:hover { text-decoration: underline; }
+
+    /* CARD ACTIONS */
+    .card-action { margin-top: 4px; }
+    .btn-card {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: all var(--transition); border: none;
+      font-family: var(--font-sans);
+    }
+    .btn-card.primary {
+      background: rgba(99,179,237,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(99,179,237,0.25);
+    }
+    .btn-card.primary:hover { background: rgba(99,179,237,0.2); transform: translateY(-1px); }
+    .btn-card.purple-btn {
+      background: rgba(159,122,234,0.12);
+      color: var(--accent2);
+      border: 1px solid rgba(159,122,234,0.25);
+    }
+    .btn-card.purple-btn:hover { background: rgba(159,122,234,0.2); transform: translateY(-1px); }
+    .btn-card.orange-btn {
+      background: rgba(246,173,85,0.12);
+      color: var(--accent3);
+      border: 1px solid rgba(246,173,85,0.25);
+    }
+    .btn-card.orange-btn:hover { background: rgba(246,173,85,0.2); transform: translateY(-1px); }
+    .btn-card.green-btn {
+      background: rgba(104,211,145,0.12);
+      color: var(--accent4);
+      border: 1px solid rgba(104,211,145,0.25);
+    }
+    .btn-card.green-btn:hover { background: rgba(104,211,145,0.2); transform: translateY(-1px); }
+
+    /* CLI OUTPUT */
+    .cli-output-section { margin-top: 8px; }
+    .cli-output {
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text-primary);
+      overflow-x: auto;
+    }
+    .cli-output .cmd-name  { color: var(--accent); font-weight: 600; }
+    .cli-output .cmd-flag  { color: var(--accent2); }
+    .cli-output .cmd-desc  { color: var(--text-muted); font-style: italic; }
+    .cli-output .cmd-line  { display: flex; gap: 16px; align-items: baseline; padding: 2px 0; }
+    .cli-output .cmd-line:hover { background: rgba(255,255,255,0.03); border-radius: 4px; }
+    .cli-divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+    /* ── CLIMATE MISSION ── */
+    .climate-footer {
+      margin-top: 80px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      animation: fadeInClimate 1s ease-out;
+    }
+    .climate-footer .climate-icon { font-size: 2.5rem; margin-bottom: 16px; }
+    .climate-footer h2 {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .climate-footer .climate-content {
+      max-width: 800px; margin: 0 auto;
+      text-align: left; font-size: 0.95rem; color: var(--text-muted);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .climate-footer strong { color: var(--text-primary); }
+    .climate-footer .highlight {
+      font-size: 1.05rem; font-weight: 600; color: var(--success);
+      text-align: center; margin-top: 8px; font-style: italic;
+    }
+    @keyframes fadeInClimate {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg p-3 mb-2 bg-primary text-white" data-bs-theme="dark">
-        <div class="container-fluid">
-          <a class="navbar-brand fw-bold" href="/">{{.PageTitle}}</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active fw-bold" aria-current="page" href="/">Home</a>
-              </li>
-              {{if .Insert}}
-                <li class="nav-item">
-                  <a class="nav-link active fw-bold" aria-current="page" href="/add">Add</a>
-                </li>
-                {{end}}
-              <li class="nav-item">
-                <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
-              </li>
-            </ul>
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active fw-bold" aria-current="page" href="/logout">Logout</a>
-              </li>
-            </ul>
-          </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="nav-brand" href="/">
+      <span class="brand-dot"></span>
+      {{.PageTitle}}
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="/">Home</a>
+      {{if .Insert}}
+      <a class="nav-link" href="/add">Add</a>
+      {{end}}
+      <a class="nav-link" href="/stored">Stored</a>
+      <a class="nav-link active" href="/help">Help</a>
+    </div>
+    <div class="nav-right">
+      <span class="version-badge">v{{.Version}}</span>
+      <a class="btn-logout" href="/logout">Logout</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Help &amp; Resources</h1>
+      <p>Everything you need to get the most out of SCMD — search, upgrade, download, and CLI reference.</p>
+    </div>
+
+    <!-- TOOLS SECTION -->
+    <p class="section-label">Application Tools</p>
+    <div class="cards-grid">
+
+      <!-- Search -->
+      <div class="help-card">
+        <div class="card-icon blue">🔍</div>
+        <div>
+          <div class="card-title">Search Commands</div>
+          <div class="card-desc">Query your knowledge base using comma or space separated keywords, command names, or full phrases. Supports AI-powered results when configured.</div>
         </div>
-      </nav>
+        <div class="card-action">
+          <a class="btn-card primary" href="/">Go to Search</a>
+        </div>
+      </div>
 
-          <div class="container-fluid mt-3">
-            Version: {{.Version}}
-          </div>
-          <hr>
-          <div class="container px-1 py-4" id="featured-3">
-            <div class="row g-4 py-1 row-cols-1 row-cols-lg-3">
+      <!-- Version -->
+      <div class="help-card">
+        <div class="card-icon purple">🏷️</div>
+        <div>
+          <div class="card-title">Version Info</div>
+          <div class="card-desc">Display the current application version and check whether a newer release is available for download.</div>
+        </div>
+        <div class="card-action">
+          <form method="post" autocomplete="off">
+            <input autocomplete="false" name="hidden" type="hidden" id="version" value="version">
+            <button type="submit" class="btn-card purple-btn">Check Version</button>
+          </form>
+        </div>
+      </div>
 
-              <div class="feature col">
-                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-                  <svg class="bi" width="1em" height="1em"><use xlink:href="#collection"></use></svg>
-                </div>
-                <h3 class="fs-2">SCMD</h3>
-                <p>Search Command (SCMD) Start your query by inputing your search criteria in the searchbar. Search based on comma or space separated pattern(s)</p>
-                <form action="/">
-                  <button type="submit">Search</button>
-              </form>
-              </div>
+      <!-- Upgrade -->
+      <div class="help-card">
+        <div class="card-icon orange">⬆️</div>
+        <div>
+          <div class="card-title">Upgrade</div>
+          <div class="card-desc">Checks <a href="https://github.com/gcclinux/scmd" target="_blank">github.com/gcclinux/scmd</a> for a newer version. If available, it will download and apply the upgrade automatically.</div>
+        </div>
+        <div class="card-action">
+          <form method="post" autocomplete="off">
+            <input autocomplete="false" name="hidden" type="hidden" id="upgrade" value="upgrade">
+            <button type="submit" class="btn-card orange-btn">Run Upgrade</button>
+          </form>
+        </div>
+      </div>
 
-              <div class="feature col">
-                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-                  <svg class="bi" width="1em" height="1em"><use xlink:href="#people-circle"></use></svg>
-                </div>
-                <h3 class="fs-2">Version</h3>
-                <p>Version helps to show the current version of the application and also shows if there is a newer version only available to download.</p>
-                <form method="post" autocomplete="off">
-                  <button type="submit">Version</button>
-                  <input autocomplete="false" name="hidden" type="hidden" id="version" name="version" value="version">
-              </form>
-              </div>
+      <!-- Download App -->
+      <div class="help-card">
+        <div class="card-icon green">📦</div>
+        <div>
+          <div class="card-title">Download App</div>
+          <div class="card-desc">Get the latest compiled release from GitHub to run your own local instance of SCMD with a personal command database.</div>
+        </div>
+        <div class="card-action">
+          <a class="btn-card green-btn" href="https://github.com/gcclinux/scmd/releases" target="_blank">App Releases ↗</a>
+        </div>
+      </div>
 
-              <div class="feature col">
-                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
-                </div>
-                <h3 class="fs-2">Upgrade</h3>
-                <p>Upgrade will check <a href="https://github.com/gcclinux/scmd">https://github.com/gcclinux/scmd</a> to see if there is a new version of the application available and if there is, it will download and upgrade it.</p>
-                <form method="post" autocomplete="off">
-                  <button type="submit">Upgrade</button>
-                  <input autocomplete="false" name="hidden" type="hidden" id="upgrade" name="upgrade" value="upgrade">
-              </form>
-              </div>
-            </div>
-          </div>
+      <!-- CLI Help -->
+      <div class="help-card">
+        <div class="card-icon blue">💻</div>
+        <div>
+          <div class="card-title">CLI Reference</div>
+          <div class="card-desc">Full list of command-line flags and syntax for using SCMD without the web interface — ideal for scripting and automation.</div>
+        </div>
+        <div class="card-action">
+          <form method="post" autocomplete="off">
+            <input autocomplete="false" name="hidden" type="hidden" id="cli" value="cli">
+            <button type="submit" class="btn-card primary">Show CLI Help</button>
+          </form>
+        </div>
+      </div>
 
-          <div class="container px-1 py-4" id="featured-3">
-            <div class="row g-4 py-1 row-cols-1 row-cols-lg-3">
+    </div>
 
-              <div class="feature col">
-                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
-                </div>
-                <h3 class="fs-2">Download (scmd)</h3>
-                <p>Download the last compiled version of the application from <a href="https://github.com/">https://github.com/</a> so that you can run your own version locally with your own commands.</p>
-                <form action="https://github.com/gcclinux/scmd/releases">
-                  <button type="submit">App Download</button>
-              </form>
-              </div>
-
-              <!-- <div class="feature col">
-                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
-                </div>
-                <h3 class="fs-2">Download (DB)</h3>
-                <p>Download the lastest version of the commands and fucntion database from <a href="https://github.com/">https://github.com/</a> allowing you to start with a full list and start adding your own.</p>
-                  <button onclick="downloadFile()">DB Download</button>
-              </div> -->
-
-              <div class="feature col">
-                <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-                  <svg class="bi" width="1em" height="1em"><use xlink:href="#toggles2"></use></svg>
-                </div>
-                <h3 class="fs-2">CLI Help</h3>
-                <p>CLI Help provides a list of commands and syntax to help individuals using SCMD via command line when web interface is not available.</p>
-                <form method="post" autocomplete="off">
-                  <button type="submit">CLI Help</button>
-                  <input autocomplete="false" name="hidden" type="hidden" id="cli" name="cli" value="cli">
-              </form>
-              </div>
-
-            </div>
-          </div>
-
-          {{if .AllData}}
-          <div class="bg-dark text-white ms-5 ps-5 me-5 pe-5">
-            {{$odd := true}}
-              {{range $data := .AllData}}
-                {{if $odd}}
-                    <B>{{ $data }}</B><BR>
-                {{else}}
-                <I>{{ $data }}</I><BR>
-                {{end}}
-              {{$odd = not $odd}}
-            {{end}}
-            <p> &nbsp; </p>
-          </div>
+    <!-- CLI OUTPUT (if returned) -->
+    {{if .AllData}}
+    <div class="cli-output-section">
+      <p class="section-label">CLI Output</p>
+      <div class="cli-output">
+        {{$odd := true}}
+        {{range $data := .AllData}}
+          {{if $odd}}
+          <div class="cmd-line"><span class="cmd-name">{{$data}}</span></div>
+          {{else}}
+          <div class="cmd-line"><span class="cmd-desc">{{$data}}</span></div>
+          {{end}}
+          {{$odd = not $odd}}
         {{end}}
+      </div>
+    </div>
+    {{end}}
+    <section class="climate-footer">
+      <div class="climate-icon">🌍</div>
+      <h2>Our Mission: A Greener Developer Ecosystem</h2>
+      <div class="climate-content">
+        <p>
+          Today's IDEs are overwhelmingly heavy. They come packed with massive dependencies, require constant
+          background interpreters, and consume excessive amounts of memory, CPU, and storage. All of this
+          translates directly to a colossal, often ignored, <strong>carbon footprint</strong>.
+        </p>
+        <p>
+          The primary goal of <strong>SCMD-CLI</strong> is to change this paradigm. We believe
+          developers shouldn't have to sacrifice our planet to write great code. By building a lightning-fast,
+          dependency-free binary in Go, we deliver all the advanced agentic features you expect from a modern
+          IDE, but with a drastically smaller environmental impact.
+        </p>
+        <p>
+          Beyond just a lightweight runtime, we are building local intelligence directly into the application
+          to minimize reliance on heavy cloud AI models where possible. And because we believe in transparency
+          and community-driven impact, the entire project is <strong>100% open source</strong>.
+        </p>
+        <p class="highlight">
+          Let's write incredible code, while leaving a smaller footprint behind.
+        </p>
+      </div>
+    </section>
 
-        <script>
-          function downloadFile() {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://raw.githubusercontent.com/gcclinux/scmd/main/tardigrade.db', true);
-            xhr.responseType = 'blob';
-          
-            xhr.onload = function() {
-              if (xhr.status === 200) {
-                var url = window.URL.createObjectURL(xhr.response);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'tardigrade.db';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(function() {
-                  document.body.removeChild(a);
-                  window.URL.revokeObjectURL(url);  
-                }, 0);
-              }
-            };
-          
-            xhr.send();
-          }
-          </script>
+  </main>
 
-          <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js" crossorigin="anonymous"></script>
-          <script type="importmap">
-          {
-            "imports": {
-              "@popperjs/core": "https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/esm/popper.min.js",
-              "bootstrap": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.esm.min.js"
-            }
-          }
-          </script>
-          
-          <script type="module">
-            import * as bootstrap from 'bootstrap'
-
-            new bootstrap.Popover(document.getElementById('popoverButton'))
-          </script>
 </body>
 </html>

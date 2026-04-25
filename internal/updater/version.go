@@ -12,7 +12,7 @@ import (
 )
 
 // Release is the current application version.
-const Release = "2.1.1"
+const Release = "2.1.2"
 
 // VersionCheck displays the local and remote version.
 func VersionCheck(msg string) string {

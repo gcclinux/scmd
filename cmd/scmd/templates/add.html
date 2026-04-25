@@ -1,89 +1,386 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{.PageTitle}}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-    <style>
-      textarea {overflow-y:scroll;}
-    </style>
-  </head>
-  <body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SCMD — Add a new command or function to your knowledge base">
+  <title>Add Command — {{.PageTitle}}</title>
+  <link rel="icon" href="scmd_icon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <nav class="navbar navbar-expand-lg p-3 mb-2 bg-primary text-white" data-bs-theme="dark">
-      <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/">(NEW)</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active fw-bold" aria-current="page" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active fw-bold" aria-current="page" href="/add">Add</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active fw-bold" aria-current="page" href="/logout">Logout</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-    <div class="container-fluid mt-3">
-      Version: {{.Version}}
+    :root {
+      --bg-base:      #0d0f14;
+      --bg-surface:   #13161e;
+      --bg-card:      rgba(255,255,255,0.04);
+      --bg-card-hov:  rgba(255,255,255,0.07);
+      --border:       rgba(255,255,255,0.08);
+      --border-focus: rgba(99,179,237,0.6);
+      --accent:       #63b3ed;
+      --accent-glow:  rgba(99,179,237,0.25);
+      --accent2:      #9f7aea;
+      --success:      #68d391;
+      --danger:       #fc8181;
+      --text-primary: #e8eaf0;
+      --text-muted:   #6b7280;
+      --text-subtle:  #4b5563;
+      --font-sans:    'Inter', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+      --radius:       12px;
+      --radius-lg:    16px;
+      --shadow:       0 4px 24px rgba(0,0,0,0.4);
+      --transition:   0.2s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-sans); background: var(--bg-base); color: var(--text-primary); min-height: 100vh; line-height: 1.6; }
+
+    /* NAVBAR */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 60px;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.15rem; font-weight: 700; color: var(--text-primary);
+      text-decoration: none; letter-spacing: -0.3px;
+    }
+    .nav-brand .brand-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.8); }
+    }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      padding: 6px 14px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; color: var(--text-muted);
+      text-decoration: none; transition: color var(--transition), background var(--transition);
+    }
+    .nav-link:hover { color: var(--text-primary); background: var(--bg-card-hov); }
+    .nav-link.active { color: var(--accent); background: var(--bg-card-hov); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .version-badge {
+      font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-subtle);
+      background: var(--bg-card); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px;
+    }
+    .btn-logout {
+      padding: 6px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+      color: var(--text-muted); background: transparent; border: 1px solid var(--border);
+      cursor: pointer; text-decoration: none; transition: all var(--transition);
+    }
+    .btn-logout:hover { color: var(--danger); border-color: var(--danger); background: rgba(252,129,129,0.08); }
+
+    /* MAIN */
+    .main { padding: 48px 24px 80px; }
+
+    /* FORM CARD */
+    .form-container {
+      max-width: 740px;
+      margin: 0 auto;
+    }
+
+    .form-header { margin-bottom: 32px; }
+    .form-header h1 {
+      font-size: 1.8rem; font-weight: 700; color: var(--text-primary);
+      letter-spacing: -0.5px; margin-bottom: 8px;
+    }
+    .form-header p { font-size: 0.95rem; color: var(--text-muted); }
+
+    .notice-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(246,173,85,0.08);
+      border: 1px solid rgba(246,173,85,0.2);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 0.875rem;
+      color: #f6d28d;
+      line-height: 1.5;
+    }
+    .notice-banner .notice-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* FORM */
+    .add-form {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .field-group { margin-bottom: 24px; }
+
+    .field-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    .field-label span {
+      text-transform: none;
+      font-weight: 400;
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+      letter-spacing: 0;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .field-row:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .field-prefix {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      background: rgba(255,255,255,0.03);
+      border-right: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      min-width: 60px;
+    }
+
+    textarea.field-input, input.field-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: none;
+    }
+    input.field-input { font-family: var(--font-sans); font-size: 0.95rem; }
+    textarea.field-input::placeholder, input.field-input::placeholder { color: var(--text-subtle); font-style: italic; }
+
+    .field-hint {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 8px;
+    }
+
+    .btn-submit {
+      padding: 10px 28px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--bg-base);
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all var(--transition);
+      box-shadow: 0 2px 12px rgba(99,179,237,0.3);
+      font-family: var(--font-sans);
+    }
+    .btn-submit:hover {
+      background: #90cdf4;
+      box-shadow: 0 4px 20px rgba(99,179,237,0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--font-sans);
+      transition: all var(--transition);
+    }
+    .btn-cancel:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); background: var(--bg-card-hov); }
+
+    /* RESULT DISPLAY */
+    .result-section {
+      margin-top: 24px;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+    .result-row { display: flex; gap: 8px; align-items: baseline; }
+    .result-label { font-weight: 600; color: var(--text-muted); flex-shrink: 0; }
+    .result-value { font-family: var(--font-mono); font-size: 0.875rem; color: var(--accent); }
+
+    /* ── CLIMATE MISSION ── */
+    .climate-footer {
+      margin-top: 80px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      animation: fadeInClimate 1s ease-out;
+    }
+    .climate-footer .climate-icon { font-size: 2.5rem; margin-bottom: 16px; }
+    .climate-footer h2 {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .climate-footer .climate-content {
+      max-width: 800px; margin: 0 auto;
+      text-align: left; font-size: 0.95rem; color: var(--text-muted);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .climate-footer strong { color: var(--text-primary); }
+    .climate-footer .highlight {
+      font-size: 1.05rem; font-weight: 600; color: var(--success);
+      text-align: center; margin-top: 8px; font-style: italic;
+    }
+    @keyframes fadeInClimate {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="nav-brand" href="/">
+      <span class="brand-dot"></span>
+      {{.PageTitle}}
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link active" href="/add">Add</a>
+      <a class="nav-link" href="/stored">Stored</a>
+      <a class="nav-link" href="/help">Help</a>
     </div>
-        <hr>
-        <form action="/add" method="post" autocomplete="off">
-          <div class="position-relative text-center">
-            <BR>
-            <H5>Start adding your own commands or functions you wish to save, either local or remote.</H5>
-            <H6><i>Please be as descriptive as possible, indentation, punctuation in full details </H6>
-            <H6>remotely bad description, commands, functions will be deleted!</i></H6>
-            <BR>
+    <div class="nav-right">
+      <span class="version-badge">v{{.Version}}</span>
+      <a class="btn-logout" href="/logout">Logout</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="form-container">
+      <div class="form-header">
+        <h1>Add New Command</h1>
+        <p>Save a command, function, or snippet to your personal knowledge base for quick retrieval later.</p>
+      </div>
+
+      <div class="notice-banner">
+        <span class="notice-icon">⚠️</span>
+        <span>Be as descriptive as possible — include full syntax, indentation, and accurate details. Commands with poor descriptions may be removed from shared databases.</span>
+      </div>
+
+      <form action="/add" method="post" autocomplete="off" class="add-form">
+
+        <!-- Command -->
+        <div class="field-group">
+          <label class="field-label" for="command">
+            Command Syntax <span>— full command with flags and arguments</span>
+          </label>
+          <div class="field-row">
+            <div class="field-prefix">CMD</div>
+            <textarea class="field-input" name="command" id="command" rows="4"
+              placeholder="$ go get -u github.com/gcclinux/scmd"></textarea>
           </div>
-              <label for="command" class="ms-3 form-label"><B>Enter Full Command Syntax</B> - Example: <i>$ go get -u github.com/gcclinux/scmd</i></label>
-              <div class="input-group flex-nowrap">
-                  <span class="ms-3 input-group-text" id="addon-wrapping">CMD</span>
-                  <textarea rows="4" cols="50" class="form-control gap-3" name="command" id="command" aria-describedby="addon-wrapping"></textarea>
-                  <input autocomplete="false" name="hidden" type="hidden" name="command">
-              </div>
-              <BR>
-              <label for="description" class="ms-3 form-label"><B>Enter Full Command Description</B> - Example: <i>Download specific & available code or application from github</i></label>
-              <div class="input-group flex-nowrap">
-                  <span class="ms-3 input-group-text" id="addon-wrapping">INFO</span>
-                  <input type="text" class="form-control gap-3" name="description" id="description" aria-describedby="addon-wrapping">
-                  <input autocomplete="false" name="hidden" type="hidden" id="description" name="description">
-              </div>
-            <BR>
-          <button class="ms-3 mt-3 btn bg-primary text-white" type="submit">Submit</button>
-        </form>
-        <div class="container-fluid mt-3">
-              <BR><B>{{.Return}}</B><i>{{.Status}}</i>
-              <BR><B>{{.DescTitle}}</B><I>{{.Data}}</I>
-              <BR><B>{{.CmdTitle}}</B><I>{{.Key}}</I><BR>
+          <div class="field-hint">Example: <code style="font-family:var(--font-mono);font-size:0.8em;color:var(--accent);">$ docker run -it --rm ubuntu:latest /bin/bash</code></div>
         </div>
 
-        <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js" crossorigin="anonymous"></script>
-        <script type="importmap">
-        {
-          "imports": {
-            "@popperjs/core": "https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/esm/popper.min.js",
-            "bootstrap": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.esm.min.js"
-          }
-        }
-        </script>
-        <script type="module">
-          import * as bootstrap from 'bootstrap'
+        <!-- Description -->
+        <div class="field-group">
+          <label class="field-label" for="description">
+            Description <span>— what does this command do?</span>
+          </label>
+          <div class="field-row">
+            <div class="field-prefix">INFO</div>
+            <input class="field-input" type="text" name="description" id="description"
+              placeholder="Download & install specific code or application from GitHub">
+          </div>
+        </div>
 
-          new bootstrap.Popover(document.getElementById('popoverButton'))
-        </script>
-  </body>
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">Save Command</button>
+          <a href="/" class="btn-cancel">Cancel</a>
+        </div>
+
+        <input autocomplete="false" name="hidden" type="hidden">
+      </form>
+
+      <!-- Result output -->
+      {{if .Return}}
+      <div class="result-section">
+        {{if .Return}}<div class="result-row"><span class="result-label">Status:</span> <span class="result-value">{{.Return}}</span> <span style="color:var(--text-muted);font-size:0.85rem;">{{.Status}}</span></div>{{end}}
+        {{if .DescTitle}}<div class="result-row"><span class="result-label">{{.DescTitle}}</span> <span class="result-value">{{.Data}}</span></div>{{end}}
+        {{if .CmdTitle}}<div class="result-row"><span class="result-label">{{.CmdTitle}}</span> <span class="result-value">{{.Key}}</span></div>{{end}}
+      </div>
+      {{end}}
+
+    </div>
+    <section class="climate-footer">
+      <div class="climate-icon">🌍</div>
+      <h2>Our Mission: A Greener Developer Ecosystem</h2>
+      <div class="climate-content">
+        <p>
+          Today's IDEs are overwhelmingly heavy. They come packed with massive dependencies, require constant
+          background interpreters, and consume excessive amounts of memory, CPU, and storage. All of this
+          translates directly to a colossal, often ignored, <strong>carbon footprint</strong>.
+        </p>
+        <p>
+          The primary goal of <strong>SCMD-CLI</strong> is to change this paradigm. We believe
+          developers shouldn't have to sacrifice our planet to write great code. By building a lightning-fast,
+          dependency-free binary in Go, we deliver all the advanced agentic features you expect from a modern
+          IDE, but with a drastically smaller environmental impact.
+        </p>
+        <p>
+          Beyond just a lightweight runtime, we are building local intelligence directly into the application
+          to minimize reliance on heavy cloud AI models where possible. And because we believe in transparency
+          and community-driven impact, the entire project is <strong>100% open source</strong>.
+        </p>
+        <p class="highlight">
+          Let's write incredible code, while leaving a smaller footprint behind.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+</body>
 </html>

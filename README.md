@@ -17,14 +17,11 @@ For a full feature breakdown and infographic-ready reference, see [docs/SCMD_INF
 
 ## Screenshots
 
-### v2.1.0 representation when scmd start with flags --cli
-![v2.1.0 representation when scmd with flags --cli](images\v208-cli-start.png)
+### v2.1.2 representation when starting scmd with flags --cli
+![v2.1.2 representation when starting scmd with flags --cli](images\v212-cli-start.png)
 
-### v2.1.0 representation when scmd --cli interactive menu /help
-![v2.1.0 representation when scmd --cli interactive menu /help](images\v208-cli-help.png)
-
-### v2.1.0 representation when scmd --cli execute required command
-![v2.1.0 representation when scmd --cli execute required command](images\v208-cli-exe.png)
+### v2.1.2 representation when starting scmd with flags --cli and executing /help command
+![v2.1.2 representation when starting scmd with flags --cli](images\v212-cli-ai-help.png)
 
 ---
 
@@ -49,12 +46,13 @@ See [INTERACTIVE_MODE.md](docs/INTERACTIVE_MODE.md) and [SLASH_COMMANDS.md](docs
 
 ### 2. Traditional CLI
 
+### v2.1.2 representation when scmd start with flags --cli
+![v2.1.2 representation when scmd with flags --cli](images\v212-cli-help.png)
+
 ```bash
 scmd --search "postgresql replication"       # AND logic (all words must match)
 scmd --search "docker,kubernetes"            # OR logic (any pattern matches)
 scmd --save "docker ps -a" "List all containers"
-scmd --import ./runbook.md                   # Import markdown documents
-scmd --copydb                                # Export database to JSON
 ```
 
 JSON output, scriptable, automation-friendly.
@@ -94,6 +92,15 @@ The **Model Context Protocol (MCP)** interface allows local AI assistants (like 
 
 See [MCP-walkthrough.md](docs/MCP-walkthrough.md) for setup and registration details.
 
+---
+
+### 5. Web Interface
+
+**Web UI when scmd with flags --web**  
+![Web UI when scmd with flags --web](images/v212-web-start.png)
+
+**Web UI using stored results when scmd with flags --web**  
+![Web UI using stored results when scmd with flags --web](images/v212-web-stored.png)
 ---
 
 ## AI Integration
@@ -197,7 +204,6 @@ SCMD (MCP Client)  ──SSE──>  MCP Server  ──>  PostgreSQL + pgvector
    {
      "agent": "ollama",
      "db_type": "mcp",
-     "tb_name": "data",
      "mcp_server": "",
      "gemini_api": "your_gemini_api_key_here",
      "ollama": "localhost",
@@ -232,7 +238,6 @@ cp config.json.example ~/.scmd/config.json
 {
   "agent": "ollama",
   "db_type": "sqlite",
-  "tb_name": "data",
   "gemini_api": "your_gemini_api_key_here",
   "gemini_model": "gemini-2.5-flash-lite",
   "gemini_embedding_model": "gemini-embedding-001",
@@ -250,7 +255,6 @@ cp config.json.example ~/.scmd/config.json
 {
   "agent": "ollama",
   "db_type": "mcp",
-  "tb_name": "data",
   "mcp_server": "",
   "gemini_api": "your_gemini_api_key_here",
   "gemini_model": "gemini-2.5-flash-lite",
@@ -400,29 +404,29 @@ See [AUTHENTICATION.md](docs/AUTHENTICATION.md) for setup instructions.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                        SCMD v2.0.6                           │
+│                        SCMD v2.1.2                           │
 ├─────────────┬──────────────┬──────────────┬──────────────────┤
-│ Interactive  │ Traditional  │  MCP Server  │     Web UI       │
-│    CLI       │    CLI       │   (stdio)    │  (HTTP/HTTPS)    │
+│ Interactive  │ Traditional  │  MCP Server  │     Web UI      │
+│    CLI       │    CLI       │   (stdio)    │  (HTTP/HTTPS)   │
 ├─────────────┴──────────────┴──────────────┴──────────────────┤
 │                       Core Engine                            │
-│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐             │
-│  │ Search   │ │ Scoring  │ │ Keyword Extract  │             │
-│  │ Engine   │ │ System   │ │ (NLP)            │             │
-│  └──────────┘ └──────────┘ └──────────────────┘             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐              │
+│  │ Search   │ │ Scoring  │ │ Keyword Extract  │              │
+│  │ Engine   │ │ System   │ │ (NLP)            │              │
+│  └──────────┘ └──────────┘ └──────────────────┘              │
 ├──────────────────────────────────────────────────────────────┤
 │                        AI Layer                              │
-│  ┌──────────────────┐ ┌───────────────────────┐             │
-│  │ Ollama (Local)   │ │ Gemini (Cloud)        │             │
-│  │ Chat + Embedding │ │ Chat + Embedding      │             │
-│  └──────────────────┘ └───────────────────────┘             │
+│  ┌──────────────────┐ ┌───────────────────────┐              │
+│  │ Ollama (Local)   │ │ Gemini (Cloud)        │              │
+│  │ Chat + Embedding │ │ Chat + Embedding      │              │
+│  └──────────────────┘ └───────────────────────┘              │
 ├──────────────────────────────────────────────────────────────┤
 │                       Data Layer                             │
-│  ┌──────────────────┐ ┌───────────────────────────────────┐ │
-│  │ SQLite           │ │ MCP Client                        │ │
-│  │ + cosine         │ │ → External MCP Server (SSE)       │ │
-│  │   similarity     │ │ → PostgreSQL + pgvector            │ │
-│  └──────────────────┘ └───────────────────────────────────┘ │
+│  ┌──────────────────┐ ┌───────────────────────────────────┐  │
+│  │ SQLite           │ │ MCP Client                        │  │
+│  │ + cosine         │ │ → External MCP Server (SSE)       │  │
+│  │   similarity     │ │ → PostgreSQL + pgvector           │  │
+│  └──────────────────┘ └───────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────┘
 ```
 

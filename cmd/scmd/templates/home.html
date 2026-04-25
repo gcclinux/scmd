@@ -1,154 +1,651 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{.PageTitle}} - {{.Version}}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  <meta name="description" content="SCMD - Search Command Knowledge Base">
+  <title>{{.PageTitle}} — {{.Version}}</title>
   <link rel="icon" href="scmd_icon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    pre {
-      border: 2px solid gray
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:      #0d0f14;
+      --bg-surface:   #13161e;
+      --bg-card:      rgba(255,255,255,0.04);
+      --bg-card-hov:  rgba(255,255,255,0.07);
+      --border:       rgba(255,255,255,0.08);
+      --border-focus: rgba(99,179,237,0.6);
+      --accent:       #63b3ed;
+      --accent-glow:  rgba(99,179,237,0.25);
+      --accent2:      #9f7aea;
+      --success:      #68d391;
+      --danger:       #fc8181;
+      --warning:      #f6ad55;
+      --text-primary: #e8eaf0;
+      --text-muted:   #6b7280;
+      --text-subtle:  #4b5563;
+      --font-sans:    'Inter', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+      --radius:       12px;
+      --radius-lg:    16px;
+      --shadow:       0 4px 24px rgba(0,0,0,0.4);
+      --transition:   0.2s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 60px;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .nav-brand .brand-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+
+    .nav-link {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color var(--transition), background var(--transition);
+    }
+    .nav-link:hover, .nav-link.active { color: var(--text-primary); background: var(--bg-card-hov); }
+    .nav-link.active { color: var(--accent); }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .version-badge {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-subtle);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .btn-logout {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all var(--transition);
+    }
+    .btn-logout:hover { color: var(--danger); border-color: var(--danger); background: rgba(252,129,129,0.08); }
+
+    /* ── MAIN ── */
+    .main { padding: 48px 24px 80px; }
+
+    /* ── SEARCH AREA ── */
+    .search-wrapper {
+      max-width: 720px;
+      margin: 0 auto 48px;
+    }
+
+    .search-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    .search-box {
+      position: relative;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 16px 52px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .search-box:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow);
+    }
+
+    #pattern {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      resize: none;
+      min-height: 64px;
+    }
+    #pattern::placeholder { color: var(--text-subtle); }
+
+    .search-footer {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #loadingIndicator {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #loadingIndicator.visible { opacity: 1; }
+
+    .search-hint {
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+    }
+    .search-hint kbd {
+      font-family: var(--font-mono);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+    }
+
+    .btn-query {
+      padding: 8px 24px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--bg-base);
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all var(--transition);
+      box-shadow: 0 2px 12px rgba(99,179,237,0.3);
+    }
+    .btn-query:hover {
+      background: #90cdf4;
+      box-shadow: 0 4px 20px rgba(99,179,237,0.45);
+      transform: translateY(-1px);
+    }
+    .btn-query:active { transform: translateY(0); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .empty-state h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .empty-state p { font-size: 0.95rem; color: var(--text-muted); }
+
+    .no-match-state {
+      text-align: center;
+      padding: 48px 24px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .no-match-state h4 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--danger);
+      margin-bottom: 20px;
+    }
+    .no-match-tips { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .no-match-tips li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: left;
+    }
+    .no-match-tips li .tip-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .no-match-tips li a { color: var(--accent); text-decoration: none; }
+    .no-match-tips li a:hover { text-decoration: underline; }
+
+    /* ── RESULTS ── */
+    .results-area {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .result-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .result-card.d-none { display: none; }
+
+    .result-card-body {
+      padding: 28px 32px;
+    }
+
+    /* Markdown styles inside cards */
+    .rendered-markdown { color: var(--text-primary); font-size: 0.95rem; line-height: 1.7; }
+    .rendered-markdown h1, .rendered-markdown h2, .rendered-markdown h3 {
+      margin: 1.2em 0 0.5em;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .rendered-markdown h1 { font-size: 1.4rem; }
+    .rendered-markdown h2 { font-size: 1.2rem; }
+    .rendered-markdown h3 { font-size: 1.05rem; color: var(--accent); }
+    .rendered-markdown p { margin: 0.6em 0; }
+    .rendered-markdown code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: rgba(99,179,237,0.1);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .rendered-markdown pre {
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+    .rendered-markdown pre code {
+      background: none;
+      padding: 0;
+      color: #a3d9ff;
+      font-size: 0.9em;
+    }
+    .rendered-markdown ul, .rendered-markdown ol { padding-left: 24px; margin: 0.6em 0; }
+    .rendered-markdown li { margin: 4px 0; }
+    .rendered-markdown a { color: var(--accent); }
+    .rendered-markdown strong { color: #fff; font-weight: 600; }
+    .rendered-markdown blockquote {
+      border-left: 3px solid var(--accent2);
+      padding-left: 14px;
+      color: var(--text-muted);
+      margin: 10px 0;
+    }
+    .rendered-markdown hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+    .raw-markdown { display: none; }
+
+    /* ── PAGINATION ── */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding: 0 4px;
+    }
+    .btn-page {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-page:hover:not(:disabled) { color: var(--text-primary); border-color: var(--accent); background: var(--bg-card-hov); }
+    .btn-page:disabled { opacity: 0.35; cursor: not-allowed; }
+    .page-indicator {
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    /* ── FEEDBACK BAR ── */
+    .feedback-bar {
+      margin-top: 20px;
+      display: none;
+    }
+    .feedback-bar.visible { display: block; }
+    .feedback-inner {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-feedback {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-feedback.good {
+      background: rgba(104,211,145,0.12);
+      color: var(--success);
+      border: 1px solid rgba(104,211,145,0.3);
+    }
+    .btn-feedback.good:hover { background: rgba(104,211,145,0.2); transform: translateY(-1px); }
+    .btn-feedback.bad {
+      background: rgba(252,129,129,0.12);
+      color: var(--danger);
+      border: 1px solid rgba(252,129,129,0.3);
+    }
+    .btn-feedback.bad:hover { background: rgba(252,129,129,0.2); transform: translateY(-1px); }
+
+    /* ── SAVE STATUS ALERTS ── */
+    .alert {
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 16px;
+      text-align: center;
+    }
+    .alert-success { background: rgba(104,211,145,0.1); border: 1px solid rgba(104,211,145,0.3); color: var(--success); }
+    .alert-info    { background: rgba(99,179,237,0.1);  border: 1px solid rgba(99,179,237,0.3);  color: var(--accent); }
+    .alert-danger  { background: rgba(252,129,129,0.1); border: 1px solid rgba(252,129,129,0.3); color: var(--danger); }
+    /* ── CLIMATE MISSION ── */
+    .climate-footer {
+      margin-top: 80px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      animation: fadeInClimate 1s ease-out;
+    }
+    .climate-footer .climate-icon { font-size: 2.5rem; margin-bottom: 16px; }
+    .climate-footer h2 {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .climate-footer .climate-content {
+      max-width: 800px; margin: 0 auto;
+      text-align: left; font-size: 0.95rem; color: var(--text-muted);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .climate-footer strong { color: var(--text-primary); }
+    .climate-footer .highlight {
+      font-size: 1.05rem; font-weight: 600; color: var(--success);
+      text-align: center; margin-top: 8px; font-style: italic;
+    }
+    @keyframes fadeInClimate {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
-
 <body>
 
-  <nav class="navbar navbar-expand-lg p-3 mb-2 bg-primary text-white" data-bs-theme="dark">
-    <div class="container-fluid">
-      <a class="navbar-brand fw-bold" href="/">{{.PageTitle}}</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active fw-bold" aria-current="page" href="/">Home</a>
-            {{if .Insert}}
-          <li class="nav-item">
-            <a class="nav-link active fw-bold" aria-current="page" href="/add">Add</a>
-          </li>
-          {{end}}
-          <li class="nav-item">
-            <a class="nav-link active fw-bold" aria-current="page" href="/help">Help</a>
-          </li>
-        </ul>
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active fw-bold" aria-current="page" href="/logout">Logout</a>
-          </li>
-        </ul>
-      </div>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="nav-brand" href="/">
+      <span class="brand-dot"></span>
+      {{.PageTitle}}
+    </a>
+    <div class="nav-links">
+      <a class="nav-link active" href="/">Home</a>
+      {{if .Insert}}
+      <a class="nav-link" href="/add">Add</a>
+      {{end}}
+      <a class="nav-link" href="/stored">Stored</a>
+      <a class="nav-link" href="/help">Help</a>
+    </div>
+    <div class="nav-right">
+      <span class="version-badge">v{{.Version}}</span>
+      <a class="btn-logout" href="/logout">Logout</a>
     </div>
   </nav>
-  <div class="container-fluid mt-3">
-    Version: {{.Version}}
-  </div>
-  <hr>
 
-  <div class="container-fluid mt-2 d-flex justify-content-center">
-    <div class="position-relative text-center w-75">
-      <form action="/" method="post" autocomplete="off" class="d-flex flex-column align-items-center w-100"
-        id="searchForm" role="search"
-        onsubmit="document.getElementById('loadingIndicator').classList.remove('d-none');">
-        <div class="position-relative w-100 mb-3">
-          <textarea class="form-control border border-2 border-secondary shadow-sm"
-            style="resize: none; padding-bottom: 24px;" rows="2"
-            placeholder="Query (Press Enter to search, Shift+Enter for new line)" aria-label="Query" name="pattern"
-            onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); document.getElementById('loadingIndicator').classList.remove('d-none'); this.form.submit(); }"></textarea>
+  <!-- MAIN -->
+  <main class="main">
 
-          <div id="loadingIndicator" class="d-none position-absolute text-muted small fw-bold"
-            style="bottom: 8px; left: 12px; pointer-events: none; opacity: 0.8;">
-            {{if .AIProviderLabel}}
-            ⚡ {{.AIProviderLabel}} &nbsp; ⏳ generating...
-            {{else}}
-            ⏳ searching database...
-            {{end}}
+    <!-- SEARCH -->
+    <div class="search-wrapper">
+      <label class="search-label">Command Search</label>
+      <form action="/" method="post" autocomplete="off" id="searchForm" role="search"
+        onsubmit="document.getElementById('loadingIndicator').classList.add('visible');">
+        <div class="search-box">
+          <textarea id="pattern" name="pattern" rows="2"
+            placeholder="Search by keyword, command, or phrase… (comma or space separated)"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('loadingIndicator').classList.add('visible');this.form.submit();}"></textarea>
+          <div class="search-footer">
+            <div id="loadingIndicator">
+              {{if .AIProviderLabel}}
+              ⚡ {{.AIProviderLabel}} &nbsp; ⏳ generating…
+              {{else}}
+              ⏳ searching database…
+              {{end}}
+            </div>
+            <div class="search-hint"><kbd>Enter</kbd> to search &nbsp; <kbd>Shift</kbd>+<kbd>Enter</kbd> for new line</div>
+            <button class="btn-query" type="submit">Search</button>
           </div>
         </div>
-
         <input autocomplete="false" type="hidden" name="hidden">
-        <button class="btn btn-outline-success text-black fw-bold" type="submit">Query</button>
       </form>
     </div>
-  </div>
-  {{if not .Pages}}
-  {{if not .Pattern}}
-  <div class="position-relative text-center mt-5">
-    <H2>Start your technical query by inputting your search criteria in the searchbar.</H2>
-    <H4 class="text-muted">Search based on comma or space separated pattern(s) or phrases</H4>
-  </div>
-  {{else}}
-  <div class="position-relative text-center mt-5">
-    <h4 class="text-danger fw-bold">No matches found for "{{.Pattern}}"</h4><BR>
-    <h6>Option 1: <I> Click <a href="/help">(Help)</a> &#8608; (Download) to download the latest database</I></h6>
-    <h6>Option 2: <I> Start your own database by saving (Add) your own commands!</I></h6>
-  </div>
-  {{end}}
-  {{else}}
-  <div class="container mt-4 mb-5 w-75">
-    <div id="pages-container">
-      {{range $index, $page := .Pages}}
-      <div class="page-content card shadow-sm {{if ne $index 0}}d-none{{end}}" id="page-{{$index}}"
-        data-page-index="{{$index}}" data-is-ai="{{if eq $index 0}}yes{{else}}no{{end}}">
-        <div class="card-body p-4 bg-dark text-white rounded">
-          <div class="raw-markdown d-none">{{$page}}</div>
-          <div class="rendered-markdown"></div>
-        </div>
+
+    <!-- STATES -->
+    {{if not .Pages}}
+      {{if not .Pattern}}
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h2>Search your command knowledge base</h2>
+        <p>Enter keywords, command names, or phrases above to find stored commands and snippets. Results support full markdown rendering.</p>
+      </div>
+      {{else}}
+      <div class="no-match-state">
+        <h4>No matches found for "{{.Pattern}}"</h4>
+        <ul class="no-match-tips">
+          <li>
+            <span class="tip-icon">📥</span>
+            <span>Visit <a href="/help">Help → App Download</a> to grab the latest release with an updated database.</span>
+          </li>
+          <li>
+            <span class="tip-icon">✏️</span>
+            <span>Use the <a href="/add">Add</a> page to save your own commands and build your personal knowledge base.</span>
+          </li>
+          <li>
+            <span class="tip-icon">💡</span>
+            <span>Try broader search terms or check for typos in your query.</span>
+          </li>
+        </ul>
       </div>
       {{end}}
-    </div>
-
-    <div class="d-flex justify-content-between mt-3 px-2">
-      <button class="btn btn-secondary fw-bold px-4" id="btnPrev" onclick="changePage(-1)" disabled>&#8592;
-        Previous</button>
-      <span class="align-self-center fw-bold fs-5 text-dark" id="pageIndicator">Page 1 of {{len .Pages}}</span>
-      <button class="btn btn-secondary fw-bold px-4" id="btnNext" onclick="changePage(1)">Next &#8594;</button>
-    </div>
-
-    {{if .PageQuery}}
-    {{if .SaveStatus}}
-    {{if eq .SaveStatus "saved"}}
-    <div class="alert alert-success mt-3 fw-bold text-center" role="alert">✅ Answer saved to database!</div>
-    {{else if eq .SaveStatus "already"}}
-    <div class="alert alert-info mt-3 fw-bold text-center" role="alert">ℹ️ This result is already stored in the
-      database.</div>
     {{else}}
-    <div class="alert alert-danger mt-3 fw-bold text-center" role="alert">❌ Error saving answer.</div>
-    {{end}}
-    {{end}}
-    <div id="ai-feedback-bar" class="d-none mt-3">
-      <div class="d-flex gap-2 justify-content-center">
-        <form method="POST" action="/answer-feedback">
-          <input type="hidden" name="action" value="save">
-          <input type="hidden" name="query" value="{{.PageQuery}}">
-          <textarea name="airesponse" id="hiddenAiText" class="d-none"></textarea>
-          <button type="submit" class="btn btn-success fw-bold px-4">👍 Good Answer &ndash; Save to DB</button>
-        </form>
-        <form method="POST" action="/answer-feedback">
-          <input type="hidden" name="action" value="retry">
-          <input type="hidden" name="query" value="{{.PageQuery}}">
-          <button type="submit" class="btn btn-danger fw-bold px-4">👎 Bad Answer &ndash; Try Again</button>
-        </form>
+    <!-- RESULTS -->
+    <div class="results-area">
+      <div id="pages-container">
+        {{range $index, $page := .Pages}}
+        <div class="result-card {{if ne $index 0}}d-none{{end}}" id="page-{{$index}}"
+          data-page-index="{{$index}}">
+          <div class="result-card-body">
+            <div class="raw-markdown">{{$page}}</div>
+            <div class="rendered-markdown"></div>
+          </div>
+        </div>
+        {{end}}
       </div>
+
+      <div class="pagination-bar">
+        <button class="btn-page" id="btnPrev" onclick="changePage(-1)" disabled>
+          ← Previous
+        </button>
+        <span class="page-indicator" id="pageIndicator">Page 1 of {{len .Pages}}</span>
+        <button class="btn-page" id="btnNext" onclick="changePage(1)">
+          Next →
+        </button>
+      </div>
+
+      {{if .PageQuery}}
+        {{if .SaveStatus}}
+          {{if eq .SaveStatus "saved"}}
+          <div class="alert alert-success">✅ Answer saved to database!</div>
+          {{else if eq .SaveStatus "already"}}
+          <div class="alert alert-info">ℹ️ This result is already stored in the database.</div>
+          {{else}}
+          <div class="alert alert-danger">❌ Error saving answer.</div>
+          {{end}}
+        {{end}}
+
+        <div id="ai-feedback-bar" class="feedback-bar">
+          <div class="feedback-inner">
+            <form method="POST" action="/answer-feedback">
+              <input type="hidden" name="action" value="save">
+              <input type="hidden" name="query" value="{{.PageQuery}}">
+              <textarea name="airesponse" id="hiddenAiText" class="raw-markdown"></textarea>
+              <button type="submit" class="btn-feedback good">👍 Good Answer — Save to DB</button>
+            </form>
+            <form method="POST" action="/answer-feedback">
+              <input type="hidden" name="action" value="retry">
+              <input type="hidden" name="query" value="{{.PageQuery}}">
+              <button type="submit" class="btn-feedback bad">👎 Bad Answer — Try Again</button>
+            </form>
+          </div>
+        </div>
+      {{end}}
     </div>
     {{end}}
-  </div>
+
+    <section class="climate-footer">
+      <div class="climate-icon">🌍</div>
+      <h2>Our Mission: A Greener Developer Ecosystem</h2>
+      <div class="climate-content">
+        <p>
+          Today's IDEs are overwhelmingly heavy. They come packed with massive dependencies, require constant
+          background interpreters, and consume excessive amounts of memory, CPU, and storage. All of this
+          translates directly to a colossal, often ignored, <strong>carbon footprint</strong>.
+        </p>
+        <p>
+          The primary goal of <strong>SCMD-CLI</strong> is to change this paradigm. We believe
+          developers shouldn't have to sacrifice our planet to write great code. By building a lightning-fast,
+          dependency-free binary in Go, we deliver all the advanced agentic features you expect from a modern
+          IDE, but with a drastically smaller environmental impact.
+        </p>
+        <p>
+          Beyond just a lightweight runtime, we are building local intelligence directly into the application
+          to minimize reliance on heavy cloud AI models where possible. And because we believe in transparency
+          and community-driven impact, the entire project is <strong>100% open source</strong>.
+        </p>
+        <p class="highlight">
+          Let's write incredible code, while leaving a smaller footprint behind.
+        </p>
+      </div>
+    </section>
+
+    <section class="climate-footer">
+      <div class="climate-icon">🌍</div>
+      <h2>Our Mission: A Greener Developer Ecosystem</h2>
+      <div class="climate-content">
+        <p>
+          Today's IDEs are overwhelmingly heavy. They come packed with massive dependencies, require constant
+          background interpreters, and consume excessive amounts of memory, CPU, and storage. All of this
+          translates directly to a colossal, often ignored, <strong>carbon footprint</strong>.
+        </p>
+        <p>
+          The primary goal of <strong>SCMD-CLI</strong> is to change this paradigm. We believe
+          developers shouldn't have to sacrifice our planet to write great code. By building a lightning-fast,
+          dependency-free binary in Go, we deliver all the advanced agentic features you expect from a modern
+          IDE, but with a drastically smaller environmental impact.
+        </p>
+        <p>
+          Beyond just a lightweight runtime, we are building local intelligence directly into the application
+          to minimize reliance on heavy cloud AI models where possible. And because we believe in transparency
+          and community-driven impact, the entire project is <strong>100% open source</strong>.
+        </p>
+        <p class="highlight">
+          Let's write incredible code, while leaving a smaller footprint behind.
+        </p>
+      </div>
+    </section>
+
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const markdownElements = document.querySelectorAll('.page-content');
-      markdownElements.forEach(function (el) {
-        const rawObj = el.querySelector('.raw-markdown');
-        const renderObj = el.querySelector('.rendered-markdown');
-        if (rawObj && renderObj) {
-          renderObj.innerHTML = marked.parse(rawObj.textContent);
-        }
+      document.querySelectorAll('.result-card').forEach(function (el) {
+        const raw = el.querySelector('.raw-markdown');
+        const rendered = el.querySelector('.rendered-markdown');
+        if (raw && rendered) rendered.innerHTML = marked.parse(raw.textContent);
       });
       updateButtons();
       updateFeedbackBar();
@@ -159,65 +656,33 @@
 
     function changePage(delta) {
       if (totalPages === 0) return;
-
-      const prevEl = document.getElementById('page-' + currentPageIdx);
-      if (prevEl) prevEl.classList.add('d-none');
-
+      document.getElementById('page-' + currentPageIdx).classList.add('d-none');
       currentPageIdx += delta;
-
-      const nextEl = document.getElementById('page-' + currentPageIdx);
-      if (nextEl) nextEl.classList.remove('d-none');
-
+      document.getElementById('page-' + currentPageIdx).classList.remove('d-none');
       updateButtons();
       updateFeedbackBar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function updateButtons() {
       if (totalPages === 0) return;
       document.getElementById('pageIndicator').innerText = `Page ${currentPageIdx + 1} of ${totalPages}`;
-      const btnPrev = document.getElementById('btnPrev');
-      const btnNext = document.getElementById('btnNext');
-      if (btnPrev) btnPrev.disabled = (currentPageIdx === 0);
-      if (btnNext) btnNext.disabled = (currentPageIdx === totalPages - 1);
+      document.getElementById('btnPrev').disabled = (currentPageIdx === 0);
+      document.getElementById('btnNext').disabled = (currentPageIdx === totalPages - 1);
     }
 
     function updateFeedbackBar() {
       const feedbackBar = document.getElementById('ai-feedback-bar');
       if (!feedbackBar) return;
-
-      // Always show the feedback bar — on every page (AI or DB result)
-      feedbackBar.classList.remove('d-none');
-
-      // Populate hidden textarea with whatever the current page's raw content is
+      feedbackBar.classList.add('visible');
       const currentPage = document.getElementById('page-' + currentPageIdx);
       const hiddenText = document.getElementById('hiddenAiText');
       if (hiddenText && currentPage) {
         const rawEl = currentPage.querySelector('.raw-markdown');
-        if (rawEl) {
-          hiddenText.value = rawEl.textContent;
-        }
+        if (rawEl) hiddenText.value = rawEl.textContent;
       }
     }
   </script>
-  {{end}}
-  </div>
-
-  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js"
-    crossorigin="anonymous"></script>
-  <script type="importmap">
-          {
-            "imports": {
-              "@popperjs/core": "https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/esm/popper.min.js",
-              "bootstrap": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.esm.min.js"
-            }
-          }
-          </script>
-  <script type="module">
-    import * as bootstrap from 'bootstrap'
-
-    new bootstrap.Popover(document.getElementById('popoverButton'))
-  </script>
 
 </body>
-
 </html>

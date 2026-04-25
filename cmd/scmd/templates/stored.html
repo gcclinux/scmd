@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SCMD — Browse all stored commands">
+  <title>Stored Commands — {{.PageTitle}}</title>
+  <link rel="icon" href="scmd_icon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-base:     #0d0f14;
+      --bg-surface:  #13161e;
+      --bg-card:     rgba(255,255,255,0.04);
+      --bg-card-hov: rgba(255,255,255,0.07);
+      --border:      rgba(255,255,255,0.08);
+      --border-foc:  rgba(99,179,237,0.6);
+      --accent:      #63b3ed;
+      --accent-glow: rgba(99,179,237,0.2);
+      --accent2:     #9f7aea;
+      --success:     #68d391;
+      --danger:      #fc8181;
+      --warn:        #f6ad55;
+      --text:        #e8eaf0;
+      --muted:       #6b7280;
+      --subtle:      #4b5563;
+      --mono:        'JetBrains Mono', monospace;
+      --sans:        'Inter', system-ui, sans-serif;
+      --radius:      10px;
+      --shadow:      0 4px 24px rgba(0,0,0,0.4);
+      --tr:          0.18s ease;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg-base); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* NAV */
+    .navbar {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 60px;
+      background: rgba(13,15,20,0.88);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; }
+    .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link { padding: 6px 14px; border-radius: 8px; font-size: .875rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color var(--tr), background var(--tr); }
+    .nav-link:hover { color: var(--text); background: var(--bg-card-hov); }
+    .nav-link.active { color: var(--accent); background: var(--bg-card-hov); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .version-badge { font-size: .75rem; font-family: var(--mono); color: var(--subtle); background: var(--bg-card); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; }
+    .btn-logout { padding: 6px 16px; border-radius: 8px; font-size: .85rem; font-weight: 500; color: var(--muted); background: transparent; border: 1px solid var(--border); cursor: pointer; text-decoration: none; transition: all var(--tr); }
+    .btn-logout:hover { color: var(--danger); border-color: var(--danger); background: rgba(252,129,129,.08); }
+
+    /* LAYOUT */
+    .layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 60px); }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 360px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .sidebar-header { padding: 20px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sidebar-title { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 10px; }
+
+    .search-input-wrap { position: relative; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--subtle); font-size: .95rem; pointer-events: none; }
+    #filterInput {
+      width: 100%; background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 9px 12px 9px 36px; color: var(--text); font-family: var(--sans); font-size: .875rem; outline: none;
+      transition: border-color var(--tr), box-shadow var(--tr);
+    }
+    #filterInput::placeholder { color: var(--subtle); }
+    #filterInput:focus { border-color: var(--border-foc); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+    .sidebar-meta { padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .meta-count { font-size: .78rem; font-family: var(--mono); color: var(--subtle); }
+    .page-controls { display: flex; gap: 6px; align-items: center; }
+    .btn-pg { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); padding: 4px 10px; font-size: .78rem; cursor: pointer; transition: all var(--tr); }
+    .btn-pg:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+    .btn-pg:disabled { opacity: .35; cursor: not-allowed; }
+    .page-num { font-size: .78rem; font-family: var(--mono); color: var(--muted); white-space: nowrap; }
+
+    /* LIST */
+    #cmdList { flex: 1; overflow-y: auto; padding: 8px; }
+    #cmdList::-webkit-scrollbar { width: 4px; }
+    #cmdList::-webkit-scrollbar-track { background: transparent; }
+    #cmdList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .cmd-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer; transition: all var(--tr);
+      margin-bottom: 4px;
+    }
+    .cmd-item:hover { background: var(--bg-card-hov); border-color: var(--border); }
+    .cmd-item.selected { background: rgba(99,179,237,.08); border-color: rgba(99,179,237,.3); }
+    .cmd-id { font-family: var(--mono); font-size: .72rem; color: var(--subtle); flex-shrink: 0; padding-top: 2px; min-width: 36px; }
+    .cmd-info { min-width: 0; }
+    .cmd-desc { font-size: .85rem; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cmd-key  { font-family: var(--mono); font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+    .empty-list { text-align: center; padding: 40px 20px; color: var(--subtle); font-size: .875rem; }
+
+    /* DETAIL PANEL */
+    .detail {
+      flex: 1; overflow-y: auto; padding: 32px 36px;
+      display: flex; flex-direction: column;
+    }
+    .detail::-webkit-scrollbar { width: 6px; }
+    .detail::-webkit-scrollbar-track { background: transparent; }
+    .detail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Welcome state */
+    .welcome {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; color: var(--subtle); gap: 12px;
+    }
+    .welcome-icon { font-size: 3rem; opacity: .4; }
+    .welcome h2 { font-size: 1.2rem; font-weight: 600; color: var(--muted); }
+    .welcome p { font-size: .875rem; }
+
+    /* Detail content */
+    #detailContent { display: none; flex-direction: column; gap: 24px; }
+    #detailContent.visible { display: flex; }
+
+    .detail-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .detail-id { font-family: var(--mono); font-size: .8rem; background: rgba(99,179,237,.1); color: var(--accent); border: 1px solid rgba(99,179,237,.25); padding: 3px 10px; border-radius: 20px; }
+
+    .section-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; color: var(--subtle); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Markdown renderer (shared by both description and command panels) ── */
+    .md-render { font-size: .92rem; line-height: 1.75; color: var(--text); }
+    .md-render h1 { font-size: 1.35rem; font-weight: 700; color: var(--text); margin: 1.2em 0 .5em; }
+    .md-render h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 1em 0 .4em; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+    .md-render h3 { font-size: .95rem; font-weight: 600; color: var(--accent); margin: .9em 0 .4em; }
+    .md-render p  { margin: .55em 0; }
+    .md-render ul, .md-render ol { padding-left: 20px; margin: .5em 0; }
+    .md-render li { margin: 4px 0; }
+    .md-render strong { color: #fff; font-weight: 600; }
+    .md-render em    { color: var(--muted); }
+    .md-render a     { color: var(--accent); text-decoration: none; }
+    .md-render a:hover { text-decoration: underline; }
+    .md-render blockquote { border-left: 3px solid var(--accent2); padding-left: 14px; color: var(--muted); margin: 10px 0; font-style: italic; }
+    .md-render hr    { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+    .md-render code  { font-family: var(--mono); font-size: .85em; background: rgba(99,179,237,.1); color: var(--accent); padding: 2px 6px; border-radius: 4px; }
+    .md-render pre   { background: var(--bg-base); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 14px 18px; overflow-x: auto; margin: 10px 0; }
+    .md-render pre code { background: none; padding: 0; color: #a3d9ff; font-size: .88em; line-height: 1.7; white-space: pre; }
+    .md-render table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: .875rem; }
+    .md-render th   { background: var(--bg-surface); border: 1px solid var(--border); padding: 8px 12px; text-align: left; color: var(--muted); font-weight: 600; }
+    .md-render td   { border: 1px solid var(--border); padding: 8px 12px; }
+
+    /* Description card */
+    .desc-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; }
+
+    /* Command card */
+    .cmd-card {
+      background: var(--bg-base); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+      border-radius: var(--radius); padding: 18px 20px 18px 22px; position: relative;
+    }
+    /* fallback plain pre (when no markdown fences detected) */
+    .cmd-plain {
+      font-family: var(--mono); font-size: .88rem; color: #a3d9ff; line-height: 1.75;
+      white-space: pre-wrap; word-break: break-word; margin: 0;
+    }
+
+    .copy-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--muted); font-size: .72rem; padding: 4px 10px; cursor: pointer;
+      font-family: var(--sans); transition: all var(--tr); z-index: 1;
+    }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .copy-btn.copied { color: var(--success); border-color: var(--success); }
+
+    .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
+    .btn-action {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 8px; font-size: .85rem; font-weight: 600;
+      border: none; cursor: pointer; font-family: var(--sans); transition: all var(--tr); text-decoration: none;
+    }
+    .btn-search { background: rgba(99,179,237,.12); color: var(--accent); border: 1px solid rgba(99,179,237,.25); }
+    .btn-search:hover { background: rgba(99,179,237,.2); transform: translateY(-1px); }
+
+    /* LOADING OVERLAY */
+    #loadingOverlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(13,15,20,.7); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+    }
+    #loadingOverlay.hidden { display: none; }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: .9rem; color: var(--muted); font-family: var(--mono); }
+
+    /* ERROR BANNER */
+    #errorBanner { display: none; margin: 16px; padding: 12px 16px; border-radius: var(--radius); background: rgba(252,129,129,.08); border: 1px solid rgba(252,129,129,.25); color: var(--danger); font-size: .875rem; }
+    #errorBanner.visible { display: block; }
+
+    /* HIGHLIGHT */
+    mark { background: rgba(246,173,85,.25); color: var(--warn); border-radius: 3px; padding: 0 2px; }
+
+    /* ── CLIMATE MISSION ── */
+    .climate-footer {
+      margin-top: 80px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      animation: fadeInClimate 1s ease-out;
+    }
+    .climate-footer .climate-icon { font-size: 2.5rem; margin-bottom: 16px; }
+    .climate-footer h2 {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 24px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .climate-footer .climate-content {
+      max-width: 800px; margin: 0 auto;
+      text-align: left; font-size: 0.95rem; color: var(--muted);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .climate-footer strong { color: var(--text-primary); }
+    .climate-footer .highlight {
+      font-size: 1.05rem; font-weight: 600; color: var(--success);
+      text-align: center; margin-top: 8px; font-style: italic;
+    }
+    @keyframes fadeInClimate {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading stored commands…</div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="nav-brand" href="/"><span class="brand-dot"></span>{{.PageTitle}}</a>
+    <div class="nav-links">
+      <a class="nav-link" href="/">Home</a>
+      {{if .Insert}}<a class="nav-link" href="/add">Add</a>{{end}}
+      <a class="nav-link active" href="/stored">Stored</a>
+      <a class="nav-link" href="/help">Help</a>
+    </div>
+    <div class="nav-right">
+      <span class="version-badge">v{{.Version}}</span>
+      <a class="btn-logout" href="/logout">Logout</a>
+    </div>
+  </nav>
+
+  <!-- ERROR -->
+  <div id="errorBanner"></div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Stored Commands</div>
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="filterInput" placeholder="Filter by description or command…" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="sidebar-meta">
+        <span class="meta-count" id="metaCount">0 commands</span>
+        <div class="page-controls">
+          <button class="btn-pg" id="pgPrev" onclick="changePage(-1)" disabled>‹</button>
+          <span class="page-num" id="pgNum">1 / 1</span>
+          <button class="btn-pg" id="pgNext" onclick="changePage(1)" disabled>›</button>
+        </div>
+      </div>
+
+      <div id="cmdList"></div>
+    </aside>
+
+    <!-- DETAIL -->
+    <main class="detail" id="detailPanel">
+      <div class="welcome" id="welcomeState">
+        <div class="welcome-icon">📋</div>
+        <h2>Select a command to view details</h2>
+        <p>Use the list on the left to browse or filter your stored commands.</p>
+      </div>
+
+      <div id="detailContent">
+        <div class="detail-meta">
+          <span class="detail-id" id="dId"></span>
+        </div>
+
+        <div>
+          <div class="section-label">Description</div>
+          <div class="desc-card">
+            <div class="md-render" id="dDescBox"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Command</div>
+          <div class="cmd-card" id="dCmd">
+            <button class="copy-btn" id="copyBtn" onclick="copyCmd()">Copy</button>
+            <div id="dCmdText"></div>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <a id="searchLink" class="btn-action btn-search" href="#">🔍 Search this</a>
+        </div>
+      </div>
+
+      <section class="climate-footer">
+        <div class="climate-icon">🌍</div>
+        <h2>Our Mission: A Greener Developer Ecosystem</h2>
+        <div class="climate-content">
+          <p>
+            Today's IDEs are overwhelmingly heavy. They come packed with massive dependencies, require constant
+            background interpreters, and consume excessive amounts of memory, CPU, and storage. All of this
+            translates directly to a colossal, often ignored, <strong>carbon footprint</strong>.
+          </p>
+          <p>
+            The primary goal of <strong>SCMD-CLI</strong> is to change this paradigm. We believe
+            developers shouldn't have to sacrifice our planet to write great code. By building a lightning-fast,
+            dependency-free binary in Go, we deliver all the advanced agentic features you expect from a modern
+            IDE, but with a drastically smaller environmental impact.
+          </p>
+          <p>
+            Beyond just a lightweight runtime, we are building local intelligence directly into the application
+            to minimize reliance on heavy cloud AI models where possible. And because we believe in transparency
+            and community-driven impact, the entire project is <strong>100% open source</strong>.
+          </p>
+          <p class="highlight">
+            Let's write incredible code, while leaving a smaller footprint behind.
+          </p>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const PAGE_SIZE = 50;
+    let allRecords = [];
+    let filtered   = [];
+    let currentPage = 1;
+    let selectedId  = null;
+
+    // ── Fetch all commands ──────────────────────────────────────────
+    async function loadData() {
+      try {
+        const res = await fetch('/api/stored');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        allRecords = json.records || [];
+        filtered   = allRecords;
+        renderList();
+      } catch (e) {
+        showError('Failed to load commands: ' + e.message);
+      } finally {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+      }
+    }
+
+    function showError(msg) {
+      const b = document.getElementById('errorBanner');
+      b.textContent = '⚠ ' + msg;
+      b.classList.add('visible');
+    }
+
+    // ── Filtering ───────────────────────────────────────────────────
+    document.getElementById('filterInput').addEventListener('input', function() {
+      const q = this.value.trim().toLowerCase();
+      if (!q) {
+        filtered = allRecords;
+      } else {
+        filtered = allRecords.filter(r =>
+          r.data.toLowerCase().includes(q) || r.key.toLowerCase().includes(q)
+        );
+      }
+      currentPage = 1;
+      renderList();
+    });
+
+    // ── Pagination ──────────────────────────────────────────────────
+    function totalPages() { return Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)); }
+
+    function changePage(delta) {
+      currentPage = Math.min(Math.max(1, currentPage + delta), totalPages());
+      renderList();
+    }
+
+    // ── Render list ─────────────────────────────────────────────────
+    function highlight(text, query) {
+      if (!query) return escHtml(text);
+      const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return escHtml(text).replace(re, '<mark>$1</mark>');
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function renderList() {
+      const list = document.getElementById('cmdList');
+      const q = document.getElementById('filterInput').value.trim().toLowerCase();
+      const tp = totalPages();
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const page  = filtered.slice(start, start + PAGE_SIZE);
+
+      document.getElementById('metaCount').textContent =
+        filtered.length === allRecords.length
+          ? allRecords.length + ' commands'
+          : filtered.length + ' of ' + allRecords.length + ' commands';
+
+      document.getElementById('pgNum').textContent = currentPage + ' / ' + tp;
+      document.getElementById('pgPrev').disabled = (currentPage <= 1);
+      document.getElementById('pgNext').disabled = (currentPage >= tp);
+
+      if (page.length === 0) {
+        list.innerHTML = '<div class="empty-list">No commands match your filter.</div>';
+        return;
+      }
+
+      list.innerHTML = page.map(r => `
+        <div class="cmd-item${r.id === selectedId ? ' selected' : ''}"
+             data-id="${r.id}" onclick="selectRecord(${r.id})">
+          <span class="cmd-id">#${r.id}</span>
+          <div class="cmd-info">
+            <div class="cmd-desc">${highlight(r.data, q)}</div>
+            <div class="cmd-key">${highlight(r.key.split('\n')[0].substring(0,80), q)}</div>
+          </div>
+        </div>`).join('');
+    }
+
+    // ── Detect whether text looks like it contains markdown ─────────
+    function looksLikeMarkdown(text) {
+      return /^#{1,6}\s|```|\*\*|\n\n|^[-*+]\s|^\d+\.\s|^>\s/m.test(text);
+    }
+
+    // ── Select record ───────────────────────────────────────────────
+    function selectRecord(id) {
+      selectedId = id;
+      const r = allRecords.find(x => x.id === id);
+      if (!r) return;
+
+      // Highlight selected in list
+      document.querySelectorAll('.cmd-item').forEach(el => {
+        el.classList.toggle('selected', parseInt(el.dataset.id) === id);
+      });
+
+      document.getElementById('welcomeState').style.display = 'none';
+      const dc = document.getElementById('detailContent');
+      dc.classList.add('visible');
+
+      document.getElementById('dId').textContent = '#' + r.id;
+
+      // ── Description: always render as markdown ───────────────────
+      const descBox = document.getElementById('dDescBox');
+      descBox.innerHTML = marked.parse(r.data);
+
+      // ── Command: render as markdown if it has fences/headers,
+      //    otherwise show as a styled plain pre block ───────────────
+      const cmdBox = document.getElementById('dCmdText');
+      if (looksLikeMarkdown(r.key)) {
+        cmdBox.className = 'md-render';
+        cmdBox.innerHTML = marked.parse(r.key);
+      } else {
+        cmdBox.className = 'cmd-plain';
+        cmdBox.textContent = r.key;
+      }
+
+      // Search link
+      const link = document.getElementById('searchLink');
+      link.onclick = function(e) {
+        e.preventDefault();
+        const form = document.createElement('form');
+        form.method = 'POST'; form.action = '/';
+        const p = document.createElement('input');
+        p.type = 'hidden'; p.name = 'pattern';
+        // Use first line of description (strip markdown markers) as query
+        p.value = r.data.split('\n')[0].replace(/^#+\s*/, '').substring(0, 100);
+        const h = document.createElement('input');
+        h.type = 'hidden'; h.name = 'hidden'; h.value = '';
+        form.appendChild(p); form.appendChild(h);
+        document.body.appendChild(form);
+        form.submit();
+      };
+
+      // Reset copy button
+      const cb = document.getElementById('copyBtn');
+      cb.textContent = 'Copy'; cb.classList.remove('copied');
+
+      // Scroll detail panel to top
+      document.getElementById('detailPanel').scrollTop = 0;
+    }
+
+    // ── Copy command — copies the raw text regardless of render mode ─
+    function copyCmd() {
+      const r = allRecords.find(x => x.id === selectedId);
+      const text = r ? r.key : document.getElementById('dCmdText').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const cb = document.getElementById('copyBtn');
+        cb.textContent = 'Copied!'; cb.classList.add('copied');
+        setTimeout(() => { cb.textContent = 'Copy'; cb.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    // ── Keyboard shortcut: Escape clears filter ─────────────────────
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const fi = document.getElementById('filterInput');
+        fi.value = '';
+        fi.dispatchEvent(new Event('input'));
+        fi.focus();
+      }
+      if ((e.key === 'ArrowDown' || e.key === 'j') && e.altKey) changePage(1);
+      if ((e.key === 'ArrowUp'   || e.key === 'k') && e.altKey) changePage(-1);
+    });
+
+    // ── Boot ────────────────────────────────────────────────────────
+    loadData();
+  </script>
+</body>
+</html>

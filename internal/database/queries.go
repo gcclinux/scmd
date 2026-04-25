@@ -69,6 +69,14 @@ func GetEmbeddingStats() (total int, withEmbeddings int, err error) {
 	return getEmbeddingStatsSQLite()
 }
 
+// ListAllCommands returns all stored commands ordered by ID.
+func ListAllCommands() ([]CommandRecord, error) {
+	if IsMCP() {
+		return listAllCommandsMCP()
+	}
+	return listAllCommandsSQLite()
+}
+
 // SearchByVector performs a vector similarity search.
 func SearchByVector(embedding []float64, limit int) ([]CommandRecord, error) {
 	if IsMCP() {

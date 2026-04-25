@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -411,4 +412,46 @@ func logoutPage(w http.ResponseWriter, r *http.Request) {
 	})
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+// storedPage renders the stored-commands browser page.
+func storedPage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	tmpl := template.Must(template.ParseFS(tplFolder, "templates/stored.html"))
+
+	data := BuildStruct{
+		PageTitle: "(SCMD)",
+		Version:   updater.Release,
+	}
+	if os.Args[len(os.Args)-1] == "-block" {
+		data.Insert = false
+	} else {
+		data.Insert = true
+	}
+
+	tmpl.Execute(w, data)
+}
+
+// storedAPIPage returns all stored commands as JSON (used by the stored page via fetch).
+func storedAPIPage(w http.ResponseWriter, r *http.Request) {
+	records, err := database.ListAllCommands()
+	if err != nil {
+		log.Printf("Error listing commands: %v", err)
+		http.Error(w, `{"error":"failed to list commands"}`, http.StatusInternalServerError)
+		return
+	}
+	if records == nil {
+		records = []database.CommandRecord{}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	enc := struct {
+		Total   int                      `json:"total"`
+		Records []database.CommandRecord `json:"records"`
+	}{
+		Total:   len(records),
+		Records: records,
+	}
+	if err := json.NewEncoder(w).Encode(enc); err != nil {
+		log.Printf("Error encoding commands: %v", err)
+	}
 }

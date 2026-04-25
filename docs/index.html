@@ -1,519 +1,792 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCMD — AI-Powered Command Search</title>
-<meta name="description" content="Store, search, and retrieve CLI commands with AI-powered semantic search. Interactive CLI, Web UI, Ollama & Gemini integration.">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0e17;--bg2:#111827;--bg3:#1a2332;
-  --green:#00ff88;--green2:#00cc6a;--cyan:#00d4ff;
-  --purple:#a78bfa;--orange:#fb923c;--red:#f87171;
-  --text:#e2e8f0;--muted:#64748b;--border:#1e293b;
-  --font-mono:'JetBrains Mono','Fira Code','SF Mono','Cascadia Code',Consolas,monospace;
-  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-}
-html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--bg);color:var(--text);font-family:var(--font-sans);line-height:1.6;overflow-x:hidden}
-a{color:var(--cyan);text-decoration:none;transition:color .2s}
-a:hover{color:var(--green)}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCMD — AI-Powered Command Search</title>
+  <meta name="description"
+    content="Store, search, and retrieve CLI commands with AI-powered semantic search. Interactive CLI, Web UI, Ollama & Gemini integration.">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #0a0e17;
+      --bg2: #111827;
+      --bg3: #1a2332;
+      --green: #00ff88;
+      --green2: #00cc6a;
+      --cyan: #00d4ff;
+      --purple: #a78bfa;
+      --orange: #fb923c;
+      --red: #f87171;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --border: #1e293b;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+      transition: color .2s
+    }
+
+    a:hover {
+      color: var(--green)
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- NAV -->
-<nav style="position:fixed;top:0;width:100%;z-index:100;background:rgba(10,14,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.75rem 0">
-  <div style="max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between">
-    <div style="display:flex;align-items:center;gap:.5rem">
-      <span style="color:var(--green);font-family:var(--font-mono);font-weight:700;font-size:1.25rem">$</span>
-      <span style="font-family:var(--font-mono);font-weight:700;font-size:1.1rem">scmd</span>
-    </div>
-    <div style="display:flex;gap:1.5rem;font-size:.875rem">
-      <a href="#features">Features</a>
-      <a href="#ai">AI</a>
-      <a href="#interfaces">Interfaces</a>
-      <a href="#install">Install</a>
-      <a href="https://github.com/gcclinux/scmd" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:.35rem">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        GitHub
-      </a>
-    </div>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:6rem 1.5rem 4rem;position:relative;overflow:hidden">
-  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,255,136,.06) 0%,transparent 60%);pointer-events:none"></div>
-  <div style="max-width:800px;text-align:center;position:relative;z-index:1">
-    <div style="font-family:var(--font-mono);color:var(--muted);font-size:.875rem;margin-bottom:1rem">v2.1.0 · Go · AGPL-3.0 License</div>
-    <h1 style="font-size:clamp(2.5rem,6vw,4rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem">
-      <span style="color:var(--green)">Search</span> commands.<br>
-      <span style="color:var(--cyan)">Ask</span> AI.<br>
-      <span style="color:var(--purple)">Ship</span> faster.
-    </h1>
-    <p style="font-size:1.15rem;color:var(--muted);max-width:600px;margin:0 auto 2.5rem">
-      An AI-powered command knowledge base with interactive CLI, web UI, and semantic vector search. Store, find, and understand commands — your way.
-    </p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <a href="https://github.com/gcclinux/scmd/releases" target="_blank" rel="noopener" style="background:var(--green);color:#000;padding:.75rem 2rem;border-radius:8px;font-weight:600;font-size:.95rem;transition:transform .15s,box-shadow .15s;display:inline-block">
-        Download Binary
-      </a>
-      <a href="#install" style="background:var(--bg3);color:var(--text);padding:.75rem 2rem;border-radius:8px;font-weight:600;font-size:.95rem;border:1px solid var(--border);transition:border-color .2s;display:inline-block">
-        Quick Start →
-      </a>
-    </div>
-
-    <!-- Terminal preview -->
-    <div style="margin-top:3rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;text-align:left;box-shadow:0 25px 60px rgba(0,0,0,.4)">
-      <div style="background:var(--bg3);padding:.6rem 1rem;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--border)">
-        <span style="width:12px;height:12px;border-radius:50%;background:var(--red);display:inline-block"></span>
-        <span style="width:12px;height:12px;border-radius:50%;background:var(--orange);display:inline-block"></span>
-        <span style="width:12px;height:12px;border-radius:50%;background:var(--green);display:inline-block"></span>
-        <span style="font-family:var(--font-mono);font-size:.75rem;color:var(--muted);margin-left:.5rem">scmd --cli</span>
+  <!-- NAV -->
+  <nav
+    style="position:fixed;top:0;width:100%;z-index:100;background:rgba(10,14,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.75rem 0">
+    <div
+      style="max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <span style="color:var(--green);font-family:var(--font-mono);font-weight:700;font-size:1.25rem">$</span>
+        <span style="font-family:var(--font-mono);font-weight:700;font-size:1.1rem">scmd</span>
       </div>
-      <div style="padding:1.25rem;font-family:var(--font-mono);font-size:.85rem;line-height:1.8">
-        <div><span style="color:var(--green)">scmd&gt;</span> show me postgresql replication examples</div>
-        <div style="color:var(--muted);margin:.25rem 0">⟳ Extracting keywords: postgresql replication</div>
-        <div style="color:var(--muted)">⟳ Searching database... found 3 results (score: 85%)</div>
-        <div style="margin:.5rem 0;color:var(--cyan)">━━━ AI-Enhanced Results ━━━━━━━━━━━━━━━━━━━━━━━━━</div>
-        <div><span style="color:var(--orange)">ID:42</span> - PostgreSQL streaming replication setup</div>
-        <div style="color:var(--purple);margin:.15rem 0 .15rem 1rem">pg_basebackup -h master -D /var/lib/postgresql/data -U replicator -Fp -Xs -P</div>
-        <div style="margin-top:.75rem"><span style="color:var(--green)">scmd&gt;</span> <span style="animation:blink 1s step-end infinite;border-right:2px solid var(--green)">▊</span></div>
+      <div style="display:flex;gap:1.5rem;font-size:.875rem">
+        <a href="#features">Features</a>
+        <a href="#ai">AI</a>
+        <a href="#interfaces">Interfaces</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/gcclinux/scmd" target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:.35rem">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+          </svg>
+          GitHub
+        </a>
       </div>
     </div>
-  </div>
-</section>
+  </nav>
 
-<!-- KEY NUMBERS -->
-<section style="padding:3rem 1.5rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)">
-  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:2rem;text-align:center">
-    <div><div style="font-size:2rem;font-weight:800;color:var(--green);font-family:var(--font-mono)">3</div><div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Interfaces</div></div>
-    <div><div style="font-size:2rem;font-weight:800;color:var(--cyan);font-family:var(--font-mono)">2</div><div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">AI Providers</div></div>
-    <div><div style="font-size:2rem;font-weight:800;color:var(--purple);font-family:var(--font-mono)">2</div><div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Database Backends</div></div>
-    <div><div style="font-size:2rem;font-weight:800;color:var(--orange);font-family:var(--font-mono)">13</div><div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Slash Commands</div></div>
-    <div><div style="font-size:2rem;font-weight:800;color:var(--green);font-family:var(--font-mono)">5</div><div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Platforms</div></div>
-    <div><div style="font-size:2rem;font-weight:800;color:var(--cyan);font-family:var(--font-mono)">1</div><div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Single Binary</div></div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section id="features" style="padding:5rem 1.5rem">
-  <div style="max-width:1100px;margin:0 auto">
-    <h2 style="text-align:center;font-size:2rem;margin-bottom:.5rem">Why <span style="color:var(--green)">SCMD</span>?</h2>
-    <p style="text-align:center;color:var(--muted);margin-bottom:3rem;max-width:550px;margin-left:auto;margin-right:auto">A single binary that replaces bookmarks, wikis, and scattered notes for your command-line knowledge.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem">
-
-      <!-- Card: Smart Search -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
-        <div style="font-size:1.5rem;margin-bottom:.75rem">🔍</div>
-        <h3 style="font-size:1.05rem;margin-bottom:.5rem">Smart Search Pipeline</h3>
-        <p style="color:var(--muted);font-size:.875rem">Keyword search → intelligent scoring → vector similarity → AI fallback. Always finds what you need, even with vague queries.</p>
-      </div>
-
-      <!-- Card: AI Powered -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
-        <div style="font-size:1.5rem;margin-bottom:.75rem">🤖</div>
-        <h3 style="font-size:1.05rem;margin-bottom:.5rem">Dual AI Providers</h3>
-        <p style="color:var(--muted);font-size:.875rem">Ollama for local/private inference, Google Gemini for cloud power. Automatic fallback between providers. Separate chat and embedding models.</p>
-      </div>
-
-      <!-- Card: Vector Embeddings -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
-        <div style="font-size:1.5rem;margin-bottom:.75rem">🧠</div>
-        <h3 style="font-size:1.05rem;margin-bottom:.5rem">Semantic Vector Search</h3>
-        <p style="color:var(--muted);font-size:.875rem">pgvector embeddings for PostgreSQL, cosine similarity for SQLite. Understands meaning, not just keywords. Configurable dimensions (384, 768+).</p>
-      </div>
-
-      <!-- Card: Multi-Interface -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
-        <div style="font-size:1.5rem;margin-bottom:.75rem">💻</div>
-        <h3 style="font-size:1.05rem;margin-bottom:.5rem">Three Interfaces</h3>
-        <p style="color:var(--muted);font-size:.875rem">Interactive CLI with slash commands, traditional scriptable CLI with JSON output, and a full web UI with syntax highlighting and auth.</p>
-      </div>
-
-      <!-- Card: Dual Database -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
-        <div style="font-size:1.5rem;margin-bottom:.75rem">🗄️</div>
-        <h3 style="font-size:1.05rem;margin-bottom:.5rem">PostgreSQL + SQLite</h3>
-        <p style="color:var(--muted);font-size:.875rem">Enterprise PostgreSQL with pgvector for teams, or lightweight SQLite for personal use. Interactive setup wizards for both.</p>
-      </div>
-
-      <!-- Card: Security -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
-        <div style="font-size:1.5rem;margin-bottom:.75rem">🔒</div>
-        <h3 style="font-size:1.05rem;margin-bottom:.5rem">Secure by Default</h3>
-        <p style="color:var(--muted);font-size:.875rem">SSL/TLS, session-based auth with 24h expiry, HTTP-only cookies, read-only mode, and SameSite protection for the web UI.</p>
-      </div>
-
+  <!-- HERO -->
+  <section
+    style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:6rem 1.5rem 4rem;position:relative;overflow:hidden">
+    <div
+      style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,255,136,.06) 0%,transparent 60%);pointer-events:none">
     </div>
-  </div>
-</section>
+    <div style="max-width:800px;text-align:center;position:relative;z-index:1">
+      <div style="font-family:var(--font-mono);color:var(--muted);font-size:.875rem;margin-bottom:1rem">v2.1.2 · Go ·
+        AGPL-3.0 License</div>
+      <h1 style="font-size:clamp(2.5rem,6vw,4rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem">
+        <span style="color:var(--green)">Search</span> commands.<br>
+        <span style="color:var(--cyan)">Ask</span> AI.<br>
+        <span style="color:var(--purple)">Ship</span> faster.
+      </h1>
+      <p style="font-size:1.15rem;color:var(--muted);max-width:600px;margin:0 auto 2.5rem">
+        An AI-powered command knowledge base with interactive CLI, web UI, and semantic vector search. Store, find, and
+        understand commands — your way.
+      </p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="https://github.com/gcclinux/scmd/releases" target="_blank" rel="noopener"
+          style="background:var(--green);color:#000;padding:.75rem 2rem;border-radius:8px;font-weight:600;font-size:.95rem;transition:transform .15s,box-shadow .15s;display:inline-block">
+          Download Binary
+        </a>
+        <a href="#install"
+          style="background:var(--bg3);color:var(--text);padding:.75rem 2rem;border-radius:8px;font-weight:600;font-size:.95rem;border:1px solid var(--border);transition:border-color .2s;display:inline-block">
+          Quick Start →
+        </a>
+      </div>
 
-<!-- AI SECTION -->
-<section id="ai" style="padding:5rem 1.5rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-  <div style="max-width:900px;margin:0 auto">
-    <h2 style="text-align:center;font-size:2rem;margin-bottom:.5rem">AI-Powered <span style="color:var(--cyan)">Search Pipeline</span></h2>
-    <p style="text-align:center;color:var(--muted);margin-bottom:3rem">Every query flows through an intelligent multi-stage pipeline that always finds the best answer.</p>
-
-    <!-- Pipeline visualization -->
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:2rem;font-family:var(--font-mono);font-size:.85rem;line-height:2.2;overflow-x:auto">
-      <div><span style="color:var(--muted)">01</span> <span style="color:var(--text)">User Query</span> <span style="color:var(--muted)">───────────────────────────────────</span></div>
-      <div><span style="color:var(--muted)">02</span> <span style="color:var(--orange)">  → NLP Keyword Extraction</span> <span style="color:var(--muted)">(stop-word removal)</span></div>
-      <div><span style="color:var(--muted)">03</span> <span style="color:var(--cyan)">  → PostgreSQL ILIKE Search</span> <span style="color:var(--muted)">(AND/OR pattern matching)</span></div>
-      <div><span style="color:var(--muted)">04</span> <span style="color:var(--purple)">  → Score &amp; Rank Results</span> <span style="color:var(--muted)">(word-match percentage)</span></div>
-      <div><span style="color:var(--muted)">05</span> <span style="color:var(--green)">  → Score ≥ 60%?</span> <span style="color:var(--green)">✓ Return ranked results</span></div>
-      <div><span style="color:var(--muted)">06</span> <span style="color:var(--orange)">  → Score &lt; 60%?</span> <span style="color:var(--cyan)">→ Vector Similarity Search</span> <span style="color:var(--muted)">(pgvector/cosine)</span></div>
-      <div><span style="color:var(--muted)">07</span> <span style="color:var(--red)">  → Still low?</span> <span style="color:var(--purple)">→ Pure AI Chat Response</span> <span style="color:var(--muted)">(Ollama/Gemini)</span></div>
-    </div>
-
-    <!-- Provider cards -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem">
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
-        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
-          <span style="font-size:1.25rem">🦙</span>
-          <h3 style="font-size:1rem">Ollama</h3>
-          <span style="font-size:.7rem;background:var(--bg3);color:var(--green);padding:.15rem .5rem;border-radius:4px;margin-left:auto">LOCAL</span>
+      <!-- Terminal preview -->
+      <div
+        style="margin-top:3rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;text-align:left;box-shadow:0 25px 60px rgba(0,0,0,.4)">
+        <div
+          style="background:var(--bg3);padding:.6rem 1rem;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--border)">
+          <span style="width:12px;height:12px;border-radius:50%;background:var(--red);display:inline-block"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:var(--orange);display:inline-block"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:var(--green);display:inline-block"></span>
+          <span style="font-family:var(--font-mono);font-size:.75rem;color:var(--muted);margin-left:.5rem">scmd
+            --cli</span>
         </div>
-        <ul style="color:var(--muted);font-size:.825rem;list-style:none;display:flex;flex-direction:column;gap:.35rem">
-          <li>✦ Self-hosted, privacy-first</li>
-          <li>✦ No API costs</li>
-          <li>✦ Chat + embedding models</li>
-          <li>✦ Configurable host &amp; port</li>
-        </ul>
-      </div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
-        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
-          <span style="font-size:1.25rem">✨</span>
-          <h3 style="font-size:1rem">Google Gemini</h3>
-          <span style="font-size:.7rem;background:var(--bg3);color:var(--cyan);padding:.15rem .5rem;border-radius:4px;margin-left:auto">CLOUD</span>
-        </div>
-        <ul style="color:var(--muted);font-size:.825rem;list-style:none;display:flex;flex-direction:column;gap:.35rem">
-          <li>✦ High-quality responses</li>
-          <li>✦ Free tier: 1,500 req/day</li>
-          <li>✦ Chat + embedding models</li>
-          <li>✦ Automatic fallback</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- INTERFACES -->
-<section id="interfaces" style="padding:5rem 1.5rem">
-  <div style="max-width:1100px;margin:0 auto">
-    <h2 style="text-align:center;font-size:2rem;margin-bottom:.5rem">Three Ways to <span style="color:var(--purple)">Search</span></h2>
-    <p style="text-align:center;color:var(--muted);margin-bottom:3rem">Pick the interface that fits your workflow.</p>
-
-    <!-- Interactive CLI -->
-    <div style="margin-bottom:3rem">
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
-        <span style="background:var(--green);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px">01</span>
-        <h3 style="font-size:1.2rem">Interactive CLI</h3>
-        <code style="font-size:.8rem;color:var(--muted);background:var(--bg2);padding:.2rem .5rem;border-radius:4px">scmd --cli</code>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
-        <div style="color:var(--muted)"># Natural language queries</div>
-        <div><span style="color:var(--green)">scmd&gt;</span> show me docker compose examples</div>
-        <div style="color:var(--muted)"># Slash commands</div>
-        <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/search</span> kubernetes deployment</div>
-        <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/add</span> "git stash pop" "Restore stashed changes"</div>
-        <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/ai</span></div>
-        <div style="color:var(--purple)">  ✓ Ollama (host: localhost, model: ministral-3:3b)</div>
-        <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/import</span> ./runbook.md</div>
-        <div style="color:var(--green)">  ✓ Imported: "Production Runbook" (with embeddings)</div>
-      </div>
-      <div style="margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.5rem">
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/search</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/add</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/list</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/count</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/delete</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/show</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/help</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/import</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/run</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/ai</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/config</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/embeddings</span>
-        <span style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/generate</span>
-      </div>
-    </div>
-
-    <!-- Traditional CLI -->
-    <div style="margin-bottom:3rem">
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
-        <span style="background:var(--cyan);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px">02</span>
-        <h3 style="font-size:1.2rem">Traditional CLI</h3>
-        <code style="font-size:.8rem;color:var(--muted);background:var(--bg2);padding:.2rem .5rem;border-radius:4px">scmd --search</code>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
-        <div style="color:var(--muted)"># AND logic — all words must match</div>
-        <div><span style="color:var(--cyan)">$</span> scmd --search "postgresql replication slave"</div>
-        <div style="color:var(--muted)"># OR logic — any pattern matches</div>
-        <div><span style="color:var(--cyan)">$</span> scmd --search "docker,kubernetes,terraform"</div>
-        <div style="color:var(--muted)"># Save a new command</div>
-        <div><span style="color:var(--cyan)">$</span> scmd --save "docker ps -a" "List all containers"</div>
-        <div style="color:var(--muted)"># Import markdown docs</div>
-        <div><span style="color:var(--cyan)">$</span> scmd --import ./disaster-recovery.md</div>
-        <div style="color:var(--muted)"># Export to JSON</div>
-        <div><span style="color:var(--cyan)">$</span> scmd --copydb backup.json</div>
-      </div>
-    </div>
-
-    <!-- Web UI -->
-    <div>
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
-        <span style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px">03</span>
-        <h3 style="font-size:1.2rem">Web UI</h3>
-        <code style="font-size:.8rem;color:var(--muted);background:var(--bg2);padding:.2rem .5rem;border-radius:4px">scmd --web</code>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
-        <div><span style="color:var(--cyan)">$</span> scmd --web <span style="color:var(--muted)"># port 3333, opens browser</span></div>
-        <div><span style="color:var(--cyan)">$</span> scmd --web -port 8080 <span style="color:var(--muted)"># custom port</span></div>
-        <div><span style="color:var(--cyan)">$</span> scmd --web -port 8080 -service <span style="color:var(--muted)"># headless mode</span></div>
-        <div><span style="color:var(--cyan)">$</span> scmd --web -block <span style="color:var(--muted)"># read-only mode</span></div>
-        <div><span style="color:var(--cyan)">$</span> scmd --ssl cert.pem key.pem <span style="color:var(--muted)"># HTTPS</span></div>
-      </div>
-      <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">Real-time search, syntax highlighting, AI explanations, session auth, duplicate detection, and markdown rendering — all in the browser.</p>
-    </div>
-  </div>
-</section>
-
-<!-- DATABASE COMPARISON -->
-<section style="padding:5rem 1.5rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-  <div style="max-width:900px;margin:0 auto">
-    <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Pick Your <span style="color:var(--orange)">Database</span></h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.75rem">
-        <h3 style="font-size:1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
-          <span style="color:var(--cyan)">🐘</span> PostgreSQL
-        </h3>
-        <table style="width:100%;font-size:.825rem;color:var(--muted);border-collapse:collapse">
-          <tr><td style="padding:.35rem 0">Type</td><td style="text-align:right;color:var(--text)">Client-server</td></tr>
-          <tr><td style="padding:.35rem 0">Vector Search</td><td style="text-align:right;color:var(--text)">pgvector</td></tr>
-          <tr><td style="padding:.35rem 0">Multi-user</td><td style="text-align:right;color:var(--green)">✓ Yes</td></tr>
-          <tr><td style="padding:.35rem 0">Setup</td><td style="text-align:right;color:var(--text);font-family:var(--font-mono);font-size:.75rem">--create-db-postgresql</td></tr>
-          <tr><td style="padding:.35rem 0">Best for</td><td style="text-align:right;color:var(--text)">Teams &amp; enterprise</td></tr>
-        </table>
-      </div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.75rem">
-        <h3 style="font-size:1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
-          <span style="color:var(--orange)">📦</span> SQLite
-        </h3>
-        <table style="width:100%;font-size:.825rem;color:var(--muted);border-collapse:collapse">
-          <tr><td style="padding:.35rem 0">Type</td><td style="text-align:right;color:var(--text)">File-based</td></tr>
-          <tr><td style="padding:.35rem 0">Vector Search</td><td style="text-align:right;color:var(--text)">Go cosine sim</td></tr>
-          <tr><td style="padding:.35rem 0">Multi-user</td><td style="text-align:right;color:var(--muted)">✗ Single</td></tr>
-          <tr><td style="padding:.35rem 0">Setup</td><td style="text-align:right;color:var(--text);font-family:var(--font-mono);font-size:.75rem">--create-db-sqlite</td></tr>
-          <tr><td style="padding:.35rem 0">Best for</td><td style="text-align:right;color:var(--text)">Personal &amp; offline</td></tr>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- USE CASES -->
-<section style="padding:5rem 1.5rem">
-  <div style="max-width:1100px;margin:0 auto">
-    <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Built For <span style="color:var(--green)">Real Workflows</span></h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem">
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--green);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">devops</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Command Library</div>
-        <div style="color:var(--muted);font-size:.8rem">Docker, K8s, Terraform, Ansible — all searchable in one place.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--cyan);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">team</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Knowledge Base</div>
-        <div style="color:var(--muted);font-size:.8rem">Shared PostgreSQL backend for team-wide command reference and onboarding.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--purple);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">docs</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Documentation Hub</div>
-        <div style="color:var(--muted);font-size:.8rem">Import markdown runbooks and SOPs, search with natural language.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--orange);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">ai</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">AI-Assisted Learning</div>
-        <div style="color:var(--muted);font-size:.8rem">Ask natural language questions, get AI explanations with real command context.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--red);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">incident</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Incident Response</div>
-        <div style="color:var(--muted);font-size:.8rem">Quickly find recovery commands during outages. Seconds matter.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--green);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">offline</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Air-Gapped Environments</div>
-        <div style="color:var(--muted);font-size:.8rem">SQLite + Ollama for fully offline, private, zero-dependency operation.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--cyan);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">automation</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">CI/CD Integration</div>
-        <div style="color:var(--muted);font-size:.8rem">Script-friendly CLI with JSON output for pipeline automation.</div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
-        <div style="color:var(--purple);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">snippets</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Code Snippet Manager</div>
-        <div style="color:var(--muted);font-size:.8rem">Store reusable code blocks for any language with syntax highlighting.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- INSTALL -->
-<section id="install" style="padding:5rem 1.5rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-  <div style="max-width:900px;margin:0 auto">
-    <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Get Started in <span style="color:var(--green)">60 Seconds</span></h2>
-
-    <!-- Step 1 -->
-    <div style="margin-bottom:2rem">
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-        <span style="background:var(--green);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">1</span>
-        <h3 style="font-size:1rem">Download or build</h3>
-      </div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
-        <div style="color:var(--muted)"># Download pre-built binary (Linux example)</div>
-        <div><span style="color:var(--cyan)">$</span> curl -LO https://github.com/gcclinux/scmd/releases/latest/download/scmd-Linux-x86_64</div>
-        <div><span style="color:var(--cyan)">$</span> chmod +x scmd-Linux-x86_64</div>
-        <div style="color:var(--muted);margin-top:.5rem"># Or build from source</div>
-        <div><span style="color:var(--cyan)">$</span> git clone https://github.com/gcclinux/scmd.git && cd scmd</div>
-        <div><span style="color:var(--cyan)">$</span> go build -o scmd ./cmd/scmd/</div>
-        <div style="color:var(--muted);margin-top:.5rem"># Or use Docker</div>
-        <div><span style="color:var(--cyan)">$</span> docker run -p 8080:8080 gcclinux/scmd:latest --web -port 8080 -service</div>
-      </div>
-    </div>
-
-    <!-- Step 2 -->
-    <div style="margin-bottom:2rem">
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-        <span style="background:var(--cyan);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">2</span>
-        <h3 style="font-size:1rem">Configure</h3>
-      </div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
-        <div><span style="color:var(--cyan)">$</span> mkdir -p ~/.scmd</div>
-        <div><span style="color:var(--cyan)">$</span> cp config.json.example ~/.scmd/config.json</div>
-        <div style="color:var(--muted)"># Or use the interactive setup wizards:</div>
-        <div><span style="color:var(--cyan)">$</span> scmd --create-db-postgresql <span style="color:var(--muted)"># or --create-db-sqlite</span></div>
-        <div><span style="color:var(--cyan)">$</span> scmd --server-ollama <span style="color:var(--muted)"># or --server-gemini</span></div>
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div style="margin-bottom:2rem">
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-        <span style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">3</span>
-        <h3 style="font-size:1rem">Search</h3>
-      </div>
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
-        <div><span style="color:var(--cyan)">$</span> scmd --cli <span style="color:var(--muted)"># interactive mode</span></div>
-        <div><span style="color:var(--cyan)">$</span> scmd --search "docker,kubernetes" <span style="color:var(--muted)"># quick search</span></div>
-        <div><span style="color:var(--cyan)">$</span> scmd --web <span style="color:var(--muted)"># web UI</span></div>
-      </div>
-    </div>
-
-    <!-- Step 4 -->
-    <div>
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-        <span style="background:var(--orange);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">4</span>
-        <h3 style="font-size:1rem">Interactive</h3>
-      </div>
-
-      <!-- Workflow steps -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem">
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;position:relative">
-          <div style="background:var(--green);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">1</div>
-          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Search Command</div>
-          <div style="color:var(--muted);font-size:.75rem">Type a natural language query or use keywords to find commands</div>
-          <div style="color:var(--green);font-size:1.2rem;position:absolute;right:-.35rem;top:50%;transform:translateY(-50%);display:none">→</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
-          <div style="background:var(--cyan);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">2</div>
-          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">AI Identifies</div>
-          <div style="color:var(--muted);font-size:.75rem">AI persona analyzes results and provides recommendations</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
-          <div style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">3</div>
-          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Select Code Block</div>
-          <div style="color:var(--muted);font-size:.75rem">Pick from numbered options <span style="color:var(--orange);font-family:var(--font-mono)">[1] [2] [3]</span> to execute</div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
-          <div style="background:var(--orange);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">4</div>
-          <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Execute &amp; Output</div>
-          <div style="color:var(--muted);font-size:.75rem">Loads user profile and displays the command output</div>
+        <div style="padding:1.25rem;font-family:var(--font-mono);font-size:.85rem;line-height:1.8">
+          <div><span style="color:var(--green)">scmd&gt;</span> show me postgresql replication examples</div>
+          <div style="color:var(--muted);margin:.25rem 0">⟳ Extracting keywords: postgresql replication</div>
+          <div style="color:var(--muted)">⟳ Searching database... found 3 results (score: 85%)</div>
+          <div style="margin:.5rem 0;color:var(--cyan)">━━━ AI-Enhanced Results ━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+          <div><span style="color:var(--orange)">ID:42</span> - PostgreSQL streaming replication setup</div>
+          <div style="color:var(--purple);margin:.15rem 0 .15rem 1rem">pg_basebackup -h master -D
+            /var/lib/postgresql/data -U replicator -Fp -Xs -P</div>
+          <div style="margin-top:.75rem"><span style="color:var(--green)">scmd&gt;</span> <span
+              style="animation:blink 1s step-end infinite;border-right:2px solid var(--green)">▊</span></div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <!-- Flow arrows (visible on wider screens) -->
-      <div style="display:flex;justify-content:center;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
-        <span style="font-size:.7rem;color:var(--green);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">search</span>
-        <span style="color:var(--muted);font-size:.75rem">→</span>
-        <span style="font-size:.7rem;color:var(--cyan);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">AI match</span>
-        <span style="color:var(--muted);font-size:.75rem">→</span>
-        <span style="font-size:.7rem;color:var(--purple);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">select [1,2,3]</span>
-        <span style="color:var(--muted);font-size:.75rem">→</span>
-        <span style="font-size:.7rem;color:var(--orange);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">output</span>
+  <section id="climate" class="climate-section">
+    <div class="climate-container fade-in">
+      <div class="climate-icon">🌍</div>
+      <h2>Our Mission: A Greener Developer Ecosystem</h2>
+      <div class="climate-content">
+        <p>
+          Today's IDEs are overwhelmingly heavy. They come packed with massive dependencies, require constant
+          background interpreters, and consume excessive amounts of memory, CPU, and storage. All of this
+          translates directly to a colossal, often ignored, <strong>carbon footprint</strong>.
+        </p>
+        <p>
+          The primary goal of <strong>SCMD-CLI</strong> is to change this paradigm. We believe
+          developers shouldn't have to sacrifice our planet to write great code. By building a lightning-fast,
+          dependency-free binary in Go, we deliver all the advanced agentic features you expect from a modern
+          CLI AI Assistant, but with a drastically smaller environmental impact.
+        </p>
+        <p>
+          Beyond just a lightweight runtime, we are building local intelligence directly into the application
+          to minimize reliance on heavy cloud AI models where possible. And because we believe in transparency
+          and community-driven impact, the entire project is <strong>100% open source</strong>.
+        </p>
+        <p class="highlight">
+          Let's write incredible code, while leaving a smaller footprint behind.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY NUMBERS -->
+  <section
+    style="padding:3rem 1.5rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)">
+    <div
+      style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:2rem;text-align:center">
+      <div>
+        <div style="font-size:2rem;font-weight:800;color:var(--green);font-family:var(--font-mono)">3</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Interfaces</div>
+      </div>
+      <div>
+        <div style="font-size:2rem;font-weight:800;color:var(--cyan);font-family:var(--font-mono)">2</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">AI Providers</div>
+      </div>
+      <div>
+        <div style="font-size:2rem;font-weight:800;color:var(--purple);font-family:var(--font-mono)">2</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Database Backends</div>
+      </div>
+      <div>
+        <div style="font-size:2rem;font-weight:800;color:var(--orange);font-family:var(--font-mono)">13</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Slash Commands</div>
+      </div>
+      <div>
+        <div style="font-size:2rem;font-weight:800;color:var(--green);font-family:var(--font-mono)">5</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Platforms</div>
+      </div>
+      <div>
+        <div style="font-size:2rem;font-weight:800;color:var(--cyan);font-family:var(--font-mono)">1</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">Single Binary</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" style="padding:5rem 1.5rem">
+    <div style="max-width:1100px;margin:0 auto">
+      <h2 style="text-align:center;font-size:2rem;margin-bottom:.5rem">Why <span style="color:var(--green)">SCMD</span>?
+      </h2>
+      <p
+        style="text-align:center;color:var(--muted);margin-bottom:3rem;max-width:550px;margin-left:auto;margin-right:auto">
+        A single binary that replaces bookmarks, wikis, and scattered notes for your command-line knowledge.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem">
+
+        <!-- Card: Smart Search -->
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
+          <div style="font-size:1.5rem;margin-bottom:.75rem">🔍</div>
+          <h3 style="font-size:1.05rem;margin-bottom:.5rem">Smart Search Pipeline</h3>
+          <p style="color:var(--muted);font-size:.875rem">Keyword search → intelligent scoring → vector similarity → AI
+            fallback. Always finds what you need, even with vague queries.</p>
+        </div>
+
+        <!-- Card: AI Powered -->
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
+          <div style="font-size:1.5rem;margin-bottom:.75rem">🤖</div>
+          <h3 style="font-size:1.05rem;margin-bottom:.5rem">Dual AI Providers</h3>
+          <p style="color:var(--muted);font-size:.875rem">Ollama for local/private inference, Google Gemini for cloud
+            power. Automatic fallback between providers. Separate chat and embedding models.</p>
+        </div>
+
+        <!-- Card: Vector Embeddings -->
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
+          <div style="font-size:1.5rem;margin-bottom:.75rem">🧠</div>
+          <h3 style="font-size:1.05rem;margin-bottom:.5rem">Semantic Vector Search</h3>
+          <p style="color:var(--muted);font-size:.875rem">pgvector embeddings for PostgreSQL, cosine similarity for
+            SQLite. Understands meaning, not just keywords. Configurable dimensions (384, 768+).</p>
+        </div>
+
+        <!-- Card: Multi-Interface -->
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
+          <div style="font-size:1.5rem;margin-bottom:.75rem">💻</div>
+          <h3 style="font-size:1.05rem;margin-bottom:.5rem">Three Interfaces</h3>
+          <p style="color:var(--muted);font-size:.875rem">Interactive CLI with slash commands, traditional scriptable
+            CLI with JSON output, and a full web UI with syntax highlighting and auth.</p>
+        </div>
+
+        <!-- Card: Dual Database -->
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
+          <div style="font-size:1.5rem;margin-bottom:.75rem">🗄️</div>
+          <h3 style="font-size:1.05rem;margin-bottom:.5rem">PostgreSQL + SQLite</h3>
+          <p style="color:var(--muted);font-size:.875rem">Enterprise PostgreSQL with pgvector for teams, or lightweight
+            SQLite for personal use. Interactive setup wizards for both.</p>
+        </div>
+
+        <!-- Card: Security -->
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:border-color .2s">
+          <div style="font-size:1.5rem;margin-bottom:.75rem">🔒</div>
+          <h3 style="font-size:1.05rem;margin-bottom:.5rem">Secure by Default</h3>
+          <p style="color:var(--muted);font-size:.875rem">SSL/TLS, session-based auth with 24h expiry, HTTP-only
+            cookies, read-only mode, and SameSite protection for the web UI.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- AI SECTION -->
+  <section id="ai"
+    style="padding:5rem 1.5rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="text-align:center;font-size:2rem;margin-bottom:.5rem">AI-Powered <span style="color:var(--cyan)">Search
+          Pipeline</span></h2>
+      <p style="text-align:center;color:var(--muted);margin-bottom:3rem">Every query flows through an intelligent
+        multi-stage pipeline that always finds the best answer.</p>
+
+      <!-- Pipeline visualization -->
+      <div
+        style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:2rem;font-family:var(--font-mono);font-size:.85rem;line-height:2.2;overflow-x:auto">
+        <div><span style="color:var(--muted)">01</span> <span style="color:var(--text)">User Query</span> <span
+            style="color:var(--muted)">───────────────────────────────────</span></div>
+        <div><span style="color:var(--muted)">02</span> <span style="color:var(--orange)"> → NLP Keyword
+            Extraction</span> <span style="color:var(--muted)">(stop-word removal)</span></div>
+        <div><span style="color:var(--muted)">03</span> <span style="color:var(--cyan)"> → PostgreSQL ILIKE
+            Search</span> <span style="color:var(--muted)">(AND/OR pattern matching)</span></div>
+        <div><span style="color:var(--muted)">04</span> <span style="color:var(--purple)"> → Score &amp; Rank
+            Results</span> <span style="color:var(--muted)">(word-match percentage)</span></div>
+        <div><span style="color:var(--muted)">05</span> <span style="color:var(--green)"> → Score ≥ 60%?</span> <span
+            style="color:var(--green)">✓ Return ranked results</span></div>
+        <div><span style="color:var(--muted)">06</span> <span style="color:var(--orange)"> → Score &lt; 60%?</span>
+          <span style="color:var(--cyan)">→ Vector Similarity Search</span> <span
+            style="color:var(--muted)">(pgvector/cosine)</span>
+        </div>
+        <div><span style="color:var(--muted)">07</span> <span style="color:var(--red)"> → Still low?</span> <span
+            style="color:var(--purple)">→ Pure AI Chat Response</span> <span
+            style="color:var(--muted)">(Ollama/Gemini)</span></div>
       </div>
 
-      <!-- Screenshot gallery -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-          <div style="background:var(--bg3);padding:.5rem .75rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border)">
-            <span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>
-            <span style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block"></span>
-            <span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span>
-            <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--muted);margin-left:.4rem">scmd --cli (execute)</span>
+      <!-- Provider cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
+            <span style="font-size:1.25rem">🦙</span>
+            <h3 style="font-size:1rem">Ollama</h3>
+            <span
+              style="font-size:.7rem;background:var(--bg3);color:var(--green);padding:.15rem .5rem;border-radius:4px;margin-left:auto">LOCAL</span>
           </div>
-          <img src="https://raw.githubusercontent.com/gcclinux/scmd/main/images/v208-cli-exe.png" alt="SCMD interactive CLI executing a command with AI-powered code block selection" style="width:100%;display:block" loading="lazy">
+          <ul
+            style="color:var(--muted);font-size:.825rem;list-style:none;display:flex;flex-direction:column;gap:.35rem">
+            <li>✦ Self-hosted, privacy-first</li>
+            <li>✦ No API costs</li>
+            <li>✦ Chat + embedding models</li>
+            <li>✦ Configurable host &amp; port</li>
+          </ul>
         </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-          <div style="background:var(--bg3);padding:.5rem .75rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border)">
-            <span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>
-            <span style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block"></span>
-            <span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span>
-            <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--muted);margin-left:.4rem">scmd --help</span>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem">
+            <span style="font-size:1.25rem">✨</span>
+            <h3 style="font-size:1rem">Google Gemini</h3>
+            <span
+              style="font-size:.7rem;background:var(--bg3);color:var(--cyan);padding:.15rem .5rem;border-radius:4px;margin-left:auto">CLOUD</span>
           </div>
-          <img src="https://raw.githubusercontent.com/gcclinux/scmd/main/images/v208-cli-help.png" alt="SCMD CLI help menu showing available commands and options" style="width:100%;display:block" loading="lazy">
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:.8rem;margin-top:.75rem;text-align:center">Search → AI identifies the best match → select a code block to run → see the output with your profile loaded.</p>
-    </div>
-
-    <!-- Platform table -->
-    <div style="margin-top:2.5rem">
-      <h3 style="font-size:.95rem;margin-bottom:1rem;color:var(--muted)">Available Platforms</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem">
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
-          <span>🪟</span> Windows AMD64
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
-          <span>🐧</span> Linux AMD64
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
-          <span>🐧</span> Linux ARM64
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
-          <span>🍎</span> macOS Intel
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
-          <span>🍎</span> macOS ARM64
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
-          <span>🐳</span> Docker
+          <ul
+            style="color:var(--muted);font-size:.825rem;list-style:none;display:flex;flex-direction:column;gap:.35rem">
+            <li>✦ High-quality responses</li>
+            <li>✦ Free tier: 1,500 req/day</li>
+            <li>✦ Chat + embedding models</li>
+            <li>✦ Automatic fallback</li>
+          </ul>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ARCHITECTURE -->
-<section style="padding:5rem 1.5rem">
-  <div style="max-width:900px;margin:0 auto">
-    <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Architecture</h2>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;font-family:var(--font-mono);font-size:.8rem;line-height:1.7;overflow-x:auto;text-align:center">
-<pre style="display:inline-block;text-align:left;color:var(--text)">
+  <!-- INTERFACES -->
+  <section id="interfaces" style="padding:5rem 1.5rem">
+    <div style="max-width:1100px;margin:0 auto">
+      <h2 style="text-align:center;font-size:2rem;margin-bottom:.5rem">Three Ways to <span
+          style="color:var(--purple)">Search</span></h2>
+      <p style="text-align:center;color:var(--muted);margin-bottom:3rem">Pick the interface that fits your workflow.</p>
+
+      <!-- Interactive CLI -->
+      <div style="margin-bottom:3rem">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+          <span
+            style="background:var(--green);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px">01</span>
+          <h3 style="font-size:1.2rem">Interactive CLI</h3>
+          <code
+            style="font-size:.8rem;color:var(--muted);background:var(--bg2);padding:.2rem .5rem;border-radius:4px">scmd --cli</code>
+        </div>
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
+          <div style="color:var(--muted)"># Natural language queries</div>
+          <div><span style="color:var(--green)">scmd&gt;</span> show me docker compose examples</div>
+          <div style="color:var(--muted)"># Slash commands</div>
+          <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/search</span>
+            kubernetes deployment</div>
+          <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/add</span> "git stash
+            pop" "Restore stashed changes"</div>
+          <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/ai</span></div>
+          <div style="color:var(--purple)"> ✓ Ollama (host: localhost, model: ministral-3:3b)</div>
+          <div><span style="color:var(--green)">scmd&gt;</span> <span style="color:var(--cyan)">/import</span>
+            ./runbook.md</div>
+          <div style="color:var(--green)"> ✓ Imported: "Production Runbook" (with embeddings)</div>
+        </div>
+        <div style="margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.5rem">
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/search</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/add</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/list</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/count</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/delete</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/show</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/help</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/import</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/run</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/ai</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/config</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/embeddings</span>
+          <span
+            style="font-size:.75rem;color:var(--muted);background:var(--bg2);padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border)">/generate</span>
+        </div>
+      </div>
+
+      <!-- Traditional CLI -->
+      <div style="margin-bottom:3rem">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+          <span
+            style="background:var(--cyan);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px">02</span>
+          <h3 style="font-size:1.2rem">Traditional CLI</h3>
+          <code
+            style="font-size:.8rem;color:var(--muted);background:var(--bg2);padding:.2rem .5rem;border-radius:4px">scmd --search</code>
+        </div>
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
+          <div style="color:var(--muted)"># AND logic — all words must match</div>
+          <div><span style="color:var(--cyan)">$</span> scmd --search "postgresql replication slave"</div>
+          <div style="color:var(--muted)"># OR logic — any pattern matches</div>
+          <div><span style="color:var(--cyan)">$</span> scmd --search "docker,kubernetes,terraform"</div>
+          <div style="color:var(--muted)"># Save a new command</div>
+          <div><span style="color:var(--cyan)">$</span> scmd --save "docker ps -a" "List all containers"</div>
+          <div style="color:var(--muted)"># Import markdown docs</div>
+          <div><span style="color:var(--cyan)">$</span> scmd --import ./disaster-recovery.md</div>
+          <div style="color:var(--muted)"># Export to JSON</div>
+          <div><span style="color:var(--cyan)">$</span> scmd --copydb backup.json</div>
+        </div>
+      </div>
+
+      <!-- Web UI -->
+      <div>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+          <span
+            style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px">03</span>
+          <h3 style="font-size:1.2rem">Web UI</h3>
+          <code
+            style="font-size:.8rem;color:var(--muted);background:var(--bg2);padding:.2rem .5rem;border-radius:4px">scmd --web</code>
+        </div>
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
+          <div><span style="color:var(--cyan)">$</span> scmd --web <span style="color:var(--muted)"># port 3333, opens
+              browser</span></div>
+          <div><span style="color:var(--cyan)">$</span> scmd --web -port 8080 <span style="color:var(--muted)"># custom
+              port</span></div>
+          <div><span style="color:var(--cyan)">$</span> scmd --web -port 8080 -service <span
+              style="color:var(--muted)"># headless mode</span></div>
+          <div><span style="color:var(--cyan)">$</span> scmd --web -block <span style="color:var(--muted)"># read-only
+              mode</span></div>
+          <div><span style="color:var(--cyan)">$</span> scmd --ssl cert.pem key.pem <span style="color:var(--muted)">#
+              HTTPS</span></div>
+        </div>
+        <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem">Real-time search, syntax highlighting, AI
+          explanations, session auth, duplicate detection, and markdown rendering — all in the browser.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATABASE COMPARISON -->
+  <section
+    style="padding:5rem 1.5rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Pick Your <span
+          style="color:var(--orange)">Database</span></h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.75rem">
+          <h3 style="font-size:1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+            <span style="color:var(--cyan)">🐘</span> PostgreSQL
+          </h3>
+          <table style="width:100%;font-size:.825rem;color:var(--muted);border-collapse:collapse">
+            <tr>
+              <td style="padding:.35rem 0">Type</td>
+              <td style="text-align:right;color:var(--text)">Client-server</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Vector Search</td>
+              <td style="text-align:right;color:var(--text)">pgvector</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Multi-user</td>
+              <td style="text-align:right;color:var(--green)">✓ Yes</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Setup</td>
+              <td style="text-align:right;color:var(--text);font-family:var(--font-mono);font-size:.75rem">
+                --create-db-postgresql</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Best for</td>
+              <td style="text-align:right;color:var(--text)">Teams &amp; enterprise</td>
+            </tr>
+          </table>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.75rem">
+          <h3 style="font-size:1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+            <span style="color:var(--orange)">📦</span> SQLite
+          </h3>
+          <table style="width:100%;font-size:.825rem;color:var(--muted);border-collapse:collapse">
+            <tr>
+              <td style="padding:.35rem 0">Type</td>
+              <td style="text-align:right;color:var(--text)">File-based</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Vector Search</td>
+              <td style="text-align:right;color:var(--text)">Go cosine sim</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Multi-user</td>
+              <td style="text-align:right;color:var(--muted)">✗ Single</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Setup</td>
+              <td style="text-align:right;color:var(--text);font-family:var(--font-mono);font-size:.75rem">
+                --create-db-sqlite</td>
+            </tr>
+            <tr>
+              <td style="padding:.35rem 0">Best for</td>
+              <td style="text-align:right;color:var(--text)">Personal &amp; offline</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section style="padding:5rem 1.5rem">
+    <div style="max-width:1100px;margin:0 auto">
+      <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Built For <span style="color:var(--green)">Real
+          Workflows</span></h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--green);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">devops</div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Command Library</div>
+          <div style="color:var(--muted);font-size:.8rem">Docker, K8s, Terraform, Ansible — all searchable in one place.
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--cyan);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">team</div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Knowledge Base</div>
+          <div style="color:var(--muted);font-size:.8rem">Shared PostgreSQL backend for team-wide command reference and
+            onboarding.</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--purple);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">docs</div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Documentation Hub</div>
+          <div style="color:var(--muted);font-size:.8rem">Import markdown runbooks and SOPs, search with natural
+            language.</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--orange);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">ai</div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">AI-Assisted Learning</div>
+          <div style="color:var(--muted);font-size:.8rem">Ask natural language questions, get AI explanations with real
+            command context.</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--red);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">incident</div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Incident Response</div>
+          <div style="color:var(--muted);font-size:.8rem">Quickly find recovery commands during outages. Seconds matter.
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--green);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">offline</div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Air-Gapped Environments</div>
+          <div style="color:var(--muted);font-size:.8rem">SQLite + Ollama for fully offline, private, zero-dependency
+            operation.</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--cyan);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">automation
+          </div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">CI/CD Integration</div>
+          <div style="color:var(--muted);font-size:.8rem">Script-friendly CLI with JSON output for pipeline automation.
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem">
+          <div style="color:var(--purple);font-size:.8rem;font-family:var(--font-mono);margin-bottom:.4rem">snippets
+          </div>
+          <div style="font-size:.9rem;font-weight:600;margin-bottom:.35rem">Code Snippet Manager</div>
+          <div style="color:var(--muted);font-size:.8rem">Store reusable code blocks for any language with syntax
+            highlighting.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install"
+    style="padding:5rem 1.5rem;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Get Started in <span
+          style="color:var(--green)">60 Seconds</span></h2>
+
+      <!-- Step 1 -->
+      <div style="margin-bottom:2rem">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+          <span
+            style="background:var(--green);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">1</span>
+          <h3 style="font-size:1rem">Download or build</h3>
+        </div>
+        <div
+          style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
+          <div style="color:var(--muted)"># Download pre-built binary (Linux example)</div>
+          <div><span style="color:var(--cyan)">$</span> curl -LO
+            https://github.com/gcclinux/scmd/releases/latest/download/scmd-Linux-x86_64</div>
+          <div><span style="color:var(--cyan)">$</span> chmod +x scmd-Linux-x86_64</div>
+          <div style="color:var(--muted);margin-top:.5rem"># Or build from source</div>
+          <div><span style="color:var(--cyan)">$</span> git clone https://github.com/gcclinux/scmd.git && cd scmd</div>
+          <div><span style="color:var(--cyan)">$</span> go build -o scmd ./cmd/scmd/</div>
+          <div style="color:var(--muted);margin-top:.5rem"># Or use Docker</div>
+          <div><span style="color:var(--cyan)">$</span> docker run -p 8080:8080 gcclinux/scmd:latest --web -port 8080
+            -service</div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div style="margin-bottom:2rem">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+          <span
+            style="background:var(--cyan);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">2</span>
+          <h3 style="font-size:1rem">Configure</h3>
+        </div>
+        <div
+          style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
+          <div><span style="color:var(--cyan)">$</span> mkdir -p ~/.scmd</div>
+          <div><span style="color:var(--cyan)">$</span> cp config.json.example ~/.scmd/config.json</div>
+          <div style="color:var(--muted)"># Or use the interactive setup wizards:</div>
+          <div><span style="color:var(--cyan)">$</span> scmd --create-db-postgresql <span style="color:var(--muted)">#
+              or --create-db-sqlite</span></div>
+          <div><span style="color:var(--cyan)">$</span> scmd --server-ollama <span style="color:var(--muted)"># or
+              --server-gemini</span></div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div style="margin-bottom:2rem">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+          <span
+            style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">3</span>
+          <h3 style="font-size:1rem">Search</h3>
+        </div>
+        <div
+          style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-family:var(--font-mono);font-size:.825rem;line-height:1.9;overflow-x:auto">
+          <div><span style="color:var(--cyan)">$</span> scmd --cli <span style="color:var(--muted)"># interactive
+              mode</span></div>
+          <div><span style="color:var(--cyan)">$</span> scmd --search "docker,kubernetes" <span
+              style="color:var(--muted)"># quick search</span></div>
+          <div><span style="color:var(--cyan)">$</span> scmd --web <span style="color:var(--muted)"># web UI</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+          <span
+            style="background:var(--orange);color:#000;font-family:var(--font-mono);font-size:.75rem;font-weight:700;padding:.25rem .6rem;border-radius:4px;min-width:1.8rem;text-align:center">4</span>
+          <h3 style="font-size:1rem">Interactive</h3>
+        </div>
+
+        <!-- Workflow steps -->
+        <div
+          style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem">
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;position:relative">
+            <div
+              style="background:var(--green);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">
+              1</div>
+            <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Search Command</div>
+            <div style="color:var(--muted);font-size:.75rem">Type a natural language query or use keywords to find
+              commands</div>
+            <div
+              style="color:var(--green);font-size:1.2rem;position:absolute;right:-.35rem;top:50%;transform:translateY(-50%);display:none">
+              →</div>
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
+            <div
+              style="background:var(--cyan);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">
+              2</div>
+            <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">AI Identifies</div>
+            <div style="color:var(--muted);font-size:.75rem">AI persona analyzes results and provides recommendations
+            </div>
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
+            <div
+              style="background:var(--purple);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">
+              3</div>
+            <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Select Code Block</div>
+            <div style="color:var(--muted);font-size:.75rem">Pick from numbered options <span
+                style="color:var(--orange);font-family:var(--font-mono)">[1] [2] [3]</span> to execute</div>
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
+            <div
+              style="background:var(--orange);color:#000;font-family:var(--font-mono);font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;display:inline-block;margin-bottom:.5rem">
+              4</div>
+            <div style="font-size:.85rem;font-weight:600;margin-bottom:.3rem">Execute &amp; Output</div>
+            <div style="color:var(--muted);font-size:.75rem">Loads user profile and displays the command output</div>
+          </div>
+        </div>
+
+        <!-- Flow arrows (visible on wider screens) -->
+        <div style="display:flex;justify-content:center;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+          <span
+            style="font-size:.7rem;color:var(--green);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">search</span>
+          <span style="color:var(--muted);font-size:.75rem">→</span>
+          <span
+            style="font-size:.7rem;color:var(--cyan);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">AI
+            match</span>
+          <span style="color:var(--muted);font-size:.75rem">→</span>
+          <span
+            style="font-size:.7rem;color:var(--purple);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">select
+            [1,2,3]</span>
+          <span style="color:var(--muted);font-size:.75rem">→</span>
+          <span
+            style="font-size:.7rem;color:var(--orange);font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);padding:.2rem .6rem;border-radius:4px">output</span>
+        </div>
+
+        <!-- Screenshot gallery -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+            <div
+              style="background:var(--bg3);padding:.5rem .75rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border)">
+              <span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>
+              <span
+                style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block"></span>
+              <span
+                style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span>
+              <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--muted);margin-left:.4rem">scmd
+                --cli (execute)</span>
+            </div>
+            <img src="https://raw.githubusercontent.com/gcclinux/scmd/main/images/v208-cli-exe.png"
+              alt="SCMD interactive CLI executing a command with AI-powered code block selection"
+              style="width:100%;display:block" loading="lazy">
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+            <div
+              style="background:var(--bg3);padding:.5rem .75rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border)">
+              <span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>
+              <span
+                style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block"></span>
+              <span
+                style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span>
+              <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--muted);margin-left:.4rem">scmd
+                --help</span>
+            </div>
+            <img src="https://raw.githubusercontent.com/gcclinux/scmd/main/images/v208-cli-help.png"
+              alt="SCMD CLI help menu showing available commands and options" style="width:100%;display:block"
+              loading="lazy">
+          </div>
+        </div>
+        <p style="color:var(--muted);font-size:.8rem;margin-top:.75rem;text-align:center">Search → AI identifies the
+          best match → select a code block to run → see the output with your profile loaded.</p>
+      </div>
+
+      <!-- Platform table -->
+      <div style="margin-top:2.5rem">
+        <h3 style="font-size:.95rem;margin-bottom:1rem;color:var(--muted)">Available Platforms</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem">
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
+            <span>🪟</span> Windows AMD64
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
+            <span>🐧</span> Linux AMD64
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
+            <span>🐧</span> Linux ARM64
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
+            <span>🍎</span> macOS Intel
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
+            <span>🍎</span> macOS ARM64
+          </div>
+          <div
+            style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:var(--font-mono);font-size:.8rem;display:flex;align-items:center;gap:.5rem">
+            <span>🐳</span> Docker
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section style="padding:5rem 1.5rem">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="text-align:center;font-size:2rem;margin-bottom:2.5rem">Architecture</h2>
+      <div
+        style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;font-family:var(--font-mono);font-size:.8rem;line-height:1.7;overflow-x:auto;text-align:center">
+        <pre style="display:inline-block;text-align:left;color:var(--text)">
 <span style="color:var(--border)">┌─────────────────────────────────────────────────┐</span>
 <span style="color:var(--border)">│</span>                 <span style="color:var(--green);font-weight:700">SCMD v2.1.0</span>                   <span style="color:var(--border)">│</span>
 <span style="color:var(--border)">├─────────────┬──────────────┬────────────────────┤</span>
@@ -539,38 +812,142 @@ a:hover{color:var(--green)}
 <span style="color:var(--border)">│</span>  <span style="color:var(--border)">└──────────────────┘ └───────────────────────┘</span> <span style="color:var(--border)">│</span>
 <span style="color:var(--border)">└──────────────────────────────────────────────────┘</span>
 </pre>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- FOOTER -->
-<footer style="padding:3rem 1.5rem;border-top:1px solid var(--border);text-align:center">
-  <div style="max-width:900px;margin:0 auto">
-    <div style="display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap;font-size:.85rem">
-      <a href="https://github.com/gcclinux/scmd" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/gcclinux/scmd/releases" target="_blank" rel="noopener">Releases</a>
-      <a href="https://github.com/gcclinux/scmd/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
-      <a href="https://github.com/gcclinux/scmd/blob/main/docs/QUICKSTART.md" target="_blank" rel="noopener">Quick Start</a>
-      <a href="https://github.com/gcclinux/scmd/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+  <!-- FOOTER -->
+  <footer style="padding:3rem 1.5rem;border-top:1px solid var(--border);text-align:center">
+    <div style="max-width:900px;margin:0 auto">
+      <div style="display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap;font-size:.85rem">
+        <a href="https://github.com/gcclinux/scmd" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/gcclinux/scmd/releases" target="_blank" rel="noopener">Releases</a>
+        <a href="https://github.com/gcclinux/scmd/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/gcclinux/scmd/blob/main/docs/QUICKSTART.md" target="_blank" rel="noopener">Quick
+          Start</a>
+        <a href="https://github.com/gcclinux/scmd/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p style="color:var(--muted);font-size:.8rem">
+        Built with Go by <a href="https://github.com/gcclinux" target="_blank" rel="noopener">Ricardo Wagemaker</a> ·
+        SCMD v2.1.2
+      </p>
     </div>
-    <p style="color:var(--muted);font-size:.8rem">
-      Built with Go by <a href="https://github.com/gcclinux" target="_blank" rel="noopener">Ricardo Wagemaker</a> · SCMD v2.1.0
-    </p>
-  </div>
-</footer>
+  </footer>
 
-<style>
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-@media(max-width:640px){
-  nav div:last-child{gap:.75rem;font-size:.8rem}
-  section{padding:3rem 1rem !important}
-  div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
-  div[style*="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))"]{grid-template-columns:1fr 1fr !important}
-}
-a[style*="background:var(--green)"]:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,255,136,.25)}
-a[style*="background:var(--bg3)"]:hover{border-color:var(--muted)}
-div[style*="transition:border-color"]:hover{border-color:var(--muted) !important}
-</style>
+  <style>
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+
+    @media(max-width:640px) {
+      nav div:last-child {
+        gap: .75rem;
+        font-size: .8rem
+      }
+
+      section {
+        padding: 3rem 1rem !important
+      }
+
+      div[style*="grid-template-columns:1fr 1fr"] {
+        grid-template-columns: 1fr !important
+      }
+
+      div[style*="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))"] {
+        grid-template-columns: 1fr 1fr !important
+      }
+    }
+
+    a[style*="background:var(--green)"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 255, 136, .25)
+    }
+
+    a[style*="background:var(--bg3)"]:hover {
+      border-color: var(--muted)
+    }
+
+    div[style*="transition:border-color"]:hover {
+      border-color: var(--muted) !important
+    }
+
+    /* Climate Mission Section Styles */
+    .climate-section {
+      padding: 6rem 1.5rem;
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      border-top: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .climate-container {
+      max-width: 850px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .climate-icon {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 15px rgba(0, 255, 136, 0.3));
+    }
+
+    .climate-section h2 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .climate-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: left;
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .climate-content strong {
+      color: var(--text);
+    }
+
+    .climate-content .highlight {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--green);
+      text-align: center;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    .fade-in {
+      animation: fadeIn 1.2s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 
 </body>
+
 </html>

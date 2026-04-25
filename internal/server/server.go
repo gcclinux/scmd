@@ -236,6 +236,8 @@ func Routes() {
 	}
 	http.HandleFunc("/game", gamePage)
 	http.HandleFunc("/help", helpPage)
+	http.HandleFunc("/stored", storedPage)
+	http.HandleFunc("/api/stored", storedAPIPage)
 	http.HandleFunc("/answer-feedback", answerFeedback)
 
 	if browser {

@@ -333,3 +333,24 @@ func searchByVectorMCP(embedding []float64, limit int) ([]CommandRecord, error) 
 
 	return results, nil
 }
+
+// listAllCommandsMCP returns all commands from the MCP backend ordered by assigned ID.
+func listAllCommandsMCP() ([]CommandRecord, error) {
+	namespace := config.TableName()
+
+	data, err := MCPListDataFn(namespace, 0, 0)
+	if err != nil {
+		return nil, fmt.Errorf("error listing MCP data: %v", err)
+	}
+
+	records, err := parseMCPRecords(data)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []CommandRecord
+	for i := range records {
+		results = append(results, records[i].toCommandRecord())
+	}
+	return results, nil
+}

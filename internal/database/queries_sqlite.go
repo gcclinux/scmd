@@ -224,6 +224,30 @@ func getEmbeddingStatsSQLite() (total int, withEmbeddings int, err error) {
 	return total, withEmbeddings, nil
 }
 
+// listAllCommandsSQLite returns all commands from SQLite ordered by ID.
+func listAllCommandsSQLite() ([]CommandRecord, error) {
+	tableName := sqliteTableName()
+	query := fmt.Sprintf("SELECT id, key, data FROM %s ORDER BY id", tableName)
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error querying all commands: %v", err)
+	}
+	defer rows.Close()
+
+	var results []CommandRecord
+	for rows.Next() {
+		var record CommandRecord
+		if err := rows.Scan(&record.Id, &record.Key, &record.Data); err != nil {
+			return nil, fmt.Errorf("error scanning row: %v", err)
+		}
+		results = append(results, record)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %v", err)
+	}
+	return results, nil
+}
+
 // searchByVectorSQLite performs cosine similarity search in SQLite.
 func searchByVectorSQLite(embedding []float64, limit int) ([]CommandRecord, error) {
 	tableName := sqliteTableName()
