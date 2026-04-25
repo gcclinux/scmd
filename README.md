@@ -18,10 +18,10 @@ For a full feature breakdown and infographic-ready reference, see [docs/SCMD_INF
 ## Screenshots
 
 ### v2.1.2 representation when starting scmd with flags --cli
-![v2.1.2 representation when starting scmd with flags --cli](images\v212-cli-start.png)
+![v2.1.2 representation when starting scmd with flags --cli](images/v212-cli-start.png)
 
 ### v2.1.2 representation when starting scmd with flags --cli and executing /help command
-![v2.1.2 representation when starting scmd with flags --cli](images\v212-cli-ai-help.png)
+![v2.1.2 representation when starting scmd with flags --cli](images/v212-cli-ai-help.png)
 
 ---
 
@@ -47,7 +47,7 @@ See [INTERACTIVE_MODE.md](docs/INTERACTIVE_MODE.md) and [SLASH_COMMANDS.md](docs
 ### 2. Traditional CLI
 
 ### v2.1.2 representation when scmd start with flags --cli
-![v2.1.2 representation when scmd with flags --cli](images\v212-cli-help.png)
+![v2.1.2 representation when scmd with flags --cli](images/v212-cli-help.png)
 
 ```bash
 scmd --search "postgresql replication"       # AND logic (all words must match)
