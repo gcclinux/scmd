@@ -456,14 +456,28 @@ func handleRunCommand(args string) {
 		}
 	}
 
-	// Run through the user's shell so that shell built-ins, aliases,
-	// and the full PATH/environment are available.
+	// Run through the user's login shell so that shell built-ins,
+	// aliases, functions (e.g. nvm), and the full PATH/environment
+	// from ~/.bashrc / ~/.profile are available.
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("powershell", "-Command", args)
 	} else {
-		cmd = exec.Command("sh", "-c", args)
+		shell := findBash()
+		if shell != "" {
+			// Login + interactive flags cause bash to source
+			// ~/.bash_profile / ~/.bashrc, loading functions like nvm.
+			cmd = exec.Command(shell, "--login", "-c", args)
+		} else {
+			cmd = exec.Command("sh", "-c", args)
+		}
 	}
+
+	// When running inside a snap, the confined environment may not
+	// include standard system directories in PATH. Merge common paths
+	// so that tools like curl, wget, git, etc. are reachable.
+	cmd.Env = enrichPathEnv(os.Environ())
+
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -484,4 +498,94 @@ func handleRunCommand(args string) {
 	fmt.Println()
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
+}
+
+// enrichPathEnv returns a copy of env with common system directories merged
+// into the PATH variable. This is a no-op when those directories are already
+// present (i.e. outside snap confinement). Inside a snap the default PATH is
+// very restricted, so we append the standard locations that contain tools
+// like curl, wget, git, etc.
+func enrichPathEnv(env []string) []string {
+	// Directories that should always be reachable.
+	extras := []string{
+		"/usr/local/sbin",
+		"/usr/local/bin",
+		"/usr/sbin",
+		"/usr/bin",
+		"/sbin",
+		"/bin",
+	}
+
+	// When running inside a snap, $SNAP/usr/bin etc. hold staged packages.
+	snap := ""
+	home := ""
+	for _, e := range env {
+		if strings.HasPrefix(e, "SNAP=") {
+			snap = strings.TrimPrefix(e, "SNAP=")
+		} else if strings.HasPrefix(e, "HOME=") {
+			home = strings.TrimPrefix(e, "HOME=")
+		}
+	}
+	if snap != "" {
+		extras = append([]string{
+			snap + "/usr/bin",
+			snap + "/usr/sbin",
+			snap + "/bin",
+			snap + "/sbin",
+		}, extras...)
+	}
+
+	// Also include the user's own ~/bin and ~/.local/bin.
+	if home != "" {
+		extras = append(extras, home+"/bin", home+"/.local/bin")
+	}
+
+	out := make([]string, 0, len(env))
+	found := false
+	for _, e := range env {
+		if strings.HasPrefix(e, "PATH=") {
+			found = true
+			current := strings.TrimPrefix(e, "PATH=")
+			dirs := strings.Split(current, ":")
+			existing := make(map[string]bool, len(dirs))
+			for _, d := range dirs {
+				existing[d] = true
+			}
+			for _, d := range extras {
+				if !existing[d] {
+					dirs = append(dirs, d)
+				}
+			}
+			out = append(out, "PATH="+strings.Join(dirs, ":"))
+		} else {
+			out = append(out, e)
+		}
+	}
+	if !found {
+		out = append(out, "PATH="+strings.Join(extras, ":"))
+	}
+	return out
+}
+
+// findBash locates a usable bash binary. Inside a snap, bash may live
+// under $SNAP/usr/bin/bash rather than the usual /bin/bash.
+func findBash() string {
+	// Check the SNAP location first (staged cli-tools part).
+	if snap := os.Getenv("SNAP"); snap != "" {
+		candidate := snap + "/usr/bin/bash"
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+	}
+	// Standard host locations.
+	for _, p := range []string{"/bin/bash", "/usr/bin/bash"} {
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+	}
+	// Last resort: let the OS find it.
+	if p, err := exec.LookPath("bash"); err == nil {
+		return p
+	}
+	return ""
 }

@@ -48,9 +48,24 @@ parts:
     override-build: |
       go build -o $CRAFT_PART_INSTALL/bin/scmd ./cmd/scmd/
 
+  # Stage common command-line utilities so that commands executed via the
+  # interactive "Execute" feature can find tools like curl, wget, git, etc.
+  # The core24 base does not ship these, so we pull them in explicitly.
+  cli-tools:
+    plugin: nil
+    stage-packages:
+      - bash
+      - coreutils
+      - curl
+      - wget
+      - git
+      - ca-certificates
+
 apps:
   scmd:
     command: bin/scmd
+    environment:
+      PATH: $SNAP/usr/bin:$SNAP/usr/sbin:$SNAP/bin:$SNAP/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
     plugs:
       - home
       - network
@@ -60,6 +75,8 @@ apps:
   # so users can run `scmd-cli` instead of `scmd.scmd-cli`.
   scmd-cli:
     command: bin/scmd --cli
+    environment:
+      PATH: $SNAP/usr/bin:$SNAP/usr/sbin:$SNAP/bin:$SNAP/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
     plugs:
       - home
       - network
