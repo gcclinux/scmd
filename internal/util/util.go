@@ -13,6 +13,30 @@ import (
 
 const WebLog = "scmdweb.log"
 
+// IsSnap returns true when the process is running inside a snap package.
+// snapd always sets the SNAP environment variable for confined applications.
+func IsSnap() bool {
+	return os.Getenv("SNAP") != ""
+}
+
+// PrintSnapNotice prints a one-time notice when running inside a snap,
+// warning the user that some features (command execution, shell functions)
+// may be limited by snap confinement.
+func PrintSnapNotice() {
+	if !IsSnap() {
+		return
+	}
+	yellow := "\033[33m"
+	reset := "\033[0m"
+	fmt.Println()
+	fmt.Printf("%s⚠  Running inside a snap package.%s\n", yellow, reset)
+	fmt.Println("   Some features (e.g. executing host commands, shell functions")
+	fmt.Println("   like nvm/rvm/pyenv) may not work due to snap confinement.")
+	fmt.Println("   For the full experience, install the native binary instead:")
+	fmt.Println("   → https://github.com/gcclinux/scmd/releases")
+	fmt.Println()
+}
+
 // CheckDB will see if the Database exist and if it contains any data.
 func CheckDB(received []byte) string {
 	s := string(received)

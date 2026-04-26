@@ -19,6 +19,7 @@ import (
 	"github.com/gcclinux/scmd/internal/server"
 	"github.com/gcclinux/scmd/internal/setup"
 	"github.com/gcclinux/scmd/internal/updater"
+	"github.com/gcclinux/scmd/internal/util"
 )
 
 func init() {
@@ -131,6 +132,9 @@ func main() {
 	}
 
 	config.LoadConfig()
+
+	// Warn the user when running inside snap confinement.
+	util.PrintSnapNotice()
 
 	// Log which storage backend is active
 	dbType := strings.ToLower(os.Getenv("DB_TYPE"))
