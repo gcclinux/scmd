@@ -1,0 +1,67 @@
+name: scmd
+title: SCMD (Search Command)
+version: '2.1.2'
+summary: AI-powered command-line search and storage tool
+description: |
+  scmd is a versatile command-line tool for searching, storing, and managing
+  commands and knowledge. It provides three interfaces to suit different
+  workflows:
+
+  - CLI mode for quick command-line searches and operations
+  - Interactive mode for a guided, menu-driven experience
+  - Web interface for browser-based access with a built-in HTTP/HTTPS server
+
+  Features AI-powered semantic search using Ollama or Google Gemini, a local
+  SQLite database for storing commands and notes, MCP server and client support,
+  and markdown training data import.
+license: AGPL-3.0
+grade: stable
+base: core24
+confinement: strict
+source-code: https://github.com/gcclinux/scmd
+website: https://gcclinux.github.io/scmd/
+contact: https://github.com/gcclinux/scmd
+issues: https://github.com/gcclinux/scmd/issues
+donation: https://buymeacoffee.com/gcclinux
+
+platforms:
+  amd64:
+  arm64:
+
+# The personal-files interface requires a store declaration approval from Canonical.
+# File a request at https://forum.snapcraft.io/ explaining why the snap needs ~/.scmd/ access.
+plugs:
+  dot-scmd:
+    interface: personal-files
+    write:
+      - $HOME/.scmd
+
+parts:
+  scmd:
+    plugin: go
+    source: .
+    build-snaps:
+      - go/1.25/stable
+    build-environment:
+      # Pure-Go SQLite via modernc.org/sqlite — no C compiler or CGO needed.
+      - CGO_ENABLED: "0"
+    override-build: |
+      go build -o $CRAFT_PART_INSTALL/bin/scmd ./cmd/scmd/
+
+apps:
+  scmd:
+    command: bin/scmd
+    plugs:
+      - home
+      - network
+      - network-bind
+      - dot-scmd
+  # The publisher can request an auto-alias for scmd-cli from the Snap Store
+  # so users can run `scmd-cli` instead of `scmd.scmd-cli`.
+  scmd-cli:
+    command: bin/scmd --cli
+    plugs:
+      - home
+      - network
+      - network-bind
+      - dot-scmd
