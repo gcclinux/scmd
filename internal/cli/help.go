@@ -36,15 +36,15 @@ func printInteractiveHelp() {
 	fmt.Println("AI Personas (Focused Context):")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println("  /ubuntu <query>       - Ubuntu expert persona                 │  /powershell <query>   - PowerShell guru persona")
-	fmt.Println("  /debian <query>       - Debian expert persona                 │  /archlinux <query>    - Arch Linux master persona")
-	fmt.Println("  /fedora <query>       - Fedora expert persona                 │  /windows <query>      - Windows admin persona")
+	fmt.Println("  /debian <query>       - Debian expert persona                 │  /windows <query>      - Windows admin persona")
+	fmt.Println("  /fedora <query>       - Fedora expert persona                 │  /research <query>     - Analyse and recommend persona")
+	fmt.Println("  /archlinux <query>    - Arch Linux master persona             │  /code <query>         - Read, Think, code persona")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println("AI Response Feedback:")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	fmt.Println("  After an AI response, you can provide feedback:")
 	fmt.Println("  [s] - Good answer (saves to database for future searches)     |  [n] - New answer (discards and regenerates)")
 	fmt.Println("  [x] - Execute the code block (when AI response contains a single code block)")
-	fmt.Println("  [1], [2], ... - Execute the Nth code block directly (when multiple code blocks are present)")
 	fmt.Println()
 }
 

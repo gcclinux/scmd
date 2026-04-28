@@ -35,6 +35,7 @@ func StartInteractiveMode() {
 	var lastQuery string
 	var lastCodeBlocks []string
 	var lastFromShow bool
+	var lastFromResearch bool
 
 	for {
 		fmt.Print("scmd> ")
@@ -62,6 +63,55 @@ func StartInteractiveMode() {
 		input = strings.TrimSpace(input)
 		if input == "" {
 			continue
+		}
+
+		// Research-specific feedback path
+		if lastAIResponse != "" && lastFromResearch && isResearchFeedbackInput(input) {
+			if input == "s" {
+				if _, err := database.AddCommand(lastAIResponse,
+					fmt.Sprintf("AI-generated response for: %s", lastQuery),
+					ai.GetBestEmbedding); err != nil {
+					fmt.Printf("Error saving response: %v\n", err)
+				} else {
+					fmt.Println("✓ Response saved to database!")
+					fmt.Println()
+				}
+				lastAIResponse = ""
+				lastQuery = ""
+				lastCodeBlocks = nil
+				lastFromShow = false
+				lastFromResearch = false
+			} else if input == "n" {
+				fmt.Println("Regenerating research recommendation...")
+				fmt.Println()
+				researchArgs := lastResearchQuery
+				resp, uid, fpath := handleResearchCommand(researchArgs)
+				if resp != "" {
+					lastAIResponse = resp
+					lastResearchUID = uid
+					lastResearchFilePath = fpath
+					lastCodeBlocks = nil
+					fmt.Println(buildResearchFeedbackPrompt())
+				} else {
+					fmt.Println("Failed to regenerate recommendation.")
+					fmt.Println()
+					lastAIResponse = ""
+					lastQuery = ""
+					lastCodeBlocks = nil
+					lastFromResearch = false
+				}
+			}
+			continue
+		}
+
+		// If lastFromResearch is true but input is NOT a research feedback input,
+		// clear the research state and fall through to process as new command
+		if lastFromResearch && lastAIResponse != "" && !isResearchFeedbackInput(input) {
+			lastAIResponse = ""
+			lastQuery = ""
+			lastCodeBlocks = nil
+			lastFromResearch = false
+			// Fall through to process as new command (don't continue)
 		}
 
 		// Feedback on last AI response
@@ -154,20 +204,28 @@ func StartInteractiveMode() {
 		aiResp := processInteractiveCommand(input)
 		if aiResp != "" {
 			lastAIResponse = aiResp
+			lastFromResearch = strings.HasPrefix(input, "/research")
 			lastFromShow = strings.HasPrefix(input, "/show")
-			if lastFromShow && showOriginalQuery != "" {
+			if lastFromResearch {
+				lastQuery = input
+				lastCodeBlocks = nil
+				fmt.Println(buildResearchFeedbackPrompt())
+			} else if lastFromShow && showOriginalQuery != "" {
 				lastQuery = showOriginalQuery
 				showOriginalQuery = ""
+				lastCodeBlocks = ExtractCodeBlocks(aiResp)
+				fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
 			} else {
 				lastQuery = input
+				lastCodeBlocks = ExtractCodeBlocks(aiResp)
+				fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
 			}
-			lastCodeBlocks = ExtractCodeBlocks(aiResp)
-			fmt.Println(buildFeedbackPrompt(len(lastCodeBlocks), lastFromShow))
 		} else {
 			lastAIResponse = ""
 			lastQuery = ""
 			lastCodeBlocks = nil
 			lastFromShow = false
+			lastFromResearch = false
 		}
 	}
 }

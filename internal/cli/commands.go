@@ -24,6 +24,12 @@ import (
 // description, so the feedback loop can use it for regeneration.
 var showOriginalQuery string
 
+// lastResearchUID, lastResearchFilePath, and lastResearchQuery store metadata
+// from the most recent /research command for use by the feedback loop.
+var lastResearchUID string
+var lastResearchFilePath string
+var lastResearchQuery string
+
 func handleSlashCommand(input string) string {
 	parts := strings.SplitN(input, " ", 2)
 	command := parts[0]
@@ -90,6 +96,16 @@ func handleSlashCommand(input string) string {
 			return ""
 		}
 		return handlePersonaCommand(command[1:], args)
+	case "/research":
+		if args == "" {
+			fmt.Println("Usage: /research <question or file path>")
+			return ""
+		}
+		resp, uid, fpath := handleResearchCommand(args)
+		lastResearchUID = uid
+		lastResearchFilePath = fpath
+		lastResearchQuery = args
+		return resp
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		fmt.Println("Type '/help' for available commands")
