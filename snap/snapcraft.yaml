@@ -1,6 +1,6 @@
 name: scmd
 title: SCMD (Search Command)
-version: '2.1.2'
+version: '2.1.5'
 summary: AI-powered command-line search and storage tool
 description: |
   scmd is a versatile command-line tool for searching, storing, and managing

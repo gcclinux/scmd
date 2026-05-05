@@ -1,6 +1,8 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [2.1.5] - 2026-05-05
+- **Initial code RAG and Persona to help code and create or fix scripts (`/code`) as a ai flag. 
 
 ## [2.1.2] - 2026-04-25
 

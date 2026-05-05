@@ -361,17 +361,17 @@ func printWelcome() {
 	green := "\033[32m"
 	reset := "\033[0m"
 
-	fmt.Println("  ╔════════════════════════════════════════════════════════════╗")
-	fmt.Println("  ║                                                            ║")
-	fmt.Printf("  ║            %s███████╗ ██████╗███╗   ███╗██████╗%s              ║\n", green, reset)
-	fmt.Printf("  ║            %s██╔════╝██╔════╝████╗ ████║██╔══██╗%s             ║\n", green, reset)
-	fmt.Printf("  ║            %s███████╗██║     ██╔████╔██║██║  ██║%s             ║\n", green, reset)
-	fmt.Printf("  ║            %s╚════██║██║     ██║╚██╔╝██║██║  ██║%s             ║\n", green, reset)
-	fmt.Printf("  ║            %s███████║╚██████╗██║ ╚═╝ ██║██████╔╝%s             ║\n", green, reset)
-	fmt.Printf("  ║             %s╚══════╝ ╚═════╝╚═╝     ╚═╝╚═════╝%s             ║\n", green, reset)
-	fmt.Println("  ║                                                            ║")
-	fmt.Printf("  ║             ⚡ Interactive CLI  ·  v%-20s  ║\n", updater.Release+" ⚡")
-	fmt.Println("  ╚════════════════════════════════════════════════════════════╝")
+	fmt.Println("  ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗")
+	fmt.Println("  ║                                                                                                                    ║")
+	fmt.Printf("  ║                                        %s███████╗ ██████╗███╗   ███╗██████╗%s                                          ║\n", green, reset)
+	fmt.Printf("  ║                                        %s██╔════╝██╔════╝████╗ ████║██╔══██╗%s                                         ║\n", green, reset)
+	fmt.Printf("  ║                                        %s███████╗██║     ██╔████╔██║██║  ██║%s                                         ║\n", green, reset)
+	fmt.Printf("  ║                                        %s╚════██║██║     ██║╚██╔╝██║██║  ██║%s                                         ║\n", green, reset)
+	fmt.Printf("  ║                                        %s███████║╚██████╗██║ ╚═╝ ██║██████╔╝%s                                         ║\n", green, reset)
+	fmt.Printf("  ║                                        %s╚══════╝ ╚═════╝╚═╝     ╚═╝╚═════╝%s                                          ║\n", green, reset)
+	fmt.Println("  ║                                                                                                                    ║")
+	fmt.Printf("  ║                                         ⚡ Interactive CLI  ·  v%-20s                              ║\n", updater.Release+" ⚡")
+	fmt.Println("  ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝")
 	fmt.Println()
 
 	preferred := strings.ToLower(os.Getenv("AGENT"))
