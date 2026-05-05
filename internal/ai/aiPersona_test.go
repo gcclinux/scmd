@@ -31,6 +31,39 @@ func TestResearchPersonaRegistered(t *testing.T) {
 	}
 }
 
+// TestCodePersonaRegistered verifies that the "code" key exists in
+// GetPersonas() with the correct Name, Description, and a non-empty
+// SystemPrompt containing the required section keywords.
+// Validates: Requirements 1.1, 1.2, 1.5, 1.6
+func TestCodePersonaRegistered(t *testing.T) {
+	personas := GetPersonas()
+
+	persona, ok := personas["code"]
+	if !ok {
+		t.Fatal(`GetPersonas() does not contain a "code" key`)
+	}
+
+	if persona.Name != "Agentic RAG Developer" {
+		t.Errorf("Name = %q, want %q", persona.Name, "Agentic RAG Developer")
+	}
+
+	wantDesc := "Read, Think, execute Agentic RAG"
+	if persona.Description != wantDesc {
+		t.Errorf("Description = %q, want %q", persona.Description, wantDesc)
+	}
+
+	if persona.SystemPrompt == "" {
+		t.Error("SystemPrompt is empty, expected a non-empty prompt")
+	}
+
+	requiredKeywords := []string{"Analysis", "Proposed Code", "Summary"}
+	for _, kw := range requiredKeywords {
+		if !strings.Contains(persona.SystemPrompt, kw) {
+			t.Errorf("SystemPrompt does not contain required keyword %q", kw)
+		}
+	}
+}
+
 // TestResearchSystemPromptContent verifies that the research persona's
 // system prompt contains the required section names: Analysis,
 // Recommendation, Summary, Proposed Fix, and Alternatives.

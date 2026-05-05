@@ -30,6 +30,12 @@ var lastResearchUID string
 var lastResearchFilePath string
 var lastResearchQuery string
 
+// lastCodeUID, lastCodeFilePath, and lastCodeQuery store metadata
+// from the most recent /code command for use by the feedback loop.
+var lastCodeUID string
+var lastCodeFilePath string
+var lastCodeQuery string
+
 func handleSlashCommand(input string) string {
 	parts := strings.SplitN(input, " ", 2)
 	command := parts[0]
@@ -105,6 +111,16 @@ func handleSlashCommand(input string) string {
 		lastResearchUID = uid
 		lastResearchFilePath = fpath
 		lastResearchQuery = args
+		return resp
+	case "/code":
+		if args == "" {
+			fmt.Println("Usage: /code <question or description>")
+			return ""
+		}
+		resp, uid, fpath := handleCodeCommand(args)
+		lastCodeUID = uid
+		lastCodeFilePath = fpath
+		lastCodeQuery = args
 		return resp
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
@@ -367,8 +383,6 @@ func handleGenerateEmbeddings() {
 		fmt.Printf("Error: %v\n", err)
 	}
 }
-
-
 
 func handleShowCommand(args string) (string, string) {
 	idStr := strings.TrimSpace(args)

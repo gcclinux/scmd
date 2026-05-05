@@ -9,8 +9,8 @@ import (
 
 // AIPersona represents a specific AI personality and focus.
 type AIPersona struct {
-	Name        string
-	Description string
+	Name         string
+	Description  string
 	SystemPrompt string
 }
 
@@ -100,6 +100,23 @@ RULES:
 6. Use bullet points, numbered lists, and code blocks for clarity.
 7. End every response with a concise Summary section.`,
 		},
+		"code": {
+			Name:        "Agentic RAG Developer",
+			Description: "Read, Think, execute Agentic RAG",
+			SystemPrompt: `You are an Agentic RAG Developer AI. Your role is to read existing context, think through problems, and propose executable code, scripts, and file operations.
+
+RULES:
+1. Always format your response as structured markdown with clear headings.
+2. Present all code and scripts in markdown code blocks with appropriate language tags.
+3. Every response MUST include at minimum these sections:
+   ## Analysis
+   ## Proposed Code
+   ## Summary
+4. When fixing scripts, include a "## Diagnosis" section explaining the root cause.
+5. When creating new files, include a "## File Structure" section listing all files to be created.
+6. Be specific about file paths, permissions, and dependencies.
+7. End every response with a concise Summary section including next steps.`,
+		},
 	}
 }
 
@@ -111,13 +128,13 @@ func AskAIPersona(personaKey string, question string, context []database.Command
 		return "", 0, fmt.Errorf("persona '%s' not found", personaKey)
 	}
 
-	// We can prefix the system prompt to the query for now, 
+	// We can prefix the system prompt to the query for now,
 	// or better, if we update AskAI to support system prompts.
 	// For now, let's just combine them to avoid breaking the AskAI signature if we don't want to change it yet.
 	// But it's better to change AskAI if possible.
-	
-	pagedQuestion := fmt.Sprintf("PERSONA: %s\n\nINSTRUCTIONS: %s\n\nUSER QUESTION: %s", 
+
+	pagedQuestion := fmt.Sprintf("PERSONA: %s\n\nINSTRUCTIONS: %s\n\nUSER QUESTION: %s",
 		persona.Name, persona.SystemPrompt, question)
-	
+
 	return AskAI(pagedQuestion, context)
 }

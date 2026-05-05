@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -28,6 +29,40 @@ func StartInteractiveMode() {
 
 	ai.InitProviders()
 
+	// Check for unfinished workbooks at startup
+	if wb, err := checkStartupWorkbook(); err == nil && wb != nil {
+		fmt.Printf("\n📋 Unfinished workbook available: %s\n", filepath.Base(wb.FilePath))
+		fmt.Printf("   Status: %s | Steps: %d total\n", wb.Status, len(wb.Steps))
+		fmt.Print("   Would you like to load and continue? (y/n/finish): ")
+
+		startupReader := bufio.NewReader(os.Stdin)
+		response, _ := startupReader.ReadString('\n')
+		response = strings.TrimSpace(strings.ToLower(response))
+
+		switch response {
+		case "y", "yes":
+			fmt.Printf("Loading workbook: %s\n", wb.Title)
+			for _, step := range wb.Steps {
+				fmt.Printf("   [%s] %d. %s\n", step.Status, step.Number, step.Description)
+			}
+			fmt.Println()
+			if idx, err := findFirstTodoStep(wb); err == nil {
+				fmt.Printf("Continuing from step %d: %s\n\n", wb.Steps[idx].Number, wb.Steps[idx].Description)
+			}
+		case "finish", "f":
+			wb.Status = WorkbookFinished
+			content := serializeWorkbook(wb)
+			if err := os.WriteFile(wb.FilePath, []byte(content), 0644); err != nil {
+				fmt.Printf("⚠ Could not update workbook: %v\n", err)
+			} else {
+				fmt.Println("   Workbook marked as FINISHED.")
+			}
+			fmt.Println()
+		default:
+			fmt.Println()
+		}
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 	printWelcome()
 
@@ -36,6 +71,7 @@ func StartInteractiveMode() {
 	var lastCodeBlocks []string
 	var lastFromShow bool
 	var lastFromResearch bool
+	var lastFromCode bool
 
 	for {
 		fmt.Print("scmd> ")
@@ -112,6 +148,90 @@ func StartInteractiveMode() {
 			lastCodeBlocks = nil
 			lastFromResearch = false
 			// Fall through to process as new command (don't continue)
+		}
+
+		// Code-specific feedback path
+		if lastAIResponse != "" && lastFromCode && isCodeFeedbackInput(input, len(lastCodeBlocks)) {
+			if input == "s" {
+				if _, err := database.AddCommand(lastAIResponse,
+					fmt.Sprintf("AI-generated response for: %s", lastQuery),
+					ai.GetBestEmbedding); err != nil {
+					fmt.Printf("Error saving response: %v\n", err)
+				} else {
+					fmt.Println("✓ Response saved to database!")
+					fmt.Println()
+				}
+				lastAIResponse = ""
+				lastQuery = ""
+				lastCodeBlocks = nil
+				lastFromCode = false
+			} else if input == "n" {
+				fmt.Println("Regenerating code proposal...")
+				fmt.Println()
+				resp, uid, fpath := handleCodeCommand(lastCodeQuery)
+				if resp != "" {
+					lastAIResponse = resp
+					lastCodeUID = uid
+					lastCodeFilePath = fpath
+					lastCodeBlocks = ExtractCodeBlocks(resp)
+					fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
+				} else {
+					fmt.Println("Failed to regenerate proposal.")
+					fmt.Println()
+					lastAIResponse = ""
+					lastQuery = ""
+					lastCodeBlocks = nil
+					lastFromCode = false
+				}
+			} else if strings.HasPrefix(input, "x") {
+				// EXECUTE phase: create files from code blocks
+				arg := strings.TrimSpace(strings.TrimPrefix(input, "x"))
+				codeReader := bufio.NewReader(os.Stdin)
+				if arg == "" {
+					switch len(lastCodeBlocks) {
+					case 0:
+						fmt.Println("No code blocks to create files from.")
+						fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
+					default:
+						// Create files from all blocks (or single block)
+						handleCodeExecute(lastAIResponse, lastCodeBlocks, -1, codeReader)
+						fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
+					}
+				} else {
+					n, usageMsg := parseExecuteArg(arg)
+					if usageMsg != "" {
+						fmt.Println(usageMsg)
+						fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
+					} else if errMsg := validateExecuteIndex(n, len(lastCodeBlocks)); errMsg != "" {
+						fmt.Println(errMsg)
+						fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
+					} else {
+						// Create file from specific block
+						handleCodeExecute(lastAIResponse, lastCodeBlocks, n-1, codeReader)
+						fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
+					}
+				}
+			} else if n, err := strconv.Atoi(input); err == nil && len(lastCodeBlocks) > 0 {
+				// Bare numeric input — create file from specific block
+				codeReader := bufio.NewReader(os.Stdin)
+				if errMsg := validateExecuteIndex(n, len(lastCodeBlocks)); errMsg != "" {
+					fmt.Println(errMsg)
+				} else {
+					handleCodeExecute(lastAIResponse, lastCodeBlocks, n-1, codeReader)
+				}
+				fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
+			}
+			continue
+		}
+
+		// If lastFromCode is true but input is NOT a code feedback input,
+		// clear the code state and fall through to process as new command
+		if lastFromCode && lastAIResponse != "" && !isCodeFeedbackInput(input, len(lastCodeBlocks)) {
+			lastAIResponse = ""
+			lastQuery = ""
+			lastCodeBlocks = nil
+			lastFromCode = false
+			// Fall through to process as new command
 		}
 
 		// Feedback on last AI response
@@ -206,10 +326,15 @@ func StartInteractiveMode() {
 			lastAIResponse = aiResp
 			lastFromResearch = strings.HasPrefix(input, "/research")
 			lastFromShow = strings.HasPrefix(input, "/show")
+			lastFromCode = strings.HasPrefix(input, "/code")
 			if lastFromResearch {
 				lastQuery = input
 				lastCodeBlocks = nil
 				fmt.Println(buildResearchFeedbackPrompt())
+			} else if lastFromCode {
+				lastQuery = input
+				lastCodeBlocks = ExtractCodeBlocks(aiResp)
+				fmt.Println(buildCodeFeedbackPrompt(len(lastCodeBlocks)))
 			} else if lastFromShow && showOriginalQuery != "" {
 				lastQuery = showOriginalQuery
 				showOriginalQuery = ""
@@ -226,6 +351,7 @@ func StartInteractiveMode() {
 			lastCodeBlocks = nil
 			lastFromShow = false
 			lastFromResearch = false
+			lastFromCode = false
 		}
 	}
 }
