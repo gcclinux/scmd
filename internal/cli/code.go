@@ -569,8 +569,8 @@ func inferFilenameFromBlock(block CodeBlock, index int) string {
 }
 
 // handleCodeExecute implements the EXECUTE phase of the /code workflow.
-// It asks the user for a target directory, validates it, shows the files
-// that will be created, asks for confirmation, and writes them.
+// It automatically saves scripts to a temporary directory, makes them executable,
+// and executes them in the current working directory.
 func handleCodeExecute(aiResponse string, codeBlocks []string, blockIndex int, reader *bufio.Reader) {
 	// Extract blocks with language info from the original AI response
 	richBlocks := extractCodeBlocksWithLang(aiResponse)
@@ -588,126 +588,59 @@ func handleCodeExecute(aiResponse string, codeBlocks []string, blockIndex int, r
 	}
 
 	if len(blocksToWrite) == 0 {
-		fmt.Println("No code blocks found to create files from.")
+		fmt.Println("No code blocks found to execute.")
 		return
 	}
 
-	// Infer filenames
-	type fileEntry struct {
-		filename string
-		content  string
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting current directory: %v\n", err)
+		return
 	}
-	files := make([]fileEntry, len(blocksToWrite))
+
+	tempDir := os.TempDir()
+
+	fmt.Println()
+	fmt.Printf("🚀 Autonomous Execution Mode\n")
+
 	for i, block := range blocksToWrite {
-		files[i] = fileEntry{
-			filename: inferFilenameFromBlock(block, i),
-			content:  block.Content,
-		}
-	}
+		filename := inferFilenameFromBlock(block, i)
+		tempFilename := fmt.Sprintf("scmd_exec_%d_%s", time.Now().UnixNano(), filename)
+		fullPath := filepath.Join(tempDir, tempFilename)
 
-	// Show what will be created
-	fmt.Println()
-	fmt.Println("📝 Files to create:")
-	for _, f := range files {
-		lineCount := strings.Count(f.content, "\n") + 1
-		fmt.Printf("   • %s (%d lines)\n", f.filename, lineCount)
-	}
-	fmt.Println()
-
-	// Ask for target directory
-	fmt.Print("Target directory (or press Enter for current dir): ")
-	targetDir, _ := reader.ReadString('\n')
-	targetDir = strings.TrimSpace(targetDir)
-	if targetDir == "" {
-		var err error
-		targetDir, err = os.Getwd()
-		if err != nil {
-			fmt.Printf("Error getting current directory: %v\n", err)
-			return
-		}
-	}
-
-	// Expand ~ to home directory
-	if strings.HasPrefix(targetDir, "~") {
-		home, err := os.UserHomeDir()
-		if err == nil {
-			targetDir = filepath.Join(home, targetDir[1:])
-		}
-	}
-
-	// Validate the target path
-	valid, reason := validateTargetPath(targetDir)
-	if !valid {
-		fmt.Printf("⚠ Invalid target: %s\n", reason)
-		fmt.Print("Enter a valid directory path: ")
-		targetDir, _ = reader.ReadString('\n')
-		targetDir = strings.TrimSpace(targetDir)
-		if targetDir == "" {
-			fmt.Println("Cancelled.")
-			return
-		}
-		if strings.HasPrefix(targetDir, "~") {
-			home, err := os.UserHomeDir()
-			if err == nil {
-				targetDir = filepath.Join(home, targetDir[1:])
-			}
-		}
-		valid, reason = validateTargetPath(targetDir)
-		if !valid {
-			fmt.Printf("⚠ Still invalid: %s. Aborting.\n", reason)
-			return
-		}
-	}
-
-	// Allow user to rename files
-	fmt.Println()
-	fmt.Println("You can rename files before creation. Press Enter to keep the suggested name.")
-	for i := range files {
-		fmt.Printf("   [%d] %s → ", i+1, files[i].filename)
-		newName, _ := reader.ReadString('\n')
-		newName = strings.TrimSpace(newName)
-		if newName != "" {
-			files[i].filename = newName
-		}
-	}
-
-	// Show final plan and confirm
-	fmt.Println()
-	fmt.Printf("📁 Will create in: %s\n", targetDir)
-	for _, f := range files {
-		fmt.Printf("   • %s\n", f.filename)
-	}
-	fmt.Print("\nProceed? (y/n): ")
-	confirm, _ := reader.ReadString('\n')
-	confirm = strings.TrimSpace(strings.ToLower(confirm))
-	if confirm != "y" && confirm != "yes" {
-		fmt.Println("Cancelled. No files were created.")
-		return
-	}
-
-	// Write files
-	fmt.Println()
-	for _, f := range files {
-		fullPath := filepath.Join(targetDir, f.filename)
-
-		// Check if file already exists
-		if _, err := os.Stat(fullPath); err == nil {
-			fmt.Printf("   ⚠ %s already exists. Overwrite? (y/n): ", f.filename)
-			overwrite, _ := reader.ReadString('\n')
-			overwrite = strings.TrimSpace(strings.ToLower(overwrite))
-			if overwrite != "y" && overwrite != "yes" {
-				fmt.Printf("   ⏭ Skipped %s\n", f.filename)
-				continue
-			}
+		// Write file with executable permissions
+		if err := os.WriteFile(fullPath, []byte(block.Content+"\n"), 0755); err != nil {
+			fmt.Printf("   ✗ Failed to create temp script %s: %v\n", tempFilename, err)
+			continue
 		}
 
-		if err := os.WriteFile(fullPath, []byte(f.content+"\n"), 0644); err != nil {
-			fmt.Printf("   ✗ Failed to create %s: %v\n", f.filename, err)
+		fmt.Printf("   ✓ Created script: %s\n", fullPath)
+
+		var cmd *exec.Cmd
+		if strings.HasSuffix(filename, ".sh") {
+			cmd = exec.Command("bash", fullPath)
+		} else if strings.HasSuffix(filename, ".py") {
+			cmd = exec.Command("python3", fullPath)
+		} else if strings.HasSuffix(filename, ".js") {
+			cmd = exec.Command("node", fullPath)
+		} else if strings.HasSuffix(filename, ".go") {
+			cmd = exec.Command("go", "run", fullPath)
 		} else {
-			fmt.Printf("   ✓ Created %s\n", fullPath)
+			cmd = exec.Command(fullPath)
+		}
+
+		cmd.Dir = cwd
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		fmt.Printf("   ▶ Executing %s in %s...\n", filename, cwd)
+		if err := cmd.Run(); err != nil {
+			fmt.Printf("   ✗ Execution failed: %v\n", err)
+		} else {
+			fmt.Printf("   ✓ Execution completed successfully.\n")
 		}
 	}
-	fmt.Println()
+	fmt.Println("\nAll autonomous tasks finished.")
 }
 
 // handleCodeCommand is the main entry point for the /code command.
