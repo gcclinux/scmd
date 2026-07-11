@@ -17,6 +17,7 @@ import (
 	"github.com/gcclinux/scmd/internal/config"
 	"github.com/gcclinux/scmd/internal/database"
 	"github.com/gcclinux/scmd/internal/markdown"
+	"github.com/gcclinux/scmd/internal/setup"
 	"github.com/gcclinux/scmd/internal/util"
 )
 
@@ -77,6 +78,8 @@ func handleSlashCommand(input string) string {
 		handleAIStatus()
 	case "/config":
 		handleConfigShow()
+	case "/setup":
+		setup.SetupInteractive()
 	case "/embeddings":
 		handleEmbeddingsCheck()
 	case "/generate":

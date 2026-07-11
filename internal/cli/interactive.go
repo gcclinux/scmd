@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -74,25 +75,36 @@ func StartInteractiveMode() {
 	var lastFromCode bool
 
 	for {
-		fmt.Print("scmd> ")
+		// Read the first input line with interactive slash-command autocomplete.
+		// readLineWithCompletion prints the "scmd> " prompt itself.
+		firstLine, readErr := readLineWithCompletion(reader)
+		if readErr != nil {
+			if readErr == io.EOF {
+				fmt.Println("Goodbye!")
+				break
+			}
+			fmt.Println("Error reading input:", readErr)
+			continue
+		}
+		if firstLine == "" {
+			continue
+		}
 
-		// Multi-line input: accumulate lines until the user submits
-		// by pressing Enter on an empty line (blank line = submit).
-		// This lets users paste or type multi-line queries freely.
-		var lines []string
+		// Continuation lines: accumulate until the user presses Enter on a
+		// blank line.  This lets users paste or type multi-line queries freely.
+		lines := []string{firstLine}
 		for {
+			fmt.Print("  ... ")
 			line, err := reader.ReadString('\n')
 			if err != nil {
-				fmt.Println("Error reading input:", err)
 				break
 			}
 			trimmed := strings.TrimSpace(line)
 			if trimmed == "" {
-				// Empty line: submit whatever we have accumulated
+				// Empty line: done accumulating.
 				break
 			}
 			lines = append(lines, trimmed)
-			fmt.Print("  ... ")
 		}
 
 		input := strings.Join(lines, " ")

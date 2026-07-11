@@ -48,6 +48,42 @@ func promptPassword(reader *bufio.Reader, label, defaultVal string) string {
 
 
 
+// SetupInteractive asks the user which AI provider to configure, then runs
+// the appropriate setup wizard (SetupOllama or SetupGemini).
+func SetupInteractive() {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Println()
+	fmt.Printf(noticeColor, "=== SCMD Interactive Configuration Setup ===\n")
+	fmt.Println()
+	fmt.Println("  This wizard will help you configure an AI provider for SCMD.")
+	fmt.Println("  Choose a provider to get started:")
+	fmt.Println()
+	fmt.Println("    1. Ollama  - self-hosted / local AI (no API key required)")
+	fmt.Println("    2. Gemini  - Google Gemini API (requires API key)")
+	fmt.Println("    3. None    - skip AI setup (use SCMD without AI features)")
+	fmt.Println()
+	fmt.Print("  Enter your choice [1/2/3]: ")
+
+	choice, _ := reader.ReadString('\n')
+	choice = strings.TrimSpace(choice)
+
+	fmt.Println()
+
+	switch choice {
+	case "1", "ollama", "Ollama":
+		SetupOllama()
+	case "2", "gemini", "Gemini":
+		SetupGemini()
+	case "3", "none", "None", "":
+		fmt.Printf(noticeColor, "Skipping AI setup. SCMD will run with traditional search only.\n")
+		fmt.Println()
+	default:
+		fmt.Printf(errorColor, fmt.Sprintf("  Unknown choice %q — aborting setup.\n", choice))
+		fmt.Println()
+	}
+}
+
 // AutoSetupSQLite automatically configures and creates a SQLite database without prompts.
 func AutoSetupSQLite() {
 	cfg := config.CurrentConfig()
